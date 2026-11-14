@@ -35,6 +35,10 @@ MonoBehaviour:
     payloadKg: 27000
     confidence: 0
     note: ">27 t a inyecci\xF3n translunar (TLI)."
+  - regime: 5
+    payloadKg: 27000
+    confidence: 0
+    note: "Inyecci\xF3n translunar (TLI), igual que hacia la \xF3rbita lunar."
   fairingDiameterM: 8.4
   reliability: 0.95
   launchCostMUSD: 2200

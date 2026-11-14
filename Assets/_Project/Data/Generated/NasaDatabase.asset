@@ -23,6 +23,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d4d1581c0040c2a449272ac400bfac3a, type: 2}
   - {fileID: 11400000, guid: cdfe305b5d08f0141b1b1095bd0b1430, type: 2}
   - {fileID: 11400000, guid: 119dc5205af9a4e48b7798874943f5fd, type: 2}
+  - {fileID: 11400000, guid: 95d8d78e9e494af45854249bff8a7fa4, type: 2}
   instruments:
   - {fileID: 11400000, guid: a14a10efcdf9ac04b90710f31ee3ad89, type: 2}
   - {fileID: 11400000, guid: 273b57df52998754da35dde172082ce7, type: 2}
@@ -32,17 +33,22 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2829d0e3f5f9d714d8412712d0cee258, type: 2}
   - {fileID: 11400000, guid: b25d2811e2801cd4a999479df7b20ba9, type: 2}
   - {fileID: 11400000, guid: 6eb88487481b3334a89902c326a0d479, type: 2}
+  - {fileID: 11400000, guid: 7825205956e840243a01461055269b56, type: 2}
+  - {fileID: 11400000, guid: a930643ee99f1cd458118a4d2adddb4a, type: 2}
+  - {fileID: 11400000, guid: 50fef9845540ae94ba33b36f3e58f6ad, type: 2}
   buses:
   - {fileID: 11400000, guid: 7c6bcb732a1678048b3e36b45150d4d7, type: 2}
   - {fileID: 11400000, guid: fc87a5075788fb34dbf6d27fdc0b5125, type: 2}
   - {fileID: 11400000, guid: c0a5eb25308da6d45ac554cea22a5a36, type: 2}
   - {fileID: 11400000, guid: 307bacd9d2642764fa27e3dea5b19d0f, type: 2}
   - {fileID: 11400000, guid: 7999da487b3c24f4fb44988497f97657, type: 2}
+  - {fileID: 11400000, guid: ec497e6c26c77394990e5625384d99f0, type: 2}
   solarArrays:
   - {fileID: 11400000, guid: 60b57d4434c3f5d48b8c64d36d2ac90d, type: 2}
   - {fileID: 11400000, guid: f51ca91320a7c4c4fbdb998646ef7599, type: 2}
   - {fileID: 11400000, guid: 464a8f463c4525b47bdca5092a9854ea, type: 2}
   - {fileID: 11400000, guid: cd05a7ccc53dbaa40ae238e06b8b07d6, type: 2}
+  - {fileID: 11400000, guid: bccd420d2768498418a474e1704869c7, type: 2}
   batteries:
   - {fileID: 11400000, guid: 59958b518484dc145beb5d5f586046a4, type: 2}
   - {fileID: 11400000, guid: 86849c3f64580ea49a543c988038946f, type: 2}
@@ -54,10 +60,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 98783e8de0dddde4fa981d88eddf09cf, type: 2}
   - {fileID: 11400000, guid: 8df459fb91ad4f74e8ab3a7504686a45, type: 2}
   - {fileID: 11400000, guid: 694865b48c77d8247b9d0d9711dc38f9, type: 2}
+  - {fileID: 11400000, guid: 28a2b5ef334cbf14fa50301eb15f5385, type: 2}
+  - {fileID: 11400000, guid: c85456eb5deab5a4695dbd7058547be9, type: 2}
   computers:
   - {fileID: 11400000, guid: 7ded750c07e078e4aaf520fe2e8e8edf, type: 2}
   - {fileID: 11400000, guid: fc7fa4da9b993734f9ec77d3e6525a94, type: 2}
   - {fileID: 11400000, guid: 1cd1f6767701eba41841569bbea3cd2c, type: 2}
+  - {fileID: 11400000, guid: 7d6d15e79947a994fa5d01342cd77077, type: 2}
   attitudeControls:
   - {fileID: 11400000, guid: 0ffee4812edf88844bbbcd2cbf44d7e1, type: 2}
   - {fileID: 11400000, guid: e974f263d988ae140924eaf7a6a9d5a6, type: 2}
@@ -67,6 +76,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0c3499593290aba4ab94d13065007314, type: 2}
   - {fileID: 11400000, guid: 6347a181f54eac64fb02decee2a1f2cd, type: 2}
   - {fileID: 11400000, guid: 36cc1fe3f3cac4f4e85c0e051bb5a256, type: 2}
+  - {fileID: 11400000, guid: 8e2d40c0ca387274aa0f8ef8281e392e, type: 2}
   randomEvents:
   - {fileID: 11400000, guid: c684350777633c64caee980be0e291ce, type: 2}
   - {fileID: 11400000, guid: 81d04fecf068c4f4e990662c482e0776, type: 2}
@@ -79,6 +89,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 01cf28a0e2756b6489cbc9334cd504da, type: 2}
   - {fileID: 11400000, guid: e3d9a6c10d1a299419fd9a4e4e7580fc, type: 2}
   - {fileID: 11400000, guid: 3e47b2f1507d4a34ba54e70211b3d2f5, type: 2}
+  - {fileID: 11400000, guid: a559bf2d3e39fd5498a839372d9d25f2, type: 2}
   realMissions:
   - {fileID: 11400000, guid: ca58b2bfc4ec5404cbcb46e4eb0cf0eb, type: 2}
   - {fileID: 11400000, guid: 8393a86749d74394c952bdb9b5c9866d, type: 2}
@@ -88,3 +99,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d0f240ebd2ffbbf4c8d7d75fa0f16b1f, type: 2}
   - {fileID: 11400000, guid: b124212496e43ef4aa4cd6d3d4b24bdf, type: 2}
   - {fileID: 11400000, guid: 82fdeb3cfe096ab43985be140d86685b, type: 2}
+  - {fileID: 11400000, guid: 624cda8b9b83fa04cb9b9e78ec09f160, type: 2}

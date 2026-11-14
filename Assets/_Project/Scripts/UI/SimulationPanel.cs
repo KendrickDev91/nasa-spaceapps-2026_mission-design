@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MissionDesign.Core;
+using OrbitRegime = MissionDesign.Core.OrbitRegime;
 using MissionDesign.Simulation;
 using TMPro;
 using UnityEngine;
@@ -25,7 +26,8 @@ namespace MissionDesign.UI
             (MissionPhase.Launch, "LANZAMIENTO"),
             (MissionPhase.OrbitInsertion, "INSERCIÓN"),
             (MissionPhase.ScienceOperations, "CIENCIA"),
-            (MissionPhase.DataTransmission, "TRANSMISIÓN")
+            (MissionPhase.DataTransmission, "TRANSMISIÓN"),
+            (MissionPhase.ReturnAndRecovery, "REGRESO")
         };
 
         private void Start()
@@ -60,12 +62,22 @@ namespace MissionDesign.UI
 
             if (phaseText == null) return;
             var parts = new List<string>();
+            bool returns = manager.Design.Orbit != null && manager.Design.Orbit.regime == OrbitRegime.LunarFlyby;
             foreach (var (p, label) in Steps)
             {
+                if (p == MissionPhase.ReturnAndRecovery && !returns) continue;
                 string color = p == phase ? UiTheme.Hex(UiTheme.Accent) : p < phase ? UiTheme.Hex(UiTheme.Ok) : UiTheme.Hex(UiTheme.TextDim);
                 parts.Add(p == phase ? $"<color={color}><b>{label}</b></color>" : $"<color={color}>{label}</color>");
             }
-            phaseText.text = string.Join("  »  ", parts);
+            // Con 5 fases (misión con regreso) el texto se ajusta en una sola línea.
+            phaseText.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+            if (!phaseText.enableAutoSizing)
+            {
+                phaseText.fontSizeMax = phaseText.fontSize;
+                phaseText.fontSizeMin = phaseText.fontSize * 0.6f;
+                phaseText.enableAutoSizing = true;
+            }
+            phaseText.text = string.Join(parts.Count > 4 ? " » " : "  »  ", parts);
         }
 
         private void AddLine(SimulationLogEntry entry)

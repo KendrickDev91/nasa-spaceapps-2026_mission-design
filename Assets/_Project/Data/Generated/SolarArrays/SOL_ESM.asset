@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b240230b07a508b449b949c5259815e9, type: 3}
+  m_Name: SOL_ESM
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.SolarArraySO
+  componentId: SOL_ESM
+  displayName: "Alas del m\xF3dulo de servicio europeo (4 alas)"
+  description: "Cuatro alas solares de ~7 m que entregan unos 11 kW; incluidas en
+    la masa del m\xF3dulo de servicio."
+  heritage: 
+  massKg: 1
+  costMUSD: 1
+  peakPowerW: 0
+  developmentMonths: 0
+  technologyReadinessLevel: 9
+  advancedOnly: 0
+  prefab: {fileID: 919132149155446097, guid: 9553bfdac1b6ede45a5ee7fddde41ad3, type: 3}
+  socket: 2
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Orion
+  sourceNotes: Densidades de potencia coherentes con el estado del arte (NASA SmallSat
+    SOA, Power).
+  powerAt1AU_W: 11200
+  annualDegradation: 0.02

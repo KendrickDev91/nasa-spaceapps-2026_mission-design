@@ -47,6 +47,7 @@ namespace MissionDesign.UI.Visual3D
                 case MissionPhase.Launch: next = Shot.Launch; break;
                 case MissionPhase.OrbitInsertion: next = Shot.Orbit; break;
                 case MissionPhase.ScienceOperations: next = lunar && lunarFlyover != null ? Shot.Lunar : Shot.Orbit; break;
+                case MissionPhase.ReturnAndRecovery: next = Shot.Orbit; break;
                 case MissionPhase.DataTransmission:
                 case MissionPhase.PostMission: next = Shot.ControlRoom; break;
                 default: next = Shot.Design; break;

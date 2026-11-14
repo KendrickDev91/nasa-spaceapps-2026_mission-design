@@ -35,6 +35,10 @@ MonoBehaviour:
     payloadKg: 30
     confidence: 1
     note: Con etapa Photon; CAPSTONE pesaba ~25 kg.
+  - regime: 5
+    payloadKg: 30
+    confidence: 1
+    note: "Inyecci\xF3n translunar (TLI), igual que hacia la \xF3rbita lunar."
   fairingDiameterM: 1.2
   reliability: 0.92
   launchCostMUSD: 7.5

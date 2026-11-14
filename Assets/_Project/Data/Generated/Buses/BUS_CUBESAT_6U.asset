@@ -39,3 +39,5 @@ MonoBehaviour:
   housekeepingDataGBPerDay: 0.05
   designLifeYears: 2
   operationsCostScale: 0.05
+  crewCapable: 0
+  recoverableStorageGB: 0

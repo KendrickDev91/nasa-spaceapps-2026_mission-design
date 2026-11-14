@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Deep Space Network (antenas de 34 m)
   description: "Tres complejos (Goldstone, Madrid, Canberra) separados ~120\xB0 para
     seguir naves lejanas las 24 h."
-  supportedRegimes: 0300000004000000
+  supportedRegimes: 030000000400000005000000
   gainFactor: 30
   contactHoursMultiplier: 1
   outageProbabilityMultiplier: 1.8

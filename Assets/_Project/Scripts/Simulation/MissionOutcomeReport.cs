@@ -100,6 +100,10 @@ namespace MissionDesign.Simulation
         public float powerAvailabilityFraction;
         public float dataReturnedTotalTB;
         public float dataLostTotalTB;
+        [Tooltip("Misiones con retorno: datos guardados a bordo y recuperados tras el amerizaje (TB).")]
+        public float dataRecoveredTB;
+        public bool returnsToEarth;
+        public bool crewed;
 
         [Header("Ciencia y programa")]
         public float scienceAchieved;

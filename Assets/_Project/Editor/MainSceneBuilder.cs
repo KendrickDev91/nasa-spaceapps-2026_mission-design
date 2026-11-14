@@ -30,6 +30,7 @@ namespace MissionDesign.Editor
         private const string RendererPath = "Assets/_Project/Settings/URP_Renderer.asset";
         private const string PipelinePath = "Assets/_Project/Settings/URP_Pipeline.asset";
         private const int UiLayer = 5;
+        private const string PlansFolder = "Assets/_Project/Art/Plans";
 
         [MenuItem("NASA SpaceApps/Build Main Scene")]
         public static void Build()
@@ -66,9 +67,17 @@ namespace MissionDesign.Editor
 
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath) ?? "Assets");
             EditorSceneManager.SaveScene(scene, ScenePath);
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
+            RegisterScenes();
             AssetDatabase.SaveAssets();
             Debug.Log($"[SceneBuilder] Escena creada: {ScenePath}");
+        }
+
+        /// <summary>Escenas del juego en Build Settings: diseño de misión (índice 0) y centro espacial si ya existe.</summary>
+        public static void RegisterScenes()
+        {
+            var list = new System.Collections.Generic.List<EditorBuildSettingsScene> { new EditorBuildSettingsScene(ScenePath, true) };
+            if (File.Exists(SpaceCenterScenePath)) list.Add(new EditorBuildSettingsScene(SpaceCenterScenePath, true));
+            EditorBuildSettings.scenes = list.ToArray();
         }
 
         // ───────────────────────────── URP ─────────────────────────────

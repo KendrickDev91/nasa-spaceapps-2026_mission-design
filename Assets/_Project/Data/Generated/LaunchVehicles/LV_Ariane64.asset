@@ -35,6 +35,10 @@ MonoBehaviour:
     payloadKg: 8600
     confidence: 1
     note: "Inyecci\xF3n translunar anunciada por ArianeGroup."
+  - regime: 5
+    payloadKg: 8600
+    confidence: 1
+    note: "Inyecci\xF3n translunar (TLI), igual que hacia la \xF3rbita lunar."
   fairingDiameterM: 5.4
   reliability: 0.95
   launchCostMUSD: 125

@@ -34,6 +34,18 @@ namespace MissionDesign.Simulation
         /// <summary>Días de datos que debe guardar la memoria para absorber un corte de enlace.</summary>
         public const float StorageDaysToBufferOutage = 2f;
 
+        /// <summary>Hitos del ascenso del SLS Block 1 (infografía de la misión Artemis; tiempos desde el despegue).</summary>
+        public static readonly (string time, string text)[] SlsAscent =
+        {
+            ("T+1:11", "Max Q: máxima presión aerodinámica (12,8 km)"),
+            ("T+2:09", "Separación de los propulsores sólidos (47,5 km)"),
+            ("T+3:18", "Expulsión del sistema de aborto de lanzamiento (87 km)"),
+            ("T+8:15", "Apagado y separación de la etapa central (162,5 km)"),
+            ("T+49 min", "La etapa superior (ICPS) eleva el perigeo"),
+            ("T+1 h 48 min", "La ICPS eleva el apogeo: órbita terrestre alta"),
+            ("T+3 h 24 min", "Orion se separa de la ICPS a 22 279 km")
+        };
+
         public static MissionOutcomeReport Run(SpacecraftDesign d, IReadOnlyList<RandomEventSO> eventPool, SimulationSettings settings = null)
         {
             if (d == null) throw new ArgumentNullException(nameof(d));
@@ -66,6 +78,12 @@ namespace MissionDesign.Simulation
             }
             Log(o, MissionPhase.Launch, 0, LogTone.Positive,
                 $"Despegue nominal de {Name(lv)}: {t.totalMassKg:N0} kg hacia {regime} (Δv {orbit?.requiredDeltaVKmS:F1} km/s, margen de carga {Margin(t):P0}).");
+            bool flyby = orbit != null && orbit.regime == OrbitRegime.LunarFlyby;
+            o.returnsToEarth = flyby;
+            o.crewed = d.Scenario != null && d.Scenario.crewed;
+            if (lv.vehicleId == "LV_SLS_B1")
+                foreach (var (time, text) in SlsAscent) Log(o, MissionPhase.Launch, 0, LogTone.Info, $"{time} · {text}");
+            var freeReturn = flyby ? FreeReturnTrajectory.Default : null;
 
             // ───── 2. INSERCIÓN ORBITAL ─────
             o.orbitInsertionSucceeded = t.spacecraftDeltaVKmS >= t.requiredOnboardDeltaVKmS;
@@ -79,10 +97,24 @@ namespace MissionDesign.Simulation
             Log(o, MissionPhase.OrbitInsertion, 1, LogTone.Positive, t.requiredOnboardDeltaVKmS > 0.1f
                 ? $"Inserción en {regime} completada: el motor aportó {t.requiredOnboardDeltaVKmS:F2} de {t.spacecraftDeltaVKmS:F2} km/s disponibles."
                 : $"Separación e inserción en {regime} completadas. Paneles desplegados.");
+            if (freeReturn != null)
+            {
+                Log(o, MissionPhase.OrbitInsertion, 0.5f, LogTone.Info,
+                    "Órbita terrestre alta: ~24 h de verificación de sistemas y pruebas de proximidad (como en Artemis II).");
+                Log(o, MissionPhase.OrbitInsertion, 1, LogTone.Positive,
+                    $"Inyección translunar (TLI): Δv {freeReturn.tliDeltaVKmS:F2} km/s → {freeReturn.injectionSpeedKmS:F2} km/s. Comienza la ida en retorno libre.");
+            }
 
             // ───── 3. OPERACIONES CIENTÍFICAS (con eventos) ─────
             Log(o, MissionPhase.ScienceOperations, 2, LogTone.Info,
                 $"Inicio de operaciones: {d.Instruments.Count} instrumento(s) generando {t.dataGeneratedGBPerDay:N1} GB/día.");
+            if (freeReturn != null)
+            {
+                Log(o, MissionPhase.ScienceOperations, 1f, LogTone.Info, "Corrección de rumbo 1: encendido de pocos m/s para afinar la ruta.");
+                Log(o, MissionPhase.ScienceOperations, Mathf.Max(1.2f, freeReturn.flybyTimeDays - 1f), LogTone.Info, "Corrección de rumbo 2: ajuste final antes de la Luna.");
+                Log(o, MissionPhase.ScienceOperations, freeReturn.flybyTimeDays, LogTone.Positive,
+                    $"Sobrevuelo lunar a {freeReturn.flybyAltitudeKm:N0} km sobre la cara oculta (día {freeReturn.flybyTimeDays:F1}): campaña fotográfica de la tripulación.");
+            }
 
             var selected = settings.forcedEvents ?? PickEvents(eventPool, orbit, rng, settings.minEvents, settings.maxEvents, d.GroundNetwork);
             var scheduled = selected.Where(e => e != null)
@@ -202,11 +234,35 @@ namespace MissionDesign.Simulation
                 $"{Name(d.Antenna)} vía {NetworkName(d)} entregó {o.downlinkGBPerDay:N1} GB/día frente a {o.dataGeneratedGBPerDay:N1} GB/día generados: " +
                 $"{o.dataReturnedTotalTB:N1} TB recibidos en tierra ({o.dataReturnFraction:P0}).");
 
+            // ───── 5. REGRESO Y RECUPERACIÓN (misiones con retorno libre) ─────
+            if (flyby)
+            {
+                Log(o, MissionPhase.ReturnAndRecovery, Mathf.Max(0f, opsDays - 0.3f), LogTone.Info,
+                    "Corrección de rumbo 3 y separación del módulo de servicio: solo la cápsula entra en la atmósfera.");
+                if (o.survivedOperations)
+                {
+                    float generatedTB = o.dataGeneratedGBPerDay * opsDays / 1000f;
+                    float storageTB = ((d.Bus != null ? d.Bus.recoverableStorageGB : 0f) + (d.Computer != null ? d.Computer.storageGB : 0f)) / 1000f;
+                    o.dataRecoveredTB = Mathf.Min(o.dataLostTotalTB, storageTB);
+                    o.dataLostTotalTB -= o.dataRecoveredTB;
+                    o.dataReturnedTotalTB += o.dataRecoveredTB;
+                    o.dataReturnFraction = generatedTB > 0f ? Mathf.Clamp01(o.dataReturnedTotalTB / generatedTB) : 1f;
+                    science = potential * sciMult * o.dataReturnFraction * powerFrac * timeFrac;
+                    Log(o, MissionPhase.ReturnAndRecovery, opsDays, LogTone.Positive,
+                        $"Interfaz de reentrada a {FreeReturnTrajectory.EntryInterfaceKm:N0} km y amerizaje en el Pacífico (día {opsDays:F1}). " +
+                        $"Se recuperan {o.dataRecoveredTB:N2} TB de tarjetas SD y memoria a bordo.");
+                }
+                else
+                {
+                    Log(o, MissionPhase.ReturnAndRecovery, opsDays, LogTone.Critical, "La cápsula no regresa: los datos guardados a bordo se pierden.");
+                }
+            }
+
             // ───── Veredicto y explicación ─────
             float target = o.scienceTarget > 0f ? o.scienceTarget : Mathf.Max(1f, potential);
             MissionVerdict verdict;
             string title;
-            if (!o.survivedOperations) { verdict = MissionVerdict.Failure; title = "Nave perdida en operación"; }
+            if (!o.survivedOperations) { verdict = MissionVerdict.Failure; title = o.crewed ? "Misión abortada: cápsula no recuperada" : "Nave perdida en operación"; }
             else if (science >= target) { verdict = MissionVerdict.Success; title = "Objetivos científicos cumplidos"; }
             else if (science >= target * PartialThreshold) { verdict = MissionVerdict.PartialSuccess; title = "Objetivos cumplidos parcialmente"; }
             else { verdict = MissionVerdict.Failure; title = "Retorno científico insuficiente"; }
@@ -308,10 +364,15 @@ namespace MissionDesign.Simulation
                 o.explanations.Add($"{prefix}: {who}, pero la antena {Name(d.Antenna)} en órbita {regime} solo transmitió " +
                                    $"{o.downlinkGBPerDay:N0} GB/día. Se perdió el {1f - o.dataReturnFraction:P0} de los datos ({o.dataLostTotalTB:N1} TB).");
             }
-            else if (o.survivedOperations)
+            else if (o.survivedOperations && o.dataRecoveredTB <= 0f)
             {
                 o.explanations.Add($"Bien: el enlace alcanzó — {Name(d.Antenna)} vía {NetworkName(d)} entregó el {o.dataReturnFraction:P0} de los datos ({o.dataReturnedTotalTB:N1} TB).");
             }
+
+            if (o.dataRecoveredTB > 0f)
+                o.explanations.Add($"Bien: tras el amerizaje se recuperaron {o.dataRecoveredTB:N2} TB guardados a bordo que el enlace no alcanzó a enviar. " +
+                                   "Así ocurrió en Artemis II: la tripulación tomó ~10 000 fotos con las 32 cámaras de Orion y cámaras Nikon D5/Z9; " +
+                                   "parte se envió por enlace láser y el resto volvió en tarjetas SD.");
 
             if (powerFrac < 0.98f)
                 o.explanations.Add($"{prefix}: los paneles dieron {genW:N0} W de media (eclipse y degradación incluidos) frente a {t.peakLoadW:N0} W de consumo pico; " +

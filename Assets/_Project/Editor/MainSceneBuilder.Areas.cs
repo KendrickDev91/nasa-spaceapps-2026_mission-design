@@ -130,6 +130,14 @@ namespace MissionDesign.Editor
             Wire(view, "transferLine", Line("TransferOrbit", area.transform, new Color(1f, 0.55f, 0.15f), 0.25f));
             Wire(view, "targetLine", Line("TargetOrbit", area.transform, new Color(0.35f, 1f, 0.5f), 0.22f));
             Wire(view, "linkLine", Line("DataLink", area.transform, new Color(1f, 0.95f, 0.3f), 0.15f));
+            // Sobrevuelo tripulado: colores del diagrama de Artemis II (ida morado, vuelta naranja).
+            var outbound = Line("FreeReturnOutbound", area.transform, new Color(0.62f, 0.45f, 1f), 0.35f);
+            var inbound = Line("FreeReturnReturn", area.transform, new Color(1f, 0.62f, 0.15f), 0.35f);
+            Wire(view, "outboundLine", outbound);
+            Wire(view, "returnLine", inbound);
+            Wire(view, "outboundMaterial", outbound.sharedMaterial);
+            Wire(view, "returnMaterial", inbound.sharedMaterial);
+            Wire(view, "milestoneMaterial", UnlitMaterial("MAT_Orbit_Milestone", Color.white));
             Wire(view, "marker", marker);
             Wire(view, "label", caption);
             Wire(view, "screenCamera", screenCam);

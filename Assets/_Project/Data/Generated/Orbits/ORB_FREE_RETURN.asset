@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3135e8f823be73840b08cc17cbfa1739, type: 3}
+  m_Name: ORB_FREE_RETURN
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.OrbitSO
+  orbitId: ORB_FREE_RETURN
+  displayName: Sobrevuelo lunar con retorno libre (tipo Artemis II)
+  regime: 5
+  description: "Trayectoria en forma de 8: tras la inyecci\xF3n translunar la nave
+    rodea la cara oculta de la Luna y su gravedad la devuelve a la Tierra sin motor."
+  altitudeKm: 7400
+  inclinationDeg: 0
+  orbitalPeriodMinutes: 0
+  requiredDeltaVKmS: 12.6
+  onboardDeltaVKmS: 0.1
+  sunDistanceAU: 1
+  eclipseFraction: 0.02
+  maxEclipseMinutes: 60
+  groundStationRangeKm: 300000
+  dailyContactHours: 20
+  radiationLevel: 0.85
+  debrisRisk: 0.03
+  educationalNote: "El retorno libre es una red de seguridad: si falla el motor,
+    la gravedad lunar trae a la tripulaci\xF3n de vuelta (as\xED se salv\xF3 Apolo
+    13). La trayectoria del juego se calcula con el problema de tres cuerpos Tierra-Luna."
+  dataConfidence: 1
+  sourceUrl: https://www.nasa.gov/mission/artemis-ii/

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e8f3ae732869945812ae38dafb5527, type: 3}
+  m_Name: INS_CREW_CAMERAS
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.InstrumentSO
+  componentId: INS_CREW_CAMERAS
+  displayName: "C\xE1maras de la tripulaci\xF3n (Nikon D5/Z9)"
+  description: "C\xE1maras manuales con lentes de 80-400 mm y 35 mm: la tripulaci\xF3n
+    tom\xF3 ~10 000 fotos durante el sobrevuelo."
+  heritage: Artemis II
+  massKg: 6
+  costMUSD: 0.1
+  peakPowerW: 20
+  developmentMonths: 6
+  technologyReadinessLevel: 9
+  advancedOnly: 0
+  prefab: {fileID: 919132149155446097, guid: 01875d8d3f1994b4fb6dfd3f1cdcd4af, type: 3}
+  socket: 1
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.nasa.gov/mission/artemis-ii/
+  sourceNotes: "~10 000 fotos \xD7 ~50 MB en unos 4 d\xEDas \u2248 120 GB/d\xEDa
+    (aprox.)."
+  instrumentType: 4
+  dataVolumeGBPerDay: 120
+  averagePowerW: 10
+  dutyCycle: 1
+  scienceValue: 40
+  requiredPointingDeg: 1
+  preferredOrbits: 05000000
+  scienceObjectives:
+  - luna
+  - artemis
+  - tripulada

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e8f3ae732869945812ae38dafb5527, type: 3}
+  m_Name: INS_ATENEA
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.InstrumentSO
+  componentId: INS_ATENEA
+  displayName: CubeSat ATENEA (CONAE, carga secundaria)
+  description: "Microsat\xE9lite argentino que viaj\xF3 en el adaptador de etapa
+    de Orion: mide radiaci\xF3n y prueba comunicaciones en \xF3rbita alta."
+  heritage: "Carga \xFAtil secundaria de Artemis II (Argentina)"
+  massKg: 12
+  costMUSD: 2
+  peakPowerW: 0
+  developmentMonths: 24
+  technologyReadinessLevel: 9
+  advancedOnly: 0
+  prefab: {fileID: 919132149155446097, guid: 5fa71c5982a50db4ebc5cdeef8174990, type: 3}
+  socket: 1
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://www.argentina.gob.ar/ciencia/conae
+  sourceNotes: "Viaja en el adaptador (no consume energ\xEDa de Orion). Valores aproximados."
+  instrumentType: 5
+  dataVolumeGBPerDay: 0.5
+  averagePowerW: 0
+  dutyCycle: 1
+  scienceValue: 15
+  requiredPointingDeg: 2
+  preferredOrbits: 05000000
+  scienceObjectives:
+  - luna
+  - radiacion
+  - cubesat

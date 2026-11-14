@@ -24,6 +24,10 @@ namespace MissionDesign.Data
         [Min(0)] public float designLifeYears = 5f;
         [Tooltip("Escala del costo del equipo de operaciones (CubeSat universitario ≈ 0.05).")]
         [Min(0)] public float operationsCostScale = 1f;
+        [Tooltip("Nave con soporte vital para tripulación (Orion). Obligatoria en escenarios tripulados.")]
+        public bool crewCapable;
+        [Tooltip("Capacidad de las tarjetas de memoria/almacenamiento que vuelven a la Tierra (GB). Solo naves con retorno.")]
+        [Min(0)] public float recoverableStorageGB;
 
         public float WetMassKg => massKg + propellantMassKg;
 

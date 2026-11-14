@@ -23,6 +23,10 @@ MonoBehaviour:
     payloadKg: 24
     confidence: 1
     note: Un dispensador de 12U (~24 kg).
+  - regime: 5
+    payloadKg: 0
+    confidence: 0
+    note: "Inyecci\xF3n translunar (TLI), igual que hacia la \xF3rbita lunar."
   fairingDiameterM: 0
   reliability: 0.95
   launchCostMUSD: 0.3

@@ -22,6 +22,11 @@ namespace MissionDesign.Data
         [Min(0)] public int minScienceValue;
         public OrbitRegime[] allowedOrbits;
 
+        [Header("Misión tripulada")]
+        [Tooltip("Requiere una nave con soporte vital; la seguridad de la tripulación prima sobre la ciencia.")]
+        public bool crewed;
+        [Min(0)] public int crewSize;
+
         [Header("Modo sandbox")]
         [Tooltip("Sin límite de presupuesto, calendario ni órbita: para experimentar libremente.")]
         public bool isSandbox;

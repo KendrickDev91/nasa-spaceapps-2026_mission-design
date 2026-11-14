@@ -7,7 +7,9 @@ namespace MissionDesign.Core
         MEO,
         GEO,
         Lunar,
-        Interplanetary
+        Interplanetary,
+        /// <summary>Sobrevuelo lunar con retorno libre (tipo Apolo 13 / Artemis II): ida, vuelta y amerizaje.</summary>
+        LunarFlyby
     }
 
     /// <summary>Categoría de pieza del ensamblador modular.</summary>
@@ -79,6 +81,8 @@ namespace MissionDesign.Core
         OrbitInsertion,
         ScienceOperations,
         DataTransmission,
+        /// <summary>Misiones con retorno: reentrada, amerizaje y recuperación de la cápsula y sus datos.</summary>
+        ReturnAndRecovery,
         PostMission
     }
 

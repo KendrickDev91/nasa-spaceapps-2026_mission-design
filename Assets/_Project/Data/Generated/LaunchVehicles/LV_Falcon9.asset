@@ -36,6 +36,10 @@ MonoBehaviour:
     payloadKg: 3000
     confidence: 2
     note: "Inyecci\xF3n translunar estimada (ref. IM-1 Nova-C ~1 900 kg)."
+  - regime: 5
+    payloadKg: 3000
+    confidence: 2
+    note: "Inyecci\xF3n translunar (TLI), igual que hacia la \xF3rbita lunar."
   fairingDiameterM: 5.2
   reliability: 0.99
   launchCostMUSD: 69.75

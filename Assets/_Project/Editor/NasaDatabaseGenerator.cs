@@ -35,6 +35,7 @@ namespace MissionDesign.Editor
             db.scenarios = CreateScenarios();
             db.realMissions = CreateRealMissions();
             AddCubeSatAndSandbox(db);
+            AddCrewedArtemis(db);
             int models = ModelLinker.LinkAll(db);
             Debug.Log($"[NASA DB] Modelos 3D vinculados: {models}");
 
@@ -392,6 +393,121 @@ namespace MissionDesign.Editor
 
             db.realMissions.Add(Real("REAL_MINXSS", "MinXSS-1", 2016, OrbitRegime.LEO, new[] { "INS_MINXSS" }, new[] { "sol", "clima_espacial" }, 4,
                 "CubeSat 3U de la Universidad de Colorado desplegado desde la ISS para estudiar los rayos X del Sol.", "https://lasp.colorado.edu/minxss/"));
+        }
+
+        // ─────────────────── MISIÓN TRIPULADA: SOBREVUELO LUNAR (tipo Artemis II) ───────────────────
+
+        /// <summary>
+        /// Sobrevuelo lunar tripulado con retorno libre. La trayectoria se calcula con FreeReturnTrajectory (CR3BP).
+        /// Datos de la campaña fotográfica: ~10 000 fotos, 32 cámaras en Orion, cámaras Nikon D5/Z9 (80-400 mm y 35 mm),
+        /// parte enviada por enlace láser y el resto recuperado en tarjetas SD tras el amerizaje (material del equipo).
+        /// </summary>
+        private static void AddCrewedArtemis(NasaDatabaseSO db)
+        {
+            const string artemis = "https://www.nasa.gov/mission/artemis-ii/";
+
+            var fr = GetOrCreate<OrbitSO>($"{Root}/Orbits/ORB_FREE_RETURN.asset");
+            fr.orbitId = "ORB_FREE_RETURN"; fr.displayName = "Sobrevuelo lunar con retorno libre (tipo Artemis II)"; fr.regime = OrbitRegime.LunarFlyby;
+            fr.description = "Trayectoria en forma de 8: tras la inyección translunar la nave rodea la cara oculta de la Luna y su gravedad la devuelve a la Tierra sin motor.";
+            fr.altitudeKm = 7400; fr.inclinationDeg = 0; fr.orbitalPeriodMinutes = 0; fr.requiredDeltaVKmS = 12.6f; fr.onboardDeltaVKmS = 0.1f;
+            fr.sunDistanceAU = 1f; fr.eclipseFraction = 0.02f; fr.maxEclipseMinutes = 60;
+            fr.groundStationRangeKm = 300000; fr.dailyContactHours = 20f;
+            fr.radiationLevel = 0.85f; fr.debrisRisk = 0.03f;
+            fr.educationalNote = "El retorno libre es una red de seguridad: si falla el motor, la gravedad lunar trae a la tripulación de vuelta (así se salvó Apolo 13). La trayectoria del juego se calcula con el problema de tres cuerpos Tierra-Luna.";
+            fr.dataConfidence = DataConfidence.Approximate; fr.sourceUrl = artemis;
+            Save(fr);
+            if (!db.orbits.Contains(fr)) db.orbits.Add(fr);
+
+            // Capacidad de inyección translunar de cada lanzador (la misma que hacia la órbita lunar).
+            foreach (var lv in db.launchVehicles)
+            {
+                if (lv.payloadCapacities.Exists(c => c.regime == OrbitRegime.LunarFlyby)) continue;
+                var lunar = lv.payloadCapacities.Find(c => c.regime == OrbitRegime.Lunar);
+                lv.payloadCapacities.Add(Cap(OrbitRegime.LunarFlyby, lunar.payloadKg, lunar.confidence, "Inyección translunar (TLI), igual que hacia la órbita lunar."));
+                Save(lv);
+            }
+
+            var orion = Bus("BUS_ORION", "Orion (cápsula + módulo de servicio europeo)",
+                "Cápsula para 4 astronautas con soporte vital, escudo térmico y sistema de aborto; el módulo de servicio de la ESA aporta motor, energía y agua.",
+                "Orion / ESM (Artemis I-II)", dry: 17900, prop: 8600, isp: 316, maxPayload: 300, maxPower: 3000, slots: 4, hk: 5500, life: 0.06f, cost: 1000, months: 48);
+            orion.crewCapable = true; orion.recoverableStorageGB = 1000; orion.operationsCostScale = 20f;
+            orion.dataConfidence = DataConfidence.Approximate; orion.sourceUrl = artemis;
+            orion.sourceNotes = "Masa en TLI ~26,5 t (aprox.). Costo de producción ~$1 000 M (orden de magnitud de auditorías de la NASA). 1 TB de tarjetas SD y memoria recuperable: estimación de juego.";
+            Save(orion);
+            if (!db.buses.Contains(orion)) db.buses.Add(orion);
+
+            var esm = Solar("SOL_ESM", "Alas del módulo de servicio europeo (4 alas)", "Cuatro alas solares de ~7 m que entregan unos 11 kW; incluidas en la masa del módulo de servicio.",
+                11200, 1, 1, 0.02f, 0, SpacecraftSocket.SolarWingLeft);
+            esm.dataConfidence = DataConfidence.Approximate; esm.sourceUrl = "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Orion"; Save(esm);
+            if (!db.solarArrays.Contains(esm)) db.solarArrays.Add(esm);
+
+            var o2o = Antenna("ANT_O2O", "Enlace láser O2O (comunicación óptica)", CommBand.Optical,
+                "Terminal láser de Orion: video y fotos en alta definición casi en tiempo real hacia estaciones ópticas terrestres.", 260f, 384400, 260f, false, 30, 40, 100, 24);
+            o2o.dataConfidence = DataConfidence.Approximate; o2o.sourceUrl = "https://www.nasa.gov/communicating-with-missions/";
+            o2o.sourceNotes = "Hasta ~260 Mbps de bajada (aprox.). Las nubes sobre la estación cortan el enlace.";
+            Save(o2o);
+            var orionS = Antenna("ANT_ORION_S", "Banda S de Orion (vía DSN)", CommBand.S,
+                "Enlace de voz, telemetría y comandos con la Red del Espacio Profundo.", 0.1f, 384400, 6f, true, 10, 5, 60, 12);
+            foreach (var a in new[] { o2o, orionS }) if (!db.antennas.Contains(a)) db.antennas.Add(a);
+
+            var optical = GetOrCreate<GroundNetworkSO>($"{Root}/GroundNetworks/GND_OPTICAL.asset");
+            optical.networkId = "GND_OPTICAL"; optical.displayName = "Estaciones ópticas terrestres (láser)";
+            optical.description = "Telescopios en tierra que reciben el enlace láser de Orion; necesitan cielo despejado.";
+            optical.supportedRegimes = new[] { OrbitRegime.Lunar, OrbitRegime.LunarFlyby };
+            optical.gainFactor = 1f; optical.contactHoursMultiplier = 0.2f; optical.outageProbabilityMultiplier = 1.5f; optical.costPerMonthMUSD = 0.3f;
+            optical.educationalNote = "La luz láser lleva muchísimos más datos que la radio, pero las nubes la bloquean: por eso parte de las fotos de Artemis II volvió en tarjetas SD.";
+            optical.dataConfidence = DataConfidence.GameEstimate; optical.sourceUrl = "https://www.nasa.gov/communicating-with-missions/";
+            Save(optical);
+            if (!db.groundNetworks.Contains(optical)) db.groundNetworks.Add(optical);
+            foreach (var n in db.groundNetworks)
+                if (n.networkId == "GND_DSN" && !n.Supports(OrbitRegime.LunarFlyby))
+                { n.supportedRegimes = new[] { OrbitRegime.Lunar, OrbitRegime.Interplanetary, OrbitRegime.LunarFlyby }; Save(n); }
+
+            var cams = Instrument("INS_ORION_CAMERAS", "32 cámaras de Orion (exteriores y cabina)", InstrumentType.Camera,
+                "Cámaras fijas en el exterior, en las alas solares y en la cabina: documentan la nave y el sobrevuelo en foto y video.",
+                "Orion, Artemis II", mass: 40, cost: 15, peakW: 300, avgW: 250, dataGB: 600, science: 60, months: 24,
+                orbits: new[] { OrbitRegime.LunarFlyby }, tags: new[] { "luna", "artemis", "tripulada" },
+                conf: DataConfidence.Approximate, url: artemis, notes: "32 cámaras según el material de la misión; volumen de datos y masa: estimación de juego.");
+            cams.requiredPointingDeg = 0.5f; Save(cams);
+            var nikon = Instrument("INS_CREW_CAMERAS", "Cámaras de la tripulación (Nikon D5/Z9)", InstrumentType.Camera,
+                "Cámaras manuales con lentes de 80-400 mm y 35 mm: la tripulación tomó ~10 000 fotos durante el sobrevuelo.",
+                "Artemis II", mass: 6, cost: 0.1f, peakW: 20, avgW: 10, dataGB: 120, science: 40, months: 6,
+                orbits: new[] { OrbitRegime.LunarFlyby }, tags: new[] { "luna", "artemis", "tripulada" },
+                conf: DataConfidence.Approximate, url: artemis, notes: "~10 000 fotos × ~50 MB en unos 4 días ≈ 120 GB/día (aprox.).");
+            nikon.requiredPointingDeg = 1f; Save(nikon);
+            var atenea = Instrument("INS_ATENEA", "CubeSat ATENEA (CONAE, carga secundaria)", InstrumentType.Radiometer,
+                "Microsatélite argentino que viajó en el adaptador de etapa de Orion: mide radiación y prueba comunicaciones en órbita alta.",
+                "Carga útil secundaria de Artemis II (Argentina)", mass: 12, cost: 2, peakW: 0, avgW: 0, dataGB: 0.5f, science: 15, months: 24,
+                orbits: new[] { OrbitRegime.LunarFlyby }, tags: new[] { "luna", "radiacion", "cubesat" },
+                conf: DataConfidence.GameEstimate, url: "https://www.argentina.gob.ar/ciencia/conae", notes: "Viaja en el adaptador (no consume energía de Orion). Valores aproximados.");
+            atenea.requiredPointingDeg = 2f; Save(atenea);
+            foreach (var i in new[] { cams, nikon, atenea }) if (!db.instruments.Contains(i)) db.instruments.Add(i);
+
+            var cdh = Computer("CDH_ORION", "Computadoras de vuelo y memoria de Orion", "Computadoras redundantes endurecidas y memoria para guardar fotos y video que vuelven a la Tierra.",
+                storage: 4000, radHard: true, mass: 50, power: 200, cost: 20, months: 36);
+            if (!db.computers.Contains(cdh)) db.computers.Add(cdh);
+
+            var scn = Scenario("SCN_ARTEMIS_FLYBY", "Sobrevuelo lunar tripulado (tipo Artemis II)",
+                "Lleva a 4 astronautas alrededor de la Luna y de vuelta a casa. Diseña el lanzamiento, la nave y las comunicaciones: " +
+                "las fotos que el enlace no alcance a enviar volverán en las tarjetas SD... si la cápsula regresa.",
+                "luna", budget: 4500, devMonths: 72, lifeMonths: 0.31f, minScience: 80, orbits: new[] { OrbitRegime.LunarFlyby });
+            scn.crewed = true; scn.crewSize = 4; Save(scn);
+            if (!db.scenarios.Contains(scn)) db.scenarios.Add(scn);
+
+            var real = Real("REAL_ARTEMIS2", "Artemis II", 2026, OrbitRegime.LunarFlyby, new[] { "INS_ORION_CAMERAS", "INS_CREW_CAMERAS" },
+                new[] { "luna", "artemis", "tripulada" }, 26500,
+                "Primera misión tripulada del programa Artemis: 4 astronautas rodearon la Luna en Orion y amerizaron en el Pacífico.", artemis);
+            if (!db.realMissions.Contains(real)) db.realMissions.Add(real);
+
+            // Eventos: fuera de la magnetosfera la tripulación está más expuesta a tormentas solares.
+            foreach (var e in db.randomEvents)
+            {
+                if (e.orbitModifiers.Exists(m => m.regime == OrbitRegime.LunarFlyby)) continue;
+                float mult = e.eventType == RandomEventType.SolarStorm ? 1.5f : e.eventType == RandomEventType.MicrometeoroidImpact ? 0.6f
+                    : e.eventType == RandomEventType.SingleEventUpset ? 1.3f : 1f;
+                e.orbitModifiers.Add(new OrbitProbabilityModifier { regime = OrbitRegime.LunarFlyby, multiplier = mult });
+                Save(e);
+            }
         }
 
         // ─────────────────── MISIONES REALES DE REFERENCIA ───────────────────

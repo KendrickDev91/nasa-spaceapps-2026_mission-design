@@ -15,7 +15,8 @@ namespace MissionDesign.Simulation
     {
         public static readonly MissionPhase[] PlaybackPhases =
         {
-            MissionPhase.Launch, MissionPhase.OrbitInsertion, MissionPhase.ScienceOperations, MissionPhase.DataTransmission
+            MissionPhase.Launch, MissionPhase.OrbitInsertion, MissionPhase.ScienceOperations, MissionPhase.DataTransmission,
+            MissionPhase.ReturnAndRecovery
         };
 
         [Tooltip("Segundos de pantalla que dura cada fase.")]
@@ -101,6 +102,7 @@ namespace MissionDesign.Simulation
                 // La misión terminó antes de esta fase (fallo de lanzamiento o de inserción).
                 if (!PhaseReached(outcome, phase)) break;
                 var entries = outcome.timeline.Where(e => e.phase == phase).ToList();
+                if (phase == MissionPhase.ReturnAndRecovery && entries.Count == 0) continue;   // solo misiones con retorno
 
                 manager.SetPhase(phase);
                 float slot = entries.Count > 0 ? secondsPerPhase / entries.Count : secondsPerPhase;

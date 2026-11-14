@@ -1,4 +1,5 @@
 using MissionDesign.Core;
+using MissionDesign.Exploration;
 using MissionDesign.Multiplayer;
 using TMPro;
 using UnityEngine;
@@ -24,10 +25,16 @@ namespace MissionDesign.UI
         [SerializeField] private Button playButton, tutorialButton, creditsButton, quitButton;
         [SerializeField] private Button resumeButton, pauseTutorialButton, restartButton, mainMenuButton, pauseQuitButton;
         [SerializeField] private Button infoPrevButton, infoNextButton, infoCloseButton;
+        [SerializeField] private Button exploreButton, plansButton;
+        [SerializeField] private TMP_Text infoCaption;
+        [SerializeField] private RawImage infoImage;
+        [SerializeField] private GameObject infoImageFrame;
+        [SerializeField] private Texture2D[] planTextures;
         [SerializeField] private bool showMainMenuOnStart = true;
 
         private string[][] pages;
         private int page;
+        private Texture2D[] pageImages;
 
         public bool IsBlocking => Visible(mainMenu) || Visible(pauseMenu) || Visible(infoPanel);
 
@@ -78,6 +85,8 @@ namespace MissionDesign.UI
             Hook(tutorialButton, () => OpenInfo(TutorialPages));
             Hook(creditsButton, () => OpenInfo(CreditsPages));
             Hook(quitButton, Quit);
+            Hook(exploreButton, SceneFlow.OpenSpaceCenter);
+            Hook(plansButton, OpenPlans);
             Hook(resumeButton, Resume);
             Hook(pauseTutorialButton, () => OpenInfo(TutorialPages));
             Hook(restartButton, Restart);
@@ -89,7 +98,7 @@ namespace MissionDesign.UI
 
             Show(pauseMenu, false);
             Show(infoPanel, false);
-            Show(mainMenu, showMainMenuOnStart);
+            Show(mainMenu, showMainMenuOnStart && !SceneFlow.ConsumeSkipMainMenu());
             UpdateTimeScale();
         }
 
@@ -124,9 +133,21 @@ namespace MissionDesign.UI
             UpdateTimeScale();
         }
 
-        public void OpenInfo(string[][] content)
+        /// <summary>Láminas 2D del centro espacial (las mismas que se consultan caminando, tecla M).</summary>
+        public void OpenPlans()
+        {
+            int n = SpaceCenterContent.Plans.Length;
+            var p = new string[n][];
+            for (int i = 0; i < n; i++) p[i] = new[] { SpaceCenterContent.Plans[i].title, SpaceCenterContent.Plans[i].caption };
+            OpenInfo(p, planTextures);
+        }
+
+        public void OpenInfo(string[][] content) => OpenInfo(content, null);
+
+        private void OpenInfo(string[][] content, Texture2D[] images)
         {
             pages = content;
+            pageImages = images;
             page = 0;
             Show(infoPanel, true);
             Render();
@@ -142,8 +163,18 @@ namespace MissionDesign.UI
         private void Render()
         {
             if (pages == null || pages.Length == 0) return;
+            var image = pageImages != null && page < pageImages.Length ? pageImages[page] : null;
+            bool hasImage = image != null;
             if (infoTitle != null) infoTitle.text = pages[page][0];
-            if (infoBody != null) infoBody.text = pages[page][1];
+            if (infoBody != null) { infoBody.text = hasImage ? string.Empty : pages[page][1]; infoBody.gameObject.SetActive(!hasImage); }
+            if (infoCaption != null) { infoCaption.text = hasImage ? pages[page][1] : string.Empty; infoCaption.gameObject.SetActive(hasImage); }
+            if (infoImageFrame != null) infoImageFrame.SetActive(hasImage);
+            if (infoImage != null)
+            {
+                infoImage.texture = image;
+                var fitter = infoImage.GetComponent<AspectRatioFitter>();
+                if (fitter != null && hasImage) fitter.aspectRatio = (float)image.width / image.height;
+            }
             if (infoPager != null) infoPager.text = pages.Length > 1 ? $"{page + 1} / {pages.Length}" : string.Empty;
             if (infoPrevButton != null) infoPrevButton.interactable = page > 0;
             if (infoNextButton != null) infoNextButton.interactable = page < pages.Length - 1;

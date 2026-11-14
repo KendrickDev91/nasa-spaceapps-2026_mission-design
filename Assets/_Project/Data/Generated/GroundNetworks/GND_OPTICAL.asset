@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 608693d040085d1469cecb66735884d7, type: 3}
+  m_Name: GND_OPTICAL
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.GroundNetworkSO
+  networkId: GND_OPTICAL
+  displayName: "Estaciones \xF3pticas terrestres (l\xE1ser)"
+  description: "Telescopios en tierra que reciben el enlace l\xE1ser de Orion; necesitan
+    cielo despejado."
+  supportedRegimes: 0300000005000000
+  gainFactor: 1
+  contactHoursMultiplier: 0.2
+  outageProbabilityMultiplier: 1.5
+  costPerMonthMUSD: 0.3
+  educationalNote: "La luz l\xE1ser lleva much\xEDsimos m\xE1s datos que la radio,
+    pero las nubes la bloquean: por eso parte de las fotos de Artemis II volvi\xF3
+    en tarjetas SD."
+  dataConfidence: 2
+  sourceUrl: https://www.nasa.gov/communicating-with-missions/

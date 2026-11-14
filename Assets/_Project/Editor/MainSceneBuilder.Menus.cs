@@ -3,6 +3,7 @@ using MissionDesign.Multiplayer;
 using MissionDesign.Simulation;
 using MissionDesign.UI;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,11 +32,13 @@ namespace MissionDesign.Editor
             Place(roleLine.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -345f), new Vector2(1600f, 30f));
 
             var column = NewRect("Buttons", main);
-            Place(column, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, 60f), new Vector2(420f, 330f));
+            Place(column, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, 110f), new Vector2(460f, 470f));
             var vlg = column.gameObject.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 16; vlg.childControlWidth = vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true; vlg.childForceExpandHeight = true;
-            var play = MakeButton("PlayButton", column, "<b>JUGAR</b>", UiTheme.Launch, 26, 0);
+            var play = MakeButton("PlayButton", column, "<b>JUGAR · DISEÑAR MISIÓN</b>", UiTheme.Launch, 26, 0);
+            var explore = MakeButton("ExploreButton", column, "<b>Explorar el centro espacial</b>", UiTheme.Accent, 22, 0);
+            var plans = MakeButton("PlansButton", column, "Planos del centro espacial", UiTheme.AccentDim, 22, 0);
             var tutorial = MakeButton("TutorialButton", column, "Cómo se juega", UiTheme.AccentDim, 22, 0);
             var credits = MakeButton("CreditsButton", column, "Fuentes y créditos", UiTheme.AccentDim, 22, 0);
             var quit = MakeButton("QuitButton", column, "Salir", UiTheme.PanelLight, 22, 0);
@@ -67,7 +70,7 @@ namespace MissionDesign.Editor
             Stretch(info);
             var infoGroup = info.gameObject.AddComponent<CanvasGroup>();
             var infoCard = Panel("Card", info, new Color(0.04f, 0.06f, 0.11f, 1f));
-            Place(infoCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 680f));
+            Place(infoCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 820f));
             var infoTitle = Text("Title", infoCard, "TÍTULO", 34, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
             Place(infoTitle.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -36f), new Vector2(-96f, 50f));
             var infoBody = Text("Body", infoCard, "", 22, UiTheme.Text, TextAlignmentOptions.TopLeft);
@@ -82,6 +85,13 @@ namespace MissionDesign.Editor
             var close = MakeButton("CloseButton", infoCard, "Cerrar", UiTheme.PanelLight, 18, 0);
             Place((RectTransform)close.transform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-48f, 30f), new Vector2(180f, 54f));
 
+            var (infoImage, infoFrame, infoCaption) = InfoImageArea(infoCard);
+            Wire(menus, "exploreButton", explore);
+            Wire(menus, "plansButton", plans);
+            Wire(menus, "infoImage", infoImage);
+            Wire(menus, "infoImageFrame", infoFrame);
+            Wire(menus, "infoCaption", infoCaption);
+            WireArray(menus, "planTextures", LoadPlanTextures());
             Wire(menus, "roles", roles);
             Wire(menus, "mainMenu", mainGroup);
             Wire(menus, "pauseMenu", pauseGroup);
@@ -106,6 +116,47 @@ namespace MissionDesign.Editor
             var sfxGo = new GameObject("Sfx");
             sfxGo.AddComponent<AudioSource>();
             Wire(sfxGo.AddComponent<SfxPlayer>(), "runner", runner);
+        }
+
+        /// <summary>Marco para láminas (RawImage con proporción fija) y pie de imagen dentro de una tarjeta de información.</summary>
+        private static (RawImage image, GameObject frame, TextMeshProUGUI caption) InfoImageArea(RectTransform card)
+        {
+            var frame = Panel("ImageFrame", card, new Color(0.02f, 0.03f, 0.06f, 1f));
+            Place(frame, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(-96f, -260f));
+            var imgRt = NewRect("Plan", frame);
+            Stretch(imgRt);
+            var image = imgRt.gameObject.AddComponent<RawImage>();
+            image.raycastTarget = false;
+            var fitter = imgRt.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            fitter.aspectRatio = 2048f / 1448f;
+            var caption = Text("Caption", card, "", 19, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            Place(caption.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 92f), new Vector2(-96f, 52f));
+            frame.gameObject.SetActive(false);
+            return (image, frame.gameObject, caption);
+        }
+
+        private static Object[] LoadPlanTextures()
+        {
+            var list = new System.Collections.Generic.List<Object>();
+            foreach (var sheet in MissionDesign.Exploration.SpaceCenterContent.Plans)
+            {
+                string path = $"{PlansFolder}/{sheet.file}.png";
+                if (AssetImporter.GetAtPath(path) is TextureImporter ti &&
+                    (ti.mipmapEnabled || ti.npotScale != TextureImporterNPOTScale.None || ti.maxTextureSize < 2048 || ti.textureCompression != TextureImporterCompression.CompressedHQ))
+                {
+                    ti.textureType = TextureImporterType.Default;
+                    ti.mipmapEnabled = false;
+                    ti.npotScale = TextureImporterNPOTScale.None;
+                    ti.maxTextureSize = 2048;
+                    ti.textureCompression = TextureImporterCompression.CompressedHQ;
+                    ti.SaveAndReimport();
+                }
+                var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (tex == null) Debug.LogWarning($"[SceneBuilder] Falta la lámina {path} (ejecuta ArtSource/Blender/build_all.ps1).");
+                list.Add(tex);
+            }
+            return list.ToArray();
         }
     }
 }

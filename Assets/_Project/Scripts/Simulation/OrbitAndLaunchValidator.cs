@@ -61,6 +61,8 @@ namespace MissionDesign.Simulation
     /// </summary>
     public static class OrbitAndLaunchValidator
     {
+        public const string OpticalNetworkId = "GND_OPTICAL";
+
         public const float StandardGravity = 9.80665f;
         /// <summary>Impulso específico de referencia (motor LOX/RP-1 de vacío) para la explicación educativa.</summary>
         public const float ReferenceIspSeconds = 350f;
@@ -201,7 +203,17 @@ namespace MissionDesign.Simulation
                     $"Se generan {t.dataGeneratedGBPerDay:N1} GB/día, pero {design.Antenna.displayName} en {orbit?.regime} solo transmite " +
                     $"{t.downlinkCapacityGBPerDay:N1} GB/día: se perdería el {1f - t.dataReturnFraction:P0} de la ciencia.");
             }
-            if (orbit != null && design.Antenna != null && orbit.regime >= OrbitRegime.Lunar && !design.Antenna.dsnCompatible)
+            bool laserLink = design.Antenna != null && design.Antenna.band == CommBand.Optical;
+            bool opticalGround = design.GroundNetwork != null && design.GroundNetwork.networkId == OpticalNetworkId;
+            if (laserLink != opticalGround && design.Antenna != null && design.GroundNetwork != null && (laserLink || opticalGround))
+            {
+                Add(issues, IssueSeverity.Blocking, ResourceKind.Comms, MissionRole.TelecomLaunchEngineer,
+                    laserLink ? "El enlace láser necesita estaciones ópticas" : "Las estaciones ópticas solo reciben láser",
+                    laserLink
+                        ? $"{design.Antenna.displayName} emite luz láser: elige las estaciones ópticas terrestres como segmento terreno."
+                        : $"{design.GroundNetwork.displayName} usa telescopios; {design.Antenna.displayName} transmite por radio. Usa una antena láser o la DSN.");
+            }
+            else if (orbit != null && design.Antenna != null && orbit.regime >= OrbitRegime.Lunar && !design.Antenna.dsnCompatible && !laserLink)
             {
                 Add(issues, IssueSeverity.Blocking, ResourceKind.Comms, MissionRole.TelecomLaunchEngineer,
                     "Antena incompatible con la DSN",
@@ -241,6 +253,13 @@ namespace MissionDesign.Simulation
             // ── Presupuesto y calendario ──
             if (scenario != null)
             {
+                if (scenario.crewed && (bus == null || !bus.crewCapable))
+                {
+                    Add(issues, IssueSeverity.Blocking, ResourceKind.Mass, MissionRole.SystemsEngineer,
+                        "Nave sin soporte vital",
+                        $"El escenario lleva {scenario.crewSize} astronautas: necesita una cápsula con soporte vital, escudo térmico " +
+                        "y sistema de aborto (p. ej. Orion con su módulo de servicio).");
+                }
                 if (t.budgetLimitMUSD > 0f && t.totalCostMUSD > t.budgetLimitMUSD)
                 {
                     Add(issues, IssueSeverity.Blocking, ResourceKind.Budget, MissionRole.MissionDirector,

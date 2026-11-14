@@ -29,7 +29,14 @@ def main():
     mt.box("Floor", (W, D, 0.2), (0, 0, -0.1), floor, root)
     mt.box("Ceiling", (W, D, 0.2), (0, 0, H + 0.1), ceiling, root)
     mt.box("Wall_Front", (W, 0.3, H), (0, D / 2, H / 2), wall, root)
-    mt.box("Wall_Back", (W, 0.3, H), (0, -D / 2, H / 2), wall, root)
+    # Pared trasera con puerta de 3 × 3 m hacia el vestíbulo del Centro de Control.
+    door_w, door_h = 3.0, 3.0
+    side = (W - door_w) / 2
+    mt.box("Wall_Back_L", (side, 0.3, H), (-(door_w + side) / 2, -D / 2, H / 2), wall, root)
+    mt.box("Wall_Back_R", (side, 0.3, H), ((door_w + side) / 2, -D / 2, H / 2), wall, root)
+    mt.box("Wall_Back_Top", (door_w, 0.3, H - door_h), (0, -D / 2, door_h + (H - door_h) / 2), wall, root)
+    mt.empty("Door_X_ControlRoom", root, location=(0, -D / 2, door_h / 2))
+    mt.empty("Interact_DesignConsole", root, location=(-2.5, 2.9, 0.0))
     mt.box("Wall_Left", (0.3, D, H), (-W / 2, 0, H / 2), wall, root)
     mt.box("Wall_Right", (0.3, D, H), (W / 2, 0, H / 2), wall, root)
     for ix in range(-2, 3):

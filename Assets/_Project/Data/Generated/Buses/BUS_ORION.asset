@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e072841796e3a7498ff46dac3d2cdf8, type: 3}
+  m_Name: BUS_ORION
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.SpacecraftBusSO
+  componentId: BUS_ORION
+  displayName: "Orion (c\xE1psula + m\xF3dulo de servicio europeo)"
+  description: "C\xE1psula para 4 astronautas con soporte vital, escudo t\xE9rmico
+    y sistema de aborto; el m\xF3dulo de servicio de la ESA aporta motor, energ\xEDa
+    y agua."
+  heritage: Orion / ESM (Artemis I-II)
+  massKg: 17900
+  costMUSD: 1000
+  peakPowerW: 5500
+  developmentMonths: 48
+  technologyReadinessLevel: 9
+  advancedOnly: 0
+  prefab: {fileID: 919132149155446097, guid: 68688afe563dfdf4d89b428d02adca8a, type: 3}
+  socket: 0
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.nasa.gov/mission/artemis-ii/
+  sourceNotes: "Masa en TLI ~26,5 t (aprox.). Costo de producci\xF3n ~$1 000 M (orden
+    de magnitud de auditor\xEDas de la NASA). 1 TB de tarjetas SD y memoria recuperable:
+    estimaci\xF3n de juego."
+  maxPayloadMassKg: 300
+  maxPayloadPowerW: 3000
+  payloadSlots: 4
+  propellantMassKg: 8600
+  propulsionIspSeconds: 316
+  housekeepingPowerW: 5500
+  housekeepingDataGBPerDay: 0.05
+  designLifeYears: 0.06
+  operationsCostScale: 20
+  crewCapable: 1
+  recoverableStorageGB: 1000

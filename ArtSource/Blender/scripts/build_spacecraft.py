@@ -236,6 +236,55 @@ def adcs(id_):
     return done(r)
 
 
+# ───────────── Misión tripulada (tipo Artemis II) ─────────────
+
+def orion(id_):
+    """Cápsula Orion sobre el módulo de servicio europeo (escala de exhibición)."""
+    r = mt.empty(id_)
+    mt.cylinder("ESM", 0.62, 0.85, -0.7, M["white"], r, verts=32)
+    mt.cylinder("ESM_Band", 0.63, 0.08, -0.25, M["silver"], r, verts=32)
+    mt.engine_bell("ESM_Engine", 0.22, 0.35, -0.7, M["silver"], r)
+    mt.cylinder("Adapter", 0.62, 0.12, 0.15, M["black"], r, verts=32)
+    mt.cylinder("CrewModule", 0.66, 0.62, 0.27, M["silver"], r, verts=32, radius_top=0.28)
+    mt.cylinder("DockingHatch", 0.2, 0.12, 0.89, M["white"], r, verts=20)
+    for k, x, y in mt.ring_of(4, 0.42, 0.4):
+        mt.box(f"Window{k}", (0.09, 0.05, 0.07), (x, y, 0.55), M["lens"], r)
+    return done(r)
+
+
+def o2o_terminal(id_):
+    r = mt.empty(id_)
+    mt.box("Mount", (0.2, 0.12, 0.2), (0, 0.06, 0), M["alu"], r)
+    dome = mt.sphere("Telescope", 0.14, (0, 0.2, 0), M["white"], r, segments=20, rings=10)
+    dome.scale = (1, 1, 1)
+    lens = mt.cylinder("Aperture", 0.08, 0.04, 0.0, M["lens"], r, verts=20)
+    lens.rotation_euler = (1.5708, 0, 0)
+    lens.location = (0, 0.33, 0)
+    return done(r)
+
+
+def camera_cluster(id_):
+    r = mt.empty(id_)
+    mt.box("Bracket", (0.45, 0.25, 0.05), (0, 0, 0.025), M["alu"], r)
+    for k, x in enumerate((-0.15, 0.0, 0.15)):
+        mt.box(f"Cam{k}", (0.1, 0.12, 0.1), (x, 0, 0.1), M["black"], r)
+        lens = mt.cylinder(f"Lens{k}", 0.035, 0.05, 0.0, M["lens"], r, verts=16)
+        lens.rotation_euler = (1.5708, 0, 0)
+        lens.location = (x, 0.085, 0.1)
+    return done(r)
+
+
+def dslr(id_):
+    r = mt.empty(id_)
+    mt.box("Body", (0.16, 0.09, 0.12), (0, 0, 0.06), M["black"], r)
+    mt.box("Grip", (0.04, 0.08, 0.1), (-0.07, 0.01, 0.05), M["black"], r)
+    lens = mt.cylinder("Zoom", 0.045, 0.2, 0.0, M["black"], r, verts=20)
+    lens.rotation_euler = (1.5708, 0, 0)
+    lens.location = (0.02, 0.145, 0.06)
+    mt.cylinder("Glass", 0.04, 0.01, 0.0, M["lens"], r, verts=20).location = (0.02, 0.25, 0.06)
+    return done(r)
+
+
 def main():
     mt.reset_scene()
     mats()
@@ -249,6 +298,8 @@ def main():
         uhf("ANT_UHF"), patch("ANT_S", 0.3), hga("ANT_X", 0.3, 0.25), hga("ANT_KA", 0.5, 0.35), patch("ANT_S_CUBESAT", 0.16),
         modis("INS_MODIS"), abi("INS_ABI"), oco2("INS_OCO2"), nisar("INS_NISAR"), lroc("INS_LROC"), gedi("INS_GEDI"),
         small_cam("INS_CUBECAM"), minxss("INS_MINXSS"),
+        orion("BUS_ORION"), wing("SOL_ESM", 3, 0.5, 0.75, M["cells"], yoke=0.3), o2o_terminal("ANT_O2O"), patch("ANT_ORION_S", 0.22),
+        camera_cluster("INS_ORION_CAMERAS"), dslr("INS_CREW_CAMERAS"), cubesat("INS_ATENEA", 0.24, 0.34, 0.24),
     ]
     for root in built:               # separados en el .blend para editarlos
         root.location = (x, 0, 0)

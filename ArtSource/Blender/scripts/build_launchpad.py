@@ -77,6 +77,13 @@ def main():
         mt.cylinder(f"LampPole{k}", 0.3, 18, 0.0, grey, root, x=x, y=y, verts=8)
         mt.box(f"LampHead{k}", (2.2, 2.2, 0.6), (x, y, 18.3), lamp, root)
     _ = tower
+    # Rampa de acceso (pendiente ~2,3°) desde el camino de orugas hasta la losa elevada.
+    ramp = mt.box("AccessRamp", (30, 50.2, 1.0), (0, 70, -1.5), concrete, root)
+    ramp.rotation_euler = (-math.atan2(2.0, 50.0), 0, 0)
+    mt.box("LaunchControlPost", (3.0, 2.0, 2.4), (24, 40, 1.2), white, root)
+    mt.box("LaunchControlScreen", (2.2, 0.1, 1.0), (24, 38.95, 1.7), lamp, root)
+    mt.empty("Interact_LaunchPanel", root, location=(24, 37.6, 0.0))
+    mt.empty("Sign_PlataformaDeLanzamiento", root, location=(0, 44, 9.0))
     mt.export(root, "LaunchPad", "LaunchPad")
     mt.save_blend("LaunchPad")
 

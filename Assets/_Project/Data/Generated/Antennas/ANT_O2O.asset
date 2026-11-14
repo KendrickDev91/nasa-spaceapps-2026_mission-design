@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8af0deda2731fab4887aab64f35837da, type: 3}
+  m_Name: ANT_O2O
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.AntennaSO
+  componentId: ANT_O2O
+  displayName: "Enlace l\xE1ser O2O (comunicaci\xF3n \xF3ptica)"
+  description: "Terminal l\xE1ser de Orion: video y fotos en alta definici\xF3n casi
+    en tiempo real hacia estaciones \xF3pticas terrestres."
+  heritage: 
+  massKg: 30
+  costMUSD: 40
+  peakPowerW: 100
+  developmentMonths: 24
+  technologyReadinessLevel: 9
+  advancedOnly: 0
+  prefab: {fileID: 919132149155446097, guid: ef3979ce52ef7f04a9f96e5e2ff4221e, type: 3}
+  socket: 4
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.nasa.gov/communicating-with-missions/
+  sourceNotes: "Hasta ~260 Mbps de bajada (aprox.). Las nubes sobre la estaci\xF3n
+    cortan el enlace."
+  band: 4
+  referenceDataRateMbps: 260
+  referenceRangeKm: 384400
+  maxDataRateMbps: 260
+  dsnCompatible: 0

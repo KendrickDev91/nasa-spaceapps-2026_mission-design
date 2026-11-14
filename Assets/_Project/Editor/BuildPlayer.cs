@@ -28,7 +28,9 @@ namespace MissionDesign.Editor
             Directory.CreateDirectory(OutputDir);
             var options = new BuildPlayerOptions
             {
-                scenes = new[] { MainSceneBuilder.ScenePath },
+                scenes = File.Exists(MainSceneBuilder.SpaceCenterScenePath)
+                    ? new[] { MainSceneBuilder.ScenePath, MainSceneBuilder.SpaceCenterScenePath }
+                    : new[] { MainSceneBuilder.ScenePath },
                 locationPathName = Path.Combine(OutputDir, ExeName),
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.None

@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/MissionDesign_Main.unity
     guid: 92b157670fe83f448b52098213abe784
+  - enabled: 1
+    path: Assets/_Project/Scenes/SpaceCenter.unity
+    guid: 2a4981bab0f8a8845a9d9d642e6c7cf9
   m_configObjects: {}
