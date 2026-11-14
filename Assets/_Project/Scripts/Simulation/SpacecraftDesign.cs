@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MissionDesign.Core;
 using MissionDesign.Data;
 
 namespace MissionDesign.Simulation
@@ -17,6 +18,10 @@ namespace MissionDesign.Simulation
         private SolarArraySO solarArray;
         private BatterySO battery;
         private AntennaSO antenna;
+        private OnboardComputerSO computer;
+        private AttitudeControlSO attitudeControl;
+        private GroundNetworkSO groundNetwork;
+        private DifficultyLevel difficulty = DifficultyLevel.Basic;
         private readonly List<InstrumentSO> instruments = new List<InstrumentSO>();
 
         /// <summary>Cualquier cambio del diseño (pieza, órbita, cohete, escenario).</summary>
@@ -33,6 +38,11 @@ namespace MissionDesign.Simulation
         public SolarArraySO SolarArray => solarArray;
         public BatterySO Battery => battery;
         public AntennaSO Antenna => antenna;
+        public OnboardComputerSO Computer => computer;
+        public AttitudeControlSO AttitudeControl => attitudeControl;
+        public GroundNetworkSO GroundNetwork => groundNetwork;
+        public DifficultyLevel Difficulty => difficulty;
+        public bool IsAdvanced => difficulty == DifficultyLevel.Advanced;
         public IReadOnlyList<InstrumentSO> Instruments => instruments;
 
         /// <summary>Todas las piezas físicas montadas (bus, panel, batería, antena, instrumentos).</summary>
@@ -44,6 +54,8 @@ namespace MissionDesign.Simulation
                 if (solarArray != null) yield return solarArray;
                 if (battery != null) yield return battery;
                 if (antenna != null) yield return antenna;
+                if (computer != null) yield return computer;
+                if (attitudeControl != null) yield return attitudeControl;
                 foreach (var i in instruments)
                     if (i != null) yield return i;
             }
@@ -70,10 +82,45 @@ namespace MissionDesign.Simulation
             Changed?.Invoke();
         }
 
+        public void SetGroundNetwork(GroundNetworkSO value)
+        {
+            if (groundNetwork == value) return;
+            groundNetwork = value;
+            Changed?.Invoke();
+        }
+
+        /// <summary>Al pasar a Básico se retiran las piezas exclusivas de Avanzado.</summary>
+        public void SetDifficulty(DifficultyLevel value)
+        {
+            if (difficulty == value) return;
+            difficulty = value;
+            if (value == DifficultyLevel.Basic)
+            {
+                Swap(ref computer, null, notify: false);
+                Swap(ref attitudeControl, null, notify: false);
+            }
+            Changed?.Invoke();
+        }
+
         public void SetBus(SpacecraftBusSO value) => Swap(ref bus, value);
         public void SetSolarArray(SolarArraySO value) => Swap(ref solarArray, value);
         public void SetBattery(BatterySO value) => Swap(ref battery, value);
         public void SetAntenna(AntennaSO value) => Swap(ref antenna, value);
+        public void SetComputer(OnboardComputerSO value) => Swap(ref computer, value);
+        public void SetAttitudeControl(AttitudeControlSO value) => Swap(ref attitudeControl, value);
+
+        /// <summary>Copia independiente (sin suscriptores) para previsualizar consecuencias.</summary>
+        public SpacecraftDesign Clone()
+        {
+            var c = new SpacecraftDesign
+            {
+                scenario = scenario, orbit = orbit, launchVehicle = launchVehicle, bus = bus, solarArray = solarArray,
+                battery = battery, antenna = antenna, computer = computer, attitudeControl = attitudeControl,
+                groundNetwork = groundNetwork, difficulty = difficulty
+            };
+            c.instruments.AddRange(instruments);
+            return c;
+        }
 
         /// <summary>
         /// Añade un instrumento. No se limita por slots a propósito: el exceso lo detecta el
@@ -113,20 +160,22 @@ namespace MissionDesign.Simulation
                 case SolarArraySO s: SetSolarArray(s); break;
                 case BatterySO bt: SetBattery(bt); break;
                 case AntennaSO a: SetAntenna(a); break;
+                case OnboardComputerSO cdh: SetComputer(cdh); break;
+                case AttitudeControlSO adcs: SetAttitudeControl(adcs); break;
                 case InstrumentSO i: AddInstrument(i); break;
                 case null: break;
                 default: throw new ArgumentException($"Tipo de pieza no soportado: {component.GetType().Name}");
             }
         }
 
-        private void Swap<T>(ref T field, T value) where T : SpacecraftComponentSO
+        private void Swap<T>(ref T field, T value, bool notify = true) where T : SpacecraftComponentSO
         {
             if (field == value) return;
             var old = field;
             field = value;
             if (old != null) ComponentRemoved?.Invoke(old);
             if (value != null) ComponentAdded?.Invoke(value);
-            Changed?.Invoke();
+            if (notify) Changed?.Invoke();
         }
     }
 }

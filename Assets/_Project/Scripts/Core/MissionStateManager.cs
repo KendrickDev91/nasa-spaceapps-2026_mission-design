@@ -101,6 +101,16 @@ namespace MissionDesign.Core
             if (CanEdit()) Design.SetLaunchVehicle(vehicle);
         }
 
+        public void SelectGroundNetwork(GroundNetworkSO network)
+        {
+            if (CanEdit()) Design.SetGroundNetwork(network);
+        }
+
+        public void SetDifficulty(DifficultyLevel level)
+        {
+            if (CanEdit()) Design.SetDifficulty(level);
+        }
+
         /// <summary>Coloca bus/panel/batería/antena en su ranura o añade un instrumento.</summary>
         public void SelectComponent(SpacecraftComponentSO component)
         {

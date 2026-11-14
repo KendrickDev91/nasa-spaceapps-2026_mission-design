@@ -17,7 +17,19 @@ namespace MissionDesign.Core
         SolarArray,
         Battery,
         Instrument,
-        Antenna
+        Antenna,
+        OnboardComputer,
+        AttitudeControl
+    }
+
+    /// <summary>
+    /// Básico: piezas esenciales, 1 evento, sin fallos de lanzamiento.
+    /// Avanzado: añade computadora de a bordo (memoria, radiación) y control de orientación.
+    /// </summary>
+    public enum DifficultyLevel
+    {
+        Basic,
+        Advanced
     }
 
     /// <summary>Puntos de anclaje (sockets) del ModularSpacecraftAssembler.</summary>

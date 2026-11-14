@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 832ba81e4f5e5eb439a08a57f8d28da0, type: 3}
+  m_Name: REAL_LRO
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RealMissionSO
+  missionId: REAL_LRO
+  displayName: Lunar Reconnaissance Orbiter
+  launchYear: 2009
+  regime: 3
+  instrumentIds:
+  - INS_LROC
+  tags:
+  - luna
+  - superficie
+  - artemis
+  massKg: 1916
+  description: "Cartograf\xEDa la Luna desde 2009; sus mapas eligen los sitios de
+    alunizaje de Artemis."
+  sourceUrl: https://science.nasa.gov/mission/lro/

@@ -27,7 +27,6 @@ MonoBehaviour:
   maxEclipseMinutes: 35
   groundStationRangeKm: 2000
   dailyContactHours: 2
-  groundGainFactor: 1
   radiationLevel: 0.25
   debrisRisk: 0.6
   educationalNote: "\u22489.4 km/s de \u0394v: ~7.8 km/s orbitales + ~1.5 km/s de

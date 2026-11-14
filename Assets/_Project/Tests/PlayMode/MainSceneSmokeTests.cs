@@ -43,6 +43,7 @@ namespace MissionDesign.Tests
             Assert.Greater(catalog.ItemCount, 0, "El catálogo del rol inicial está vacío.");
 
             mgr.SelectLaunchVehicle(db.launchVehicles.First(v => v.vehicleId == "LV_FALCON9"));
+            mgr.SelectGroundNetwork(db.DefaultNetworkFor(OrbitRegime.LEO));
             Select(mgr, db, "BUS_MEDIUM", "SOL_WINGS", "BAT_2000", "ANT_X", "INS_MODIS", "INS_OCO2");
             yield return new WaitForSeconds(0.6f);
 
@@ -92,6 +93,8 @@ namespace MissionDesign.Tests
             Assert.IsTrue(File.Exists(mgr.LastReportPath), $"No se exportó el reporte: {mgr.LastReportPath}");
             var post = Object.FindAnyObjectByType<PostMissionPanel>();
             StringAssert.Contains(MissionOutcomeReport.VerdictLabel(outcome.verdict), post.VerdictText);
+            StringAssert.Contains(outcome.rank, post.RankText);
+            Assert.IsFalse(string.IsNullOrEmpty(outcome.similarMission), "Debe sugerir una misión real parecida.");
             yield return Capture("Logs/screenshot_04_post_mission.png");
 
             // Volver al diseño reinicia el consenso.
@@ -107,13 +110,29 @@ namespace MissionDesign.Tests
             var roles = Object.FindAnyObjectByType<RoleTurnManager>();
 
             mgr.SelectLaunchVehicle(db.launchVehicles.First(v => v.vehicleId == "LV_ELECTRON"));
+            mgr.SelectGroundNetwork(db.DefaultNetworkFor(OrbitRegime.LEO));
             Select(mgr, db, "BUS_SMALL", "SOL_BODY", "BAT_500", "ANT_X");
 
-            // Clic real sobre el botón del catálogo del Científico.
             roles.SetActiveRole(MissionRole.PrincipalScientist);
             yield return null;
             var nisarButton = Object.FindObjectsByType<Button>(FindObjectsSortMode.None).FirstOrDefault(b => b.name == "Item_INS_NISAR");
             Assert.IsNotNull(nisarButton, "No se encontró el botón de NISAR en el catálogo.");
+
+            // Tooltip educativo ANTES de elegir: debe avisar de la consecuencia.
+            var trigger = nisarButton.GetComponent<TooltipTrigger>();
+            Assert.IsNotNull(trigger, "Los botones del catálogo deben tener tooltip.");
+            string tip = trigger.Resolve();
+            StringAssert.Contains("Provocaría: Masa excede la capacidad del lanzador", tip);
+            StringAssert.Contains("Electron", tip);
+            yield return Capture("Logs/screenshot_05_tooltip.png", cam =>
+            {
+                var rt = (RectTransform)nisarButton.transform;
+                Vector2 screen = RectTransformUtility.WorldToScreenPoint(cam, rt.position);
+                TooltipView.Instance.Show(tip, screen + new Vector2(rt.rect.width * 0.25f, 0f));
+            });
+            TooltipView.Instance.Hide();
+
+            // Clic real sobre el botón del catálogo del Científico.
             nisarButton.onClick.Invoke();
             yield return new WaitForSeconds(0.5f);
 
@@ -143,7 +162,7 @@ namespace MissionDesign.Tests
         }
 
         /// <summary>Renderiza la cámara principal (con el HUD ScreenSpace-Camera) a un PNG 1920×1080.</summary>
-        private static IEnumerator Capture(string path)
+        private static IEnumerator Capture(string path, System.Action<Camera> beforeRender = null)
         {
             var cam = Camera.main;
             var rt = new RenderTexture(1920, 1080, 24);
@@ -151,6 +170,7 @@ namespace MissionDesign.Tests
             cam.targetTexture = rt;
             yield return null;
             yield return null;
+            beforeRender?.Invoke(cam);
             Canvas.ForceUpdateCanvases();
             cam.Render();
 

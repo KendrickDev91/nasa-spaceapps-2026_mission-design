@@ -229,6 +229,7 @@ namespace MissionDesign.Editor
             BuildValidation(root, roles);
             BuildSimulation(root, runner);
             BuildPostMission(root);
+            BuildTooltip(root);
         }
 
         private static void BuildSimulation(Transform root, MissionSimulationRunner runner)
@@ -276,28 +277,24 @@ namespace MissionDesign.Editor
 
             var header = Text("Header", card, "ANÁLISIS POST-MISIÓN", 18, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
             Place(header.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -24), new Vector2(-64, 26));
-            var verdict = Text("VerdictText", card, "VEREDICTO", 64, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
-            Place(verdict.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -56), new Vector2(-64, 120));
-            var score = Text("ScoreText", card, "0", 64, UiTheme.Text, TextAlignmentOptions.TopRight, bold: true);
-            Place(score.rectTransform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-32, -40), new Vector2(260, 130));
+            var verdict = Text("VerdictText", card, "VEREDICTO", 60, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
+            Place(verdict.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -54), new Vector2(-64, 90));
 
-            var metrics = Text("MetricsText", card, "", 19, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            metrics.lineSpacing = 18;
-            Place(metrics.rectTransform, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(32, -196), new Vector2(400, -300));
+            // Tres tarjetas: bien · falló · puntuación (card 1500 × 900; columnas de 32 + 455 + 20 + 455 + 20 + 486 + 32).
+            var wentWell = MakeCard(card, "WentWellCard", "LO QUE SALIÓ BIEN", UiTheme.Ok, new Color(0.06f, 0.16f, 0.11f, 1f), 32f, 455f);
+            var wentWrong = MakeCard(card, "WentWrongCard", "LO QUE FALLÓ", UiTheme.Critical, new Color(0.18f, 0.07f, 0.07f, 1f), 507f, 455f);
 
-            var whyTitle = Text("WhyTitle", card, "¿POR QUÉ?", 20, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
-            Place(whyTitle.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(470, -196), new Vector2(560, 28));
-            var explanations = Text("ExplanationsText", card, "", 17, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            explanations.paragraphSpacing = 10;
-            explanations.overflowMode = TextOverflowModes.Ellipsis;
-            Place(explanations.rectTransform, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(470, -232), new Vector2(560, -336));
-
-            var eventsTitle = Text("EventsTitle", card, "EVENTOS", 20, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
-            Place(eventsTitle.rectTransform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-32, -196), new Vector2(400, 28));
-            var events = Text("EventsText", card, "", 15, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            events.paragraphSpacing = 8;
-            events.overflowMode = TextOverflowModes.Ellipsis;
-            Place(events.rectTransform, new Vector2(1, 0), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-32, -232), new Vector2(400, -336));
+            var scoreCard = Panel("ScoreCard", card, new Color(0.08f, 0.11f, 0.19f, 1f));
+            Place(scoreCard, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(982, -160), new Vector2(486, -270));
+            var scoreTitle = Text("Title", scoreCard, "PUNTUACIÓN", 18, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
+            Place(scoreTitle.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -16), new Vector2(-40, 26));
+            var rank = Text("RankText", scoreCard, "A", 110, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
+            Place(rank.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -42), new Vector2(-40, 120));
+            var similar = Text("SimilarText", scoreCard, "", 16, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            Place(similar.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -170), new Vector2(-40, 130));
+            var metrics = Text("MetricsText", scoreCard, "", 16, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            metrics.lineSpacing = 12;
+            Place(metrics.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -310), new Vector2(-40, -330));
 
             var export = Text("ExportText", card, "", 13, UiTheme.TextDim, TextAlignmentOptions.BottomLeft);
             Place(export.rectTransform, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(-250, 34), new Vector2(-564, 44));
@@ -308,13 +305,54 @@ namespace MissionDesign.Editor
 
             var view = overlay.gameObject.AddComponent<PostMissionPanel>();
             Wire(view, "verdictText", verdict);
-            Wire(view, "scoreText", score);
+            Wire(view, "wentWellText", wentWell);
+            Wire(view, "wentWrongText", wentWrong);
+            Wire(view, "rankText", rank);
+            Wire(view, "similarText", similar);
             Wire(view, "metricsText", metrics);
-            Wire(view, "explanationsText", explanations);
-            Wire(view, "eventsText", events);
             Wire(view, "exportText", export);
             Wire(view, "openReportsButton", open);
             Wire(view, "backButton", back);
+        }
+
+        /// <summary>Tarjeta con encabezado coloreado; devuelve el texto del cuerpo.</summary>
+        private static TextMeshProUGUI MakeCard(RectTransform parent, string name, string title, Color accent, Color background, float x, float width)
+        {
+            var cardRt = Panel(name, parent, background);
+            Place(cardRt, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -160), new Vector2(width, -270));
+            var stripe = NewRect("Stripe", cardRt);
+            stripe.gameObject.AddComponent<Image>().color = accent;
+            Place(stripe, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), Vector2.zero, new Vector2(0, 5));
+            var head = Text("Title", cardRt, title, 18, accent, TextAlignmentOptions.TopLeft, bold: true);
+            Place(head.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(-40, 26));
+            var body = Text("Body", cardRt, "", 16, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            body.paragraphSpacing = 10;
+            body.overflowMode = TextOverflowModes.Ellipsis;
+            Place(body.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -56), new Vector2(-40, -72));
+            return body;
+        }
+
+        /// <summary>Tooltip único, último hijo del canvas para quedar por encima de todo.</summary>
+        private static void BuildTooltip(Transform root)
+        {
+            var tooltipRoot = NewRect("Tooltip", root);
+            Stretch(tooltipRoot);
+            var panel = Panel("Panel", tooltipRoot, new Color(0.03f, 0.05f, 0.10f, 0.98f));
+            panel.GetComponent<Image>().raycastTarget = false;
+            panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
+            panel.pivot = new Vector2(0f, 1f);
+            panel.sizeDelta = new Vector2(500f, 100f);
+            var vlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(16, 16, 12, 14);
+            vlg.childControlWidth = vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true; vlg.childForceExpandHeight = false;
+            panel.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var text = Text("Text", panel, "", 15, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            text.paragraphSpacing = 4;
+
+            var view = tooltipRoot.gameObject.AddComponent<TooltipView>();
+            Wire(view, "panel", panel);
+            Wire(view, "text", text);
         }
 
         private static void SetPhases(GameObject go, params MissionPhase[] phases)
@@ -333,7 +371,7 @@ namespace MissionDesign.Editor
             var bar = Panel("TopBar", root, UiTheme.Panel);
             Place(bar, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), Vector2.zero, new Vector2(0, 96));
 
-            var title = Text("Title", bar, "<b>MISSION DESIGN LAB</b>\n<size=60%><color=#9FB3D1>NASA Space Apps Challenge 2026</color></size>", 30, UiTheme.Text, TextAlignmentOptions.MidlineLeft);
+            var title = Text("Title", bar, $"<b>{GameInfo.Title}</b>\n<size=60%><color=#9FB3D1>{GameInfo.Tagline}</color></size>", 30, UiTheme.Text, TextAlignmentOptions.MidlineLeft);
             Place(title.rectTransform, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(24, 0), new Vector2(420, 0));
 
             var row = NewRect("RoleTabs", bar);
@@ -447,6 +485,7 @@ namespace MissionDesign.Editor
         private static ResourceBarView MakeResourceBar(Transform parent, ResourceKind kind)
         {
             var bar = NewRect($"Bar_{kind}", parent);
+            bar.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);   // recibe el hover para el tooltip
             var vlg = bar.gameObject.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 4;
             vlg.childControlWidth = vlg.childControlHeight = true;

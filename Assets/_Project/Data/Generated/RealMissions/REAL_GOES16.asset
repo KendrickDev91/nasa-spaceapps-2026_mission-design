@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 832ba81e4f5e5eb439a08a57f8d28da0, type: 3}
+  m_Name: REAL_GOES16
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RealMissionSO
+  missionId: REAL_GOES16
+  displayName: GOES-16
+  launchYear: 2016
+  regime: 2
+  instrumentIds:
+  - INS_ABI
+  tags:
+  - meteorologia
+  - tormentas
+  - clima
+  massKg: 5192
+  description: "Sat\xE9lite meteorol\xF3gico geoestacionario NOAA/NASA: im\xE1genes
+    del hemisferio cada 10 minutos."
+  sourceUrl: https://www.goes-r.gov/

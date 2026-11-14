@@ -24,6 +24,8 @@ namespace MissionDesign.Data
         [Tooltip("Meses de desarrollo + integración que añade la pieza.")]
         [Min(0)] public float developmentMonths;
         [Range(1, 9)] public int technologyReadinessLevel = 9;
+        [Tooltip("Solo aparece en dificultad Avanzada.")]
+        public bool advancedOnly;
 
         [Header("Arte 3D (Blender)")]
         public GameObject prefab;

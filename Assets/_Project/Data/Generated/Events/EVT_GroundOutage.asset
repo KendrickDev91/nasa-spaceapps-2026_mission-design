@@ -27,7 +27,7 @@ MonoBehaviour:
   - regime: 2
     multiplier: 0.5
   - regime: 3
-    multiplier: 1.8
+    multiplier: 1
   affectedPhase: 4
   scienceMultiplier: 1
   dataGenerationMultiplier: 1

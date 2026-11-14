@@ -66,7 +66,8 @@ namespace MissionDesign.Tests
 
             Assert.AreEqual(100f + 10f + 2f + 5f + 50f, t.hardwareCostMUSD, 0.01f);
             Assert.AreEqual(50f, t.launchCostMUSD, 0.01f);
-            Assert.AreEqual(60f * MissionTelemetry.OperationsCostPerMonth(Core.OrbitRegime.LEO), t.operationsCostMUSD, 0.01f);
+            // equipo de control + red terrena (0.1 $M/mes en el fixture) durante 60 meses
+            Assert.AreEqual(60f * (MissionTelemetry.OperationsCostPerMonth(Core.OrbitRegime.LEO) + 0.1f), t.operationsCostMUSD, 0.01f);
             Assert.AreEqual(t.hardwareCostMUSD + t.launchCostMUSD + t.operationsCostMUSD, t.totalCostMUSD, 0.01f);
         }
 

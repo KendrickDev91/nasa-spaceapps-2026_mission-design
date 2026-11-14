@@ -28,8 +28,12 @@ namespace MissionDesign.Editor
             db.solarArrays = CreateSolarArrays();
             db.batteries = CreateBatteries();
             db.antennas = CreateAntennas();
+            db.computers = CreateComputers();
+            db.attitudeControls = CreateAttitudeControls();
+            db.groundNetworks = CreateGroundNetworks();
             db.randomEvents = CreateRandomEvents();
             db.scenarios = CreateScenarios();
+            db.realMissions = CreateRealMissions();
 
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
@@ -37,8 +41,9 @@ namespace MissionDesign.Editor
 
             Debug.Log($"[NASA DB] OK → {Root}: {db.launchVehicles.Count} cohetes, {db.orbits.Count} órbitas, " +
                       $"{db.instruments.Count} instrumentos, {db.buses.Count} buses, {db.solarArrays.Count} paneles, " +
-                      $"{db.batteries.Count} baterías, {db.antennas.Count} antenas, {db.randomEvents.Count} eventos, " +
-                      $"{db.scenarios.Count} escenarios.");
+                      $"{db.batteries.Count} baterías, {db.antennas.Count} antenas, {db.computers.Count} computadoras, " +
+                      $"{db.attitudeControls.Count} ADCS, {db.groundNetworks.Count} redes terrenas, {db.randomEvents.Count} eventos, " +
+                      $"{db.scenarios.Count} escenarios, {db.realMissions.Count} misiones reales.");
             LogCommsSanityTable(db);
             Selection.activeObject = db;
         }
@@ -54,7 +59,7 @@ namespace MissionDesign.Editor
             leo.description = "Órbita baja polar heliosíncrona usada por Terra, Aqua y Landsat: cruza el ecuador a la misma hora solar.";
             leo.altitudeKm = 705; leo.inclinationDeg = 98.2f; leo.orbitalPeriodMinutes = 98.9f; leo.requiredDeltaVKmS = 9.4f; leo.onboardDeltaVKmS = 0.05f;
             leo.sunDistanceAU = 1f; leo.eclipseFraction = 0.35f; leo.maxEclipseMinutes = 35;
-            leo.groundStationRangeKm = 2000; leo.dailyContactHours = 2f; leo.groundGainFactor = 1f;
+            leo.groundStationRangeKm = 2000; leo.dailyContactHours = 2f;
             leo.radiationLevel = 0.25f; leo.debrisRisk = 0.6f;
             leo.educationalNote = "≈9.4 km/s de Δv: ~7.8 km/s orbitales + ~1.5 km/s de pérdidas por gravedad y arrastre. Solo hay contacto con tierra en pasadas de ~10 min.";
             leo.dataConfidence = DataConfidence.Approximate; leo.sourceUrl = "https://landsat.gsfc.nasa.gov/satellites/landsat-9/";
@@ -65,7 +70,7 @@ namespace MissionDesign.Editor
             meo.description = "Órbita media usada por constelaciones de navegación (GPS, Galileo). Atraviesa el cinturón de Van Allen exterior.";
             meo.altitudeKm = 20200; meo.inclinationDeg = 55f; meo.orbitalPeriodMinutes = 718f; meo.requiredDeltaVKmS = 11.8f; meo.onboardDeltaVKmS = 0.3f;
             meo.sunDistanceAU = 1f; meo.eclipseFraction = 0.04f; meo.maxEclipseMinutes = 56;
-            meo.groundStationRangeKm = 22000; meo.dailyContactHours = 10f; meo.groundGainFactor = 1f;
+            meo.groundStationRangeKm = 22000; meo.dailyContactHours = 10f;
             meo.radiationLevel = 0.85f; meo.debrisRisk = 0.1f;
             meo.educationalNote = "La radiación del cinturón de Van Allen degrada paneles y provoca Single Event Upsets: requiere electrónica endurecida.";
             meo.dataConfidence = DataConfidence.GameEstimate; meo.sourceUrl = "https://www.gps.gov/systems/gps/space/";
@@ -76,7 +81,7 @@ namespace MissionDesign.Editor
             geo.description = "Órbita geoestacionaria: el satélite ve siempre el mismo hemisferio (GOES-R, TDRS).";
             geo.altitudeKm = 35786; geo.inclinationDeg = 0f; geo.orbitalPeriodMinutes = 1436f; geo.requiredDeltaVKmS = 13.0f; geo.onboardDeltaVKmS = 1.5f;
             geo.sunDistanceAU = 1f; geo.eclipseFraction = 0.01f; geo.maxEclipseMinutes = 72;
-            geo.groundStationRangeKm = 38000; geo.dailyContactHours = 24f; geo.groundGainFactor = 1f;
+            geo.groundStationRangeKm = 38000; geo.dailyContactHours = 24f;
             geo.radiationLevel = 0.6f; geo.debrisRisk = 0.2f;
             geo.educationalNote = "Contacto 24/7 con una estación fija, pero 19× más lejos que LEO: la señal llega ~360 veces más débil (1/r²).";
             geo.dataConfidence = DataConfidence.Approximate; geo.sourceUrl = "https://www.goes-r.gov/mission/mission.html";
@@ -87,7 +92,7 @@ namespace MissionDesign.Editor
             lunar.description = "Órbita polar baja alrededor de la Luna, como Lunar Reconnaissance Orbiter (LRO).";
             lunar.altitudeKm = 50; lunar.inclinationDeg = 90f; lunar.orbitalPeriodMinutes = 113f; lunar.requiredDeltaVKmS = 15.5f; lunar.onboardDeltaVKmS = 0.85f;
             lunar.sunDistanceAU = 1f; lunar.eclipseFraction = 0.30f; lunar.maxEclipseMinutes = 48;
-            lunar.groundStationRangeKm = 384400; lunar.dailyContactHours = 8f; lunar.groundGainFactor = 30f;
+            lunar.groundStationRangeKm = 384400; lunar.dailyContactHours = 8f;
             lunar.radiationLevel = 0.7f; lunar.debrisRisk = 0.05f;
             lunar.educationalNote = "Sin magnetosfera que proteja de partículas solares. Las antenas de 34 m de la DSN compensan los 384 400 km de distancia.";
             lunar.dataConfidence = DataConfidence.Approximate; lunar.sourceUrl = "https://science.nasa.gov/mission/lro/";
@@ -186,7 +191,7 @@ namespace MissionDesign.Editor
                 notes: "Masa y potencia redondeadas de documentación pública; volumen de datos aproximado. Costo: estimación de juego."));
 
             list.Add(Instrument("INS_OCO2", "Espectrómetro OCO-2", InstrumentType.Spectrometer,
-                "Tres espectrómetros de rejilla de alta resolución que miden CO₂ atmosférico con precisión de 1 ppm.",
+                "Tres espectrómetros de rejilla de alta resolución que miden CO2 atmosférico con precisión de 1 ppm.",
                 "Orbiting Carbon Observatory-2 (2014)", mass: 140f, cost: 120f, peakW: 130f, avgW: 105f, dataGB: 15f, science: 65, months: 42,
                 orbits: new[] { OrbitRegime.LEO }, tags: new[] { "clima", "carbono", "atmosfera" },
                 conf: DataConfidence.GameEstimate, url: "https://ocov2.jpl.nasa.gov/",
@@ -213,7 +218,139 @@ namespace MissionDesign.Editor
                 conf: DataConfidence.GameEstimate, url: "https://gedi.umd.edu/",
                 notes: "Masa ~520 kg aproximada; potencia y datos son estimaciones de juego."));
 
+            // Precisión de apuntamiento requerida (grados): estimaciones de juego por clase de instrumento.
+            var pointing = new Dictionary<string, float>
+            {
+                { "INS_MODIS", 0.05f }, { "INS_ABI", 0.01f }, { "INS_OCO2", 0.05f },
+                { "INS_NISAR", 0.05f }, { "INS_LROC", 0.01f }, { "INS_GEDI", 0.01f }
+            };
+            foreach (var i in list)
+            {
+                if (pointing.TryGetValue(i.componentId, out float deg)) i.requiredPointingDeg = deg;
+                Save(i);
+            }
             return list;
+        }
+
+        // ─────────────────── DIFICULTAD AVANZADA: C&DH y ADCS ───────────────────
+
+        private static List<OnboardComputerSO> CreateComputers()
+        {
+            return new List<OnboardComputerSO>
+            {
+                Computer("CDH_COTS", "Computadora comercial (clase SmallSat)", "Procesador comercial barato y ligero; sensible a la radiación.",
+                    storage: 32, radHard: false, mass: 1.5f, power: 5, cost: 0.5f, months: 6),
+                Computer("CDH_RAD", "Computadora endurecida (clase RAD750)", "Procesador tolerante a radiación usado en misiones científicas de la NASA.",
+                    storage: 256, radHard: true, mass: 6, power: 20, cost: 4, months: 12),
+                Computer("CDH_SSR", "Endurecida + grabador de 4 TB", "Computadora endurecida con grabador de estado sólido de gran capacidad para instrumentos de alto volumen.",
+                    storage: 4096, radHard: true, mass: 15, power: 40, cost: 12, months: 18)
+            };
+        }
+
+        private static OnboardComputerSO Computer(string id, string name, string desc, float storage, bool radHard,
+            float mass, float power, float cost, float months)
+        {
+            var c = GetOrCreate<OnboardComputerSO>($"{Root}/Computers/{id}.asset");
+            c.componentId = id; c.displayName = name; c.description = desc;
+            c.storageGB = storage; c.radiationHardened = radHard;
+            c.massKg = mass; c.peakPowerW = power; c.costMUSD = cost; c.developmentMonths = months;
+            c.advancedOnly = true; c.socket = SpacecraftSocket.InternalBay; c.dataConfidence = DataConfidence.GameEstimate;
+            c.sourceUrl = "https://www.nasa.gov/smallsat-institute/sst-soa/small-spacecraft-avionics/";
+            c.sourceNotes = "Valores representativos de la clase; no de un producto concreto.";
+            Save(c);
+            return c;
+        }
+
+        private static List<AttitudeControlSO> CreateAttitudeControls()
+        {
+            return new List<AttitudeControlSO>
+            {
+                Adcs("ADCS_MAG", "Magnetopares + sensores solares", "Control pasivo/ligero que usa el campo magnético terrestre. Barato, pero impreciso.",
+                    accuracy: 2f, mass: 1, power: 2, cost: 0.3f, months: 4),
+                Adcs("ADCS_RW_SUN", "Ruedas de reacción + sensores solares", "Apuntamiento medio, suficiente para cámaras de baja resolución.",
+                    accuracy: 0.1f, mass: 10, power: 30, cost: 2, months: 8),
+                Adcs("ADCS_RW_STAR", "Ruedas de reacción + rastreador estelar", "Apuntamiento de precisión usando las estrellas como referencia: necesario para alta resolución.",
+                    accuracy: 0.01f, mass: 20, power: 60, cost: 6, months: 12)
+            };
+        }
+
+        private static AttitudeControlSO Adcs(string id, string name, string desc, float accuracy, float mass, float power, float cost, float months)
+        {
+            var a = GetOrCreate<AttitudeControlSO>($"{Root}/AttitudeControl/{id}.asset");
+            a.componentId = id; a.displayName = name; a.description = desc;
+            a.pointingAccuracyDeg = accuracy; a.massKg = mass; a.peakPowerW = power; a.costMUSD = cost; a.developmentMonths = months;
+            a.advancedOnly = true; a.socket = SpacecraftSocket.InternalBay; a.dataConfidence = DataConfidence.GameEstimate;
+            a.sourceUrl = "https://www.nasa.gov/smallsat-institute/sst-soa/guidance-navigation-and-control/";
+            a.sourceNotes = "Precisiones típicas por tecnología (estado del arte de pequeños satélites).";
+            Save(a);
+            return a;
+        }
+
+        // ─────────────────── SEGMENTO TERRENO ───────────────────
+
+        private static List<GroundNetworkSO> CreateGroundNetworks()
+        {
+            var nsn = GetOrCreate<GroundNetworkSO>($"{Root}/GroundNetworks/GND_NSN.asset");
+            nsn.networkId = "GND_NSN"; nsn.displayName = "Near Space Network (NASA)";
+            nsn.description = "Estaciones terrenas y satélites de retransmisión de la NASA para misiones cercanas a la Tierra.";
+            nsn.supportedRegimes = new[] { OrbitRegime.LEO, OrbitRegime.MEO, OrbitRegime.GEO };
+            nsn.gainFactor = 1f; nsn.contactHoursMultiplier = 1f; nsn.outageProbabilityMultiplier = 1f; nsn.costPerMonthMUSD = 0.1f;
+            nsn.educationalNote = "Una nave en LEO solo ve cada estación ~10 minutos por pasada: las horas de contacto son el cuello de botella.";
+            nsn.dataConfidence = DataConfidence.GameEstimate; nsn.sourceUrl = "https://www.nasa.gov/communicating-with-missions/";
+            Save(nsn);
+
+            var commercial = GetOrCreate<GroundNetworkSO>($"{Root}/GroundNetworks/GND_COMMERCIAL.asset");
+            commercial.networkId = "GND_COMMERCIAL"; commercial.displayName = "Red comercial (pago por pase)";
+            commercial.description = "Proveedores privados con muchas antenas repartidas por el mundo: más pases al día, a mayor costo.";
+            commercial.supportedRegimes = new[] { OrbitRegime.LEO, OrbitRegime.MEO, OrbitRegime.GEO };
+            commercial.gainFactor = 1f; commercial.contactHoursMultiplier = 2f; commercial.outageProbabilityMultiplier = 0.7f; commercial.costPerMonthMUSD = 0.25f;
+            commercial.educationalNote = "Duplicar las horas de contacto duplica los datos que bajan sin cambiar la nave: un trade-off de costo de operaciones.";
+            commercial.dataConfidence = DataConfidence.GameEstimate; commercial.sourceUrl = "https://www.nasa.gov/communicating-with-missions/";
+            Save(commercial);
+
+            var dsn = GetOrCreate<GroundNetworkSO>($"{Root}/GroundNetworks/GND_DSN.asset");
+            dsn.networkId = "GND_DSN"; dsn.displayName = "Deep Space Network (antenas de 34 m)";
+            dsn.description = "Tres complejos (Goldstone, Madrid, Canberra) separados ~120° para seguir naves lejanas las 24 h.";
+            dsn.supportedRegimes = new[] { OrbitRegime.Lunar, OrbitRegime.Interplanetary };
+            dsn.gainFactor = 30f; dsn.contactHoursMultiplier = 1f; dsn.outageProbabilityMultiplier = 1.8f; dsn.costPerMonthMUSD = 0.7f;
+            dsn.educationalNote = "Sus antenas enormes compensan la distancia, pero la demanda supera su capacidad: es habitual perder turnos.";
+            dsn.dataConfidence = DataConfidence.Approximate; dsn.sourceUrl = "https://www.nasa.gov/communicating-with-missions/dsn/";
+            Save(dsn);
+
+            return new List<GroundNetworkSO> { nsn, commercial, dsn };
+        }
+
+        // ─────────────────── MISIONES REALES DE REFERENCIA ───────────────────
+
+        private static List<RealMissionSO> CreateRealMissions()
+        {
+            return new List<RealMissionSO>
+            {
+                Real("REAL_TERRA", "Terra", 1999, OrbitRegime.LEO, new[] { "INS_MODIS" }, new[] { "clima", "tierra", "incendios" }, 4864,
+                    "Buque insignia del Earth Observing System: 5 instrumentos, entre ellos MODIS, observando toda la Tierra.", "https://terra.nasa.gov/"),
+                Real("REAL_OCO2", "OCO-2", 2014, OrbitRegime.LEO, new[] { "INS_OCO2" }, new[] { "carbono", "clima", "atmosfera" }, 454,
+                    "Mide el CO2 atmosférico desde órbita heliosíncrona con tres espectrómetros.", "https://ocov2.jpl.nasa.gov/"),
+                Real("REAL_NISAR", "NISAR", 2025, OrbitRegime.LEO, new[] { "INS_NISAR" }, new[] { "terremotos", "hielo", "tierra" }, 2800,
+                    "Radar NASA-ISRO que mide deformaciones del suelo de centímetros y genera terabytes al día.", "https://nisar.jpl.nasa.gov/"),
+                Real("REAL_GEDI", "GEDI (en la ISS)", 2018, OrbitRegime.LEO, new[] { "INS_GEDI" }, new[] { "bosques", "carbono" }, 520,
+                    "Lidar instalado en la Estación Espacial que mide la estructura 3D de los bosques.", "https://gedi.umd.edu/"),
+                Real("REAL_GOES16", "GOES-16", 2016, OrbitRegime.GEO, new[] { "INS_ABI" }, new[] { "meteorologia", "tormentas", "clima" }, 5192,
+                    "Satélite meteorológico geoestacionario NOAA/NASA: imágenes del hemisferio cada 10 minutos.", "https://www.goes-r.gov/"),
+                Real("REAL_LRO", "Lunar Reconnaissance Orbiter", 2009, OrbitRegime.Lunar, new[] { "INS_LROC" }, new[] { "luna", "superficie", "artemis" }, 1916,
+                    "Cartografía la Luna desde 2009; sus mapas eligen los sitios de alunizaje de Artemis.", "https://science.nasa.gov/mission/lro/"),
+                Real("REAL_CAPSTONE", "CAPSTONE", 2022, OrbitRegime.Lunar, new string[0], new[] { "luna", "artemis" }, 25,
+                    "CubeSat de 25 kg lanzado por Electron que probó la órbita lunar de la futura estación Gateway.", "https://www.nasa.gov/mission/capstone/")
+            };
+        }
+
+        private static RealMissionSO Real(string id, string name, int year, OrbitRegime regime, string[] instruments, string[] tags,
+            float mass, string desc, string url)
+        {
+            var m = GetOrCreate<RealMissionSO>($"{Root}/RealMissions/{id}.asset");
+            m.missionId = id; m.displayName = name; m.launchYear = year; m.regime = regime;
+            m.instrumentIds = instruments; m.tags = tags; m.massKg = mass; m.description = desc; m.sourceUrl = url;
+            Save(m);
+            return m;
         }
 
         private static InstrumentSO Instrument(string id, string name, InstrumentType type, string desc, string heritage,
@@ -372,7 +509,7 @@ namespace MissionDesign.Editor
             dsn.eventId = "EVT_GROUND_OUTAGE"; dsn.displayName = "Conflicto de agenda DSN / falla de estación terrena"; dsn.eventType = RandomEventType.GroundStationOutage;
             dsn.description = "Una misión prioritaria ocupa las antenas o una estación queda fuera de servicio: se reduce el tiempo de contacto.";
             dsn.isPositive = false; dsn.baseProbability = 0.20f; dsn.affectedPhase = MissionPhase.DataTransmission;
-            dsn.orbitModifiers = Mods((OrbitRegime.LEO, 0.8f), (OrbitRegime.MEO, 1.0f), (OrbitRegime.GEO, 0.5f), (OrbitRegime.Lunar, 1.8f));
+            dsn.orbitModifiers = Mods((OrbitRegime.LEO, 0.8f), (OrbitRegime.MEO, 1.0f), (OrbitRegime.GEO, 0.5f), (OrbitRegime.Lunar, 1.0f));
             dsn.commsMultiplier = 0.6f;
             dsn.mitigationAdvice = "Añade memoria a bordo y margen de enlace; reserva más horas de contacto o una antena de mayor ganancia.";
             dsn.educationalFact = "La DSN tiene complejos en Goldstone, Madrid y Canberra, separados ~120° para cubrir el cielo las 24 h; su demanda supera su capacidad.";
@@ -433,7 +570,7 @@ namespace MissionDesign.Editor
             {
                 sb.Append($"  {a.displayName,-30}");
                 foreach (var o in db.orbits)
-                    sb.Append($" | {o.regime}: {o.GetDailyDownlinkGB(a),9:F1}");
+                    sb.Append($" | {o.regime}: {o.GetDailyDownlinkGB(a, db.DefaultNetworkFor(o.regime)),9:F1}");
                 sb.AppendLine();
             }
             Debug.Log(sb.ToString());

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 832ba81e4f5e5eb439a08a57f8d28da0, type: 3}
+  m_Name: REAL_NISAR
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RealMissionSO
+  missionId: REAL_NISAR
+  displayName: NISAR
+  launchYear: 2025
+  regime: 0
+  instrumentIds:
+  - INS_NISAR
+  tags:
+  - terremotos
+  - hielo
+  - tierra
+  massKg: 2800
+  description: "Radar NASA-ISRO que mide deformaciones del suelo de cent\xEDmetros
+    y genera terabytes al d\xEDa."
+  sourceUrl: https://nisar.jpl.nasa.gov/

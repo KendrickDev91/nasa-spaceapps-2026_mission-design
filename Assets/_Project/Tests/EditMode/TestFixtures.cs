@@ -26,8 +26,41 @@ namespace MissionDesign.Tests
             var o = Make<OrbitSO>();
             o.displayName = "LEO test"; o.regime = OrbitRegime.LEO; o.requiredDeltaVKmS = 9.4f;
             o.sunDistanceAU = 1f; o.eclipseFraction = 0.35f; o.maxEclipseMinutes = 36;
-            o.groundStationRangeKm = 2000; o.dailyContactHours = 2f; o.groundGainFactor = 1f;
+            o.groundStationRangeKm = 2000; o.dailyContactHours = 2f;
             return o;
+        }
+
+        public GroundNetworkSO Network(float gain = 1f, float contact = 1f, float costPerMonth = 0.1f, float outage = 1f,
+            params OrbitRegime[] regimes)
+        {
+            var n = Make<GroundNetworkSO>();
+            n.displayName = "Red test"; n.gainFactor = gain; n.contactHoursMultiplier = contact;
+            n.costPerMonthMUSD = costPerMonth; n.outageProbabilityMultiplier = outage;
+            n.supportedRegimes = regimes.Length > 0 ? regimes : new[] { OrbitRegime.LEO };
+            return n;
+        }
+
+        public OnboardComputerSO Computer(float storageGB = 256f, bool radHard = true, float mass = 5f, float cost = 3f)
+        {
+            var c = Make<OnboardComputerSO>();
+            c.displayName = "Computadora test"; c.storageGB = storageGB; c.radiationHardened = radHard;
+            c.massKg = mass; c.costMUSD = cost; c.peakPowerW = 10f; c.developmentMonths = 6; c.advancedOnly = true;
+            return c;
+        }
+
+        public AttitudeControlSO Adcs(float accuracyDeg = 0.01f, float mass = 10f, float cost = 2f)
+        {
+            var a = Make<AttitudeControlSO>();
+            a.displayName = "ADCS test"; a.pointingAccuracyDeg = accuracyDeg; a.massKg = mass; a.costMUSD = cost;
+            a.peakPowerW = 20f; a.developmentMonths = 8; a.advancedOnly = true;
+            return a;
+        }
+
+        public RealMissionSO RealMission(string name, OrbitRegime regime, float mass, string[] instrumentIds, params string[] tags)
+        {
+            var m = Make<RealMissionSO>();
+            m.displayName = name; m.regime = regime; m.massKg = mass; m.instrumentIds = instrumentIds; m.tags = tags;
+            return m;
         }
 
         public LaunchVehicleSO Rocket(string name, float leoKg, float cost = 50f, float lead = 12f)
@@ -115,7 +148,9 @@ namespace MissionDesign.Tests
             d.SetSolarArray(Solar());
             d.SetBattery(Battery());
             d.SetAntenna(Antenna());
+            d.SetGroundNetwork(Network());
             instrument = Instrument("Imager", mass: 200, peakW: 250, dataGB: 60);
+            instrument.componentId = "INS_IMAGER";
             d.AddInstrument(instrument);
             return d;
         }

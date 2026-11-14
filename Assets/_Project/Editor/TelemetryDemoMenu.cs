@@ -58,6 +58,7 @@ namespace MissionDesign.Editor
             var d = new SpacecraftDesign();
             d.SetScenario(db.scenarios.FirstOrDefault(s => s.scenarioId == scenarioId));
             d.SetOrbit(db.GetOrbit(regime));
+            d.SetGroundNetwork(db.DefaultNetworkFor(regime));
             d.SetLaunchVehicle(db.launchVehicles.FirstOrDefault(v => v.vehicleId == lvId));
             d.SetBus(db.buses.FirstOrDefault(c => c.componentId == busId));
             d.SetSolarArray(db.solarArrays.FirstOrDefault(c => c.componentId == solarId));

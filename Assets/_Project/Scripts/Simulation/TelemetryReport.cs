@@ -80,6 +80,10 @@ namespace MissionDesign.Simulation
         public float downlinkCapacityGBPerDay;
         public float dataLostGBPerDay;
         public float dataReturnFraction = 1f;
+        public float contactHoursPerDay;
+        [Tooltip("Memoria a bordo (dificultad Avanzada) y cuántos días de datos puede guardar.")]
+        public float onboardStorageGB;
+        public float storageDays;
 
         [Header("6. Tiempo (meses)")]
         public float developmentMonths;

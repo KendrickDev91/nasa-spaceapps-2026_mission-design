@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 329d21d966b51bd48b6fdd45b2d2b806, type: 3}
+  m_Name: ADCS_MAG
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.AttitudeControlSO
+  componentId: ADCS_MAG
+  displayName: Magnetopares + sensores solares
+  description: "Control pasivo/ligero que usa el campo magn\xE9tico terrestre. Barato,
+    pero impreciso."
+  heritage: 
+  massKg: 1
+  costMUSD: 0.3
+  peakPowerW: 2
+  developmentMonths: 4
+  technologyReadinessLevel: 9
+  advancedOnly: 1
+  prefab: {fileID: 0}
+  socket: 6
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://www.nasa.gov/smallsat-institute/sst-soa/guidance-navigation-and-control/
+  sourceNotes: "Precisiones t\xEDpicas por tecnolog\xEDa (estado del arte de peque\xF1os
+    sat\xE9lites)."
+  pointingAccuracyDeg: 2

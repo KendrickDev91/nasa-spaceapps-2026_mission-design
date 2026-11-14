@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,22 +10,29 @@ using UnityEngine.UI;
 
 namespace MissionDesign.UI
 {
-    /// <summary>Análisis post-misión: veredicto, métricas clave y el desglose de POR QUÉ.</summary>
+    /// <summary>
+    /// Análisis post-misión en 3 tarjetas: "Lo que salió bien", "Lo que falló" y "Puntuación"
+    /// (rango A-F, misión real parecida y métricas clave).
+    /// </summary>
     public sealed class PostMissionPanel : MonoBehaviour
     {
         [SerializeField] private TMP_Text verdictText;
-        [SerializeField] private TMP_Text scoreText;
+        [SerializeField] private TMP_Text wentWellText;
+        [SerializeField] private TMP_Text wentWrongText;
+        [SerializeField] private TMP_Text rankText;
+        [SerializeField] private TMP_Text similarText;
         [SerializeField] private TMP_Text metricsText;
-        [SerializeField] private TMP_Text explanationsText;
-        [SerializeField] private TMP_Text eventsText;
         [SerializeField] private TMP_Text exportText;
         [SerializeField] private Button openReportsButton;
         [SerializeField] private Button backButton;
+        [SerializeField] private int maxLinesPerCard = 6;
 
         private MissionStateManager manager;
 
         public string VerdictText => verdictText != null ? verdictText.text : string.Empty;
-        public string ExplanationsText => explanationsText != null ? explanationsText.text : string.Empty;
+        public string WentWellText => wentWellText != null ? wentWellText.text : string.Empty;
+        public string WentWrongText => wentWrongText != null ? wentWrongText.text : string.Empty;
+        public string RankText => rankText != null ? rankText.text : string.Empty;
 
         private void Start()
         {
@@ -44,12 +52,25 @@ namespace MissionDesign.UI
         public void Show(MissionOutcomeReport o)
         {
             if (o == null) return;
-            Color c = o.verdict == MissionVerdict.Success ? UiTheme.Ok : o.verdict == MissionVerdict.PartialSuccess ? UiTheme.Warning : UiTheme.Critical;
+            Color verdictColor = o.verdict == MissionVerdict.Success ? UiTheme.Ok : o.verdict == MissionVerdict.PartialSuccess ? UiTheme.Warning : UiTheme.Critical;
 
             if (verdictText != null)
-                verdictText.text = $"<color={UiTheme.Hex(c)}>{MissionOutcomeReport.VerdictLabel(o.verdict)}</color>\n<size=55%>{o.verdictTitle}</size>";
-            if (scoreText != null)
-                scoreText.text = $"<size=40%><color={UiTheme.Hex(UiTheme.TextDim)}>PUNTUACIÓN</color></size>\n{o.score}<size=40%>/100</size>";
+                verdictText.text = $"<color={UiTheme.Hex(verdictColor)}>{MissionOutcomeReport.VerdictLabel(o.verdict)}</color>  " +
+                                   $"<size=45%>{o.verdictTitle}</size>";
+
+            if (wentWellText != null) wentWellText.text = Card(o.wentWell, "Nada destacable esta vez: revisa la tarjeta de fallos.");
+            if (wentWrongText != null) wentWrongText.text = Card(o.wentWrong, "¡Nada falló! Diseño sólido.");
+
+            if (rankText != null)
+            {
+                Color rankColor = o.rank == "A" || o.rank == "B" ? UiTheme.Ok : o.rank == "C" || o.rank == "D" ? UiTheme.Warning : UiTheme.Critical;
+                rankText.text = $"<color={UiTheme.Hex(rankColor)}>{o.rank}</color>  <size=50%>{o.score}/100</size>";
+            }
+
+            if (similarText != null)
+                similarText.text = string.IsNullOrEmpty(o.similarMission)
+                    ? string.Empty
+                    : $"<color={UiTheme.Hex(UiTheme.TextDim)}>TU MISIÓN SE PARECE A</color>\n<b>{o.similarMission}</b>\n<size=85%>{o.similarMissionDescription}</size>";
 
             if (metricsText != null)
             {
@@ -57,40 +78,34 @@ namespace MissionDesign.UI
                 metricsText.text =
                     $"<color={dim}>Ciencia</color>  {o.scienceAchieved:N0} / {o.scienceTarget:N0}\n" +
                     $"<color={dim}>Datos recibidos</color>  {o.dataReturnedTotalTB:N1} TB ({o.dataReturnFraction:P0})\n" +
-                    $"<color={dim}>Datos perdidos</color>  {o.dataLostTotalTB:N1} TB\n" +
                     $"<color={dim}>Operación</color>  {o.achievedOperationsDays:N0} / {o.plannedOperationsDays:N0} días\n" +
                     $"<color={dim}>Energía disponible</color>  {o.powerAvailabilityFraction:P0}\n" +
                     $"<color={dim}>Costo</color>  ${o.totalCostMUSD:N0}M / ${o.budgetLimitMUSD:N0}M\n" +
-                    $"<color={dim}>Semilla</color>  {o.seed}";
-            }
-
-            if (explanationsText != null)
-            {
-                var sb = new StringBuilder();
-                foreach (var e in o.explanations)
-                {
-                    Color lc = e.StartsWith("Éxito") || e.StartsWith("A favor") ? UiTheme.Ok
-                        : e.StartsWith("Fallo parcial") || e.StartsWith("Atención") || e.StartsWith("En contra") ? UiTheme.Warning
-                        : e.StartsWith("Fallo") ? UiTheme.Critical : UiTheme.Text;
-                    sb.AppendLine($"<color={UiTheme.Hex(lc)}>•</color> {e}");
-                }
-                explanationsText.text = sb.ToString();
-            }
-
-            if (eventsText != null)
-            {
-                eventsText.text = o.events.Count == 0
-                    ? "Sin eventos aleatorios."
-                    : string.Join("\n", o.events.Select(e =>
-                        $"<color={UiTheme.Hex(e.positive ? UiTheme.Ok : UiTheme.Warning)}><b>Día {e.missionDay:N0} · {e.displayName}</b></color>\n" +
-                        $"{e.impact}\n" +
-                        $"<size=90%><color={UiTheme.Hex(UiTheme.TextDim)}>{e.educationalFact}</color></size>"));
+                    $"<color={dim}>Dificultad · semilla</color>  {(o.difficulty == DifficultyLevel.Basic ? "Básico" : "Avanzado")} · {o.seed}";
             }
 
             if (exportText != null)
                 exportText.text = string.IsNullOrEmpty(manager.LastReportPath)
                     ? "Reporte no exportado."
                     : $"Reporte JSON/TXT: {manager.LastReportPath}";
+        }
+
+        private string Card(List<string> lines, string empty)
+        {
+            if (lines == null || lines.Count == 0) return $"<color={UiTheme.Hex(UiTheme.TextDim)}>{empty}</color>";
+            var sb = new StringBuilder();
+            foreach (var line in lines.Take(maxLinesPerCard)) sb.AppendLine($"• {StripPrefix(line)}");
+            if (lines.Count > maxLinesPerCard) sb.Append($"<size=80%>… y {lines.Count - maxLinesPerCard} más en el reporte</size>");
+            return sb.ToString();
+        }
+
+        /// <summary>Quita "Fallo parcial:", "A favor:", etc.: la tarjeta ya indica el tono.</summary>
+        private static string StripPrefix(string line)
+        {
+            int colon = line.IndexOf(':');
+            if (colon <= 0 || colon > 16) return line;
+            string rest = line.Substring(colon + 1).TrimStart();
+            return rest.Length > 0 ? char.ToUpperInvariant(rest[0]) + rest.Substring(1) : line;
         }
 
         private void OpenReportsFolder()

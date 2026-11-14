@@ -1,13 +1,24 @@
 using MissionDesign.Simulation;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace MissionDesign.UI
 {
-    /// <summary>Barra de un recurso crítico: uso frente a límite, coloreada por estado.</summary>
-    public sealed class ResourceBarView : MonoBehaviour
+    /// <summary>Barra de un recurso crítico: uso frente a límite, coloreada por estado. Al pasar el ratón explica el recurso.</summary>
+    public sealed class ResourceBarView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (TooltipView.Instance != null) TooltipView.Instance.Show(ResourceExplanations.For(kind));
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (TooltipView.Instance != null) TooltipView.Instance.Hide();
+        }
+
         [SerializeField] private ResourceKind kind;
         [SerializeField] private TMP_Text label;
         [SerializeField] private TMP_Text valueText;

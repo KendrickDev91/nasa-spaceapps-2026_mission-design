@@ -15,6 +15,8 @@ namespace MissionDesign.Data
         [Range(0f, 1f)] public float dutyCycle = 1f;
         [Tooltip("Valor científico de diseño de juego (1-100).")]
         [Range(1, 100)] public int scienceValue = 50;
+        [Tooltip("Precisión de apuntamiento que necesita el instrumento (grados). Se compara con el control de orientación.")]
+        [Min(0.0001f)] public float requiredPointingDeg = 0.1f;
         [Tooltip("Órbitas donde el instrumento rinde el 100% de su valor científico.")]
         public OrbitRegime[] preferredOrbits;
         [Tooltip("Etiquetas de objetivo científico (clima, océano, superficie lunar...).")]

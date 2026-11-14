@@ -22,6 +22,7 @@ MonoBehaviour:
   peakPowerW: 30
   developmentMonths: 36
   technologyReadinessLevel: 9
+  advancedOnly: 0
   prefab: {fileID: 0}
   socket: 1
   icon: {fileID: 0}
@@ -34,6 +35,7 @@ MonoBehaviour:
   averagePowerW: 22
   dutyCycle: 1
   scienceValue: 75
+  requiredPointingDeg: 0.01
   preferredOrbits: 03000000
   scienceObjectives:
   - luna

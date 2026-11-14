@@ -27,7 +27,6 @@ MonoBehaviour:
   maxEclipseMinutes: 48
   groundStationRangeKm: 384400
   dailyContactHours: 8
-  groundGainFactor: 30
   radiationLevel: 0.7
   debrisRisk: 0.05
   educationalNote: "Sin magnetosfera que proteja de part\xEDculas solares. Las antenas

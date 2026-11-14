@@ -22,6 +22,7 @@ MonoBehaviour:
   peakPowerW: 150
   developmentMonths: 14
   technologyReadinessLevel: 9
+  advancedOnly: 0
   prefab: {fileID: 0}
   socket: 4
   icon: {fileID: 0}

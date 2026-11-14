@@ -66,12 +66,18 @@ namespace MissionDesign.Simulation
 
         private void OnLaunchApproved()
         {
+            // Básico: un solo evento y sin fallos de lanzamiento. Avanzado: 1-2 eventos y riesgo real del cohete.
+            bool advanced = manager.Design.IsAdvanced;
+            var db = manager.Database;
             var settings = new SimulationSettings
             {
                 seed = fixedSeed >= 0 ? fixedSeed : Environment.TickCount & int.MaxValue,
-                allowLaunchFailure = allowLaunchFailure
+                allowLaunchFailure = advanced && allowLaunchFailure,
+                minEvents = 1,
+                maxEvents = advanced ? 2 : 1,
+                realMissions = db != null ? db.realMissions : null
             };
-            Current = MissionSimulator.Run(manager.Design, manager.Database != null ? manager.Database.randomEvents : null, settings);
+            Current = MissionSimulator.Run(manager.Design, db != null ? db.randomEvents : null, settings);
             if (playback != null) StopCoroutine(playback);
             skipRequested = false;
             playback = StartCoroutine(Play(Current));

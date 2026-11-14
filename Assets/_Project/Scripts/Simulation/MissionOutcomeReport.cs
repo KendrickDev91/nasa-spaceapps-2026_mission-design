@@ -38,6 +38,10 @@ namespace MissionDesign.Simulation
         public MissionPhase phase;
         public float missionDay;
         public bool positive;
+        /// <summary>El diseño neutralizó el evento (memoria a bordo, electrónica endurecida…).</summary>
+        public bool mitigated;
+        /// <summary>Solo redujo la capacidad de enlace (sin daño, ciencia ni energía): el margen puede absorberlo.</summary>
+        public bool commsOnly;
         public string impact;
         public string mitigation;
         public string educationalFact;
@@ -52,6 +56,7 @@ namespace MissionDesign.Simulation
     {
         public string generatedAtUtc;
         public int seed;
+        public DifficultyLevel difficulty;
 
         [Header("Diseño")]
         public string scenarioId;
@@ -62,12 +67,19 @@ namespace MissionDesign.Simulation
         public string solarArray;
         public string battery;
         public string antenna;
+        public string groundNetwork;
+        public string computer;
+        public string attitudeControl;
         public string[] instruments = Array.Empty<string>();
 
         [Header("Veredicto")]
         public MissionVerdict verdict;
         public string verdictTitle;
         public int score;
+        /// <summary>A ≥ 90 · B ≥ 75 · C ≥ 60 · D ≥ 40 · F.</summary>
+        public string rank;
+        public string similarMission;
+        public string similarMissionDescription;
 
         [Header("Fases")]
         public bool launchSucceeded;
@@ -97,6 +109,10 @@ namespace MissionDesign.Simulation
         public List<SimulationLogEntry> timeline = new List<SimulationLogEntry>();
         /// <summary>El "por qué" del resultado, en lenguaje claro y con los números exactos.</summary>
         public List<string> explanations = new List<string>();
+        /// <summary>Tarjeta "Lo que salió bien".</summary>
+        public List<string> wentWell = new List<string>();
+        /// <summary>Tarjeta "Lo que falló".</summary>
+        public List<string> wentWrong = new List<string>();
         public TelemetryReport designTelemetry;
 
         public string ToJson() => JsonUtility.ToJson(this, true);
@@ -107,22 +123,30 @@ namespace MissionDesign.Simulation
         public string ToText()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("=== REPORTE DE MISIÓN — Mission Design Lab (NASA Space Apps 2026) ===");
-            sb.AppendLine($"Generado (UTC): {generatedAtUtc}   Semilla: {seed}");
+            sb.AppendLine($"=== REPORTE DE MISIÓN — {GameInfo.Title} ({GameInfo.Event}) ===");
+            sb.AppendLine($"Generado (UTC): {generatedAtUtc}   Semilla: {seed}   Dificultad: {difficulty}");
             sb.AppendLine($"Escenario: {scenarioName} ({scenarioId})");
-            sb.AppendLine($"Órbita: {orbit}   Lanzador: {launchVehicle}");
+            sb.AppendLine($"Órbita: {orbit}   Lanzador: {launchVehicle}   Red terrena: {groundNetwork}");
             sb.AppendLine($"Bus: {bus}   Paneles: {solarArray}   Batería: {battery}   Antena: {antenna}");
+            if (difficulty == DifficultyLevel.Advanced)
+                sb.AppendLine($"Computadora: {computer}   Control de orientación: {attitudeControl}");
             sb.AppendLine($"Instrumentos: {string.Join(", ", instruments)}");
             sb.AppendLine();
-            sb.AppendLine($"VEREDICTO: {VerdictLabel(verdict)} — {verdictTitle}   Puntuación: {score}/100");
+            sb.AppendLine($"VEREDICTO: {VerdictLabel(verdict)} — {verdictTitle}   Puntuación: {score}/100 (rango {rank})");
+            if (!string.IsNullOrEmpty(similarMission)) sb.AppendLine($"Tu misión se parece a: {similarMission} — {similarMissionDescription}");
             sb.AppendLine($"Ciencia lograda: {scienceAchieved:N0} / {scienceTarget:N0} requerida");
             sb.AppendLine($"Datos: {dataGeneratedGBPerDay:N1} GB/día generados, {downlinkGBPerDay:N1} GB/día de enlace " +
                           $"({dataReturnFraction:P0} de retorno) → {dataReturnedTotalTB:N1} TB recibidos, {dataLostTotalTB:N1} TB perdidos");
             sb.AppendLine($"Operación: {achievedOperationsDays:N0} de {plannedOperationsDays:N0} días · energía disponible {powerAvailabilityFraction:P0}");
             sb.AppendLine($"Programa: ${totalCostMUSD:N1} M de ${budgetLimitMUSD:N0} M · desarrollo {developmentMonths:N0} meses");
             sb.AppendLine();
-            sb.AppendLine("POR QUÉ:");
-            foreach (var e in explanations) sb.AppendLine($" - {e}");
+            sb.AppendLine("LO QUE SALIÓ BIEN:");
+            foreach (var e in wentWell) sb.AppendLine($" + {e}");
+            sb.AppendLine("LO QUE FALLÓ:");
+            foreach (var e in wentWrong) sb.AppendLine($" - {e}");
+            sb.AppendLine();
+            sb.AppendLine("POR QUÉ (todas las explicaciones):");
+            foreach (var e in explanations) sb.AppendLine($" · {e}");
             sb.AppendLine();
             sb.AppendLine("EVENTOS:");
             if (events.Count == 0) sb.AppendLine(" - (ninguno)");

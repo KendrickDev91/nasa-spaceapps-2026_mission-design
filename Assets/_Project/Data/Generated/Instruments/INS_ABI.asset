@@ -22,6 +22,7 @@ MonoBehaviour:
   peakPowerW: 500
   developmentMonths: 60
   technologyReadinessLevel: 9
+  advancedOnly: 0
   prefab: {fileID: 0}
   socket: 1
   icon: {fileID: 0}
@@ -34,6 +35,7 @@ MonoBehaviour:
   averagePowerW: 450
   dutyCycle: 1
   scienceValue: 80
+  requiredPointingDeg: 0.01
   preferredOrbits: 02000000
   scienceObjectives:
   - clima

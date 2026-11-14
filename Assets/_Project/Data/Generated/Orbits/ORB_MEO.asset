@@ -27,7 +27,6 @@ MonoBehaviour:
   maxEclipseMinutes: 56
   groundStationRangeKm: 22000
   dailyContactHours: 10
-  groundGainFactor: 1
   radiationLevel: 0.85
   debrisRisk: 0.1
   educationalNote: "La radiaci\xF3n del cintur\xF3n de Van Allen degrada paneles

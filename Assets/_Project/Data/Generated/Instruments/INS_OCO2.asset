@@ -15,13 +15,14 @@ MonoBehaviour:
   componentId: INS_OCO2
   displayName: "Espectr\xF3metro OCO-2"
   description: "Tres espectr\xF3metros de rejilla de alta resoluci\xF3n que miden
-    CO\u2082 atmosf\xE9rico con precisi\xF3n de 1 ppm."
+    CO2 atmosf\xE9rico con precisi\xF3n de 1 ppm."
   heritage: Orbiting Carbon Observatory-2 (2014)
   massKg: 140
   costMUSD: 120
   peakPowerW: 130
   developmentMonths: 42
   technologyReadinessLevel: 9
+  advancedOnly: 0
   prefab: {fileID: 0}
   socket: 1
   icon: {fileID: 0}
@@ -34,6 +35,7 @@ MonoBehaviour:
   averagePowerW: 105
   dutyCycle: 1
   scienceValue: 65
+  requiredPointingDeg: 0.05
   preferredOrbits: 00000000
   scienceObjectives:
   - clima

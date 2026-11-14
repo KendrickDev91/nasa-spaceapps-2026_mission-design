@@ -23,19 +23,35 @@ namespace MissionDesign.Simulation
         /// <summary>Penalización científica por operar fuera de la órbita óptima del instrumento.</summary>
         public const float OffOrbitScienceFactor = 0.5f;
 
-        /// <summary>Costo de operaciones ($M/mes): equipo de control + tiempo de antena.</summary>
+        /// <summary>Costo del equipo de control de misión ($M/mes). El tiempo de antena lo suma la red terrena.</summary>
         public static float OperationsCostPerMonth(OrbitRegime regime)
         {
             switch (regime)
             {
-                case OrbitRegime.LEO: return 0.4f;
+                case OrbitRegime.LEO: return 0.3f;
                 case OrbitRegime.MEO:
-                case OrbitRegime.GEO: return 0.5f;
-                case OrbitRegime.Lunar: return 1.0f;        // tiempo de DSN
-                case OrbitRegime.Interplanetary: return 1.5f;
-                default: return 0.5f;
+                case OrbitRegime.GEO: return 0.4f;
+                case OrbitRegime.Lunar: return 0.3f;
+                case OrbitRegime.Interplanetary: return 0.5f;
+                default: return 0.4f;
             }
         }
+
+        /// <summary>
+        /// Fracción de ciencia que se logra según el apuntamiento: 1 si el ADCS es suficiente;
+        /// 10× peor → 0.5, 100× peor → 0.33. Sin ADCS (dificultad Básica) se asume adecuado.
+        /// </summary>
+        public static float PointingFactor(InstrumentSO instrument, AttitudeControlSO adcs)
+        {
+            if (instrument == null || adcs == null || adcs.pointingAccuracyDeg <= instrument.requiredPointingDeg) return 1f;
+            return 1f / (1f + Mathf.Log10(adcs.pointingAccuracyDeg / instrument.requiredPointingDeg));
+        }
+
+        /// <summary>Valor científico de un instrumento en este diseño (órbita + apuntamiento).</summary>
+        public static float InstrumentScience(InstrumentSO i, OrbitSO orbit, AttitudeControlSO adcs) =>
+            i.scienceValue
+            * (orbit != null && i.IsPreferredOrbit(orbit.regime) ? 1f : OffOrbitScienceFactor)
+            * PointingFactor(i, adcs);
 
         private readonly SpacecraftDesign design;
 
@@ -94,7 +110,8 @@ namespace MissionDesign.Simulation
             // 2. ENERGÍA
             float sunAU = orbit != null ? orbit.sunDistanceAU : 1f;
             float eclipse = orbit != null ? orbit.eclipseFraction : 0f;
-            float contactHours = orbit != null ? orbit.dailyContactHours : 0f;
+            var network = d.GroundNetwork;
+            float contactHours = orbit != null ? orbit.GetContactHours(network) : 0f;
             float housekeeping = bus != null ? bus.housekeepingPowerW : 0f;
             float antennaPower = antenna != null ? antenna.peakPowerW : 0f;
 
@@ -119,7 +136,9 @@ namespace MissionDesign.Simulation
             // 3. PRESUPUESTO
             r.hardwareCostMUSD = d.AllComponents.Sum(c => c.costMUSD);
             r.launchCostMUSD = lv != null ? lv.launchCostMUSD : 0f;
-            r.operationsCostMUSD = orbit != null ? r.plannedOperationsMonths * OperationsCostPerMonth(orbit.regime) : 0f;
+            r.operationsCostMUSD = orbit != null
+                ? r.plannedOperationsMonths * (OperationsCostPerMonth(orbit.regime) + (network != null ? network.costPerMonthMUSD : 0f))
+                : 0f;
             r.totalCostMUSD = r.hardwareCostMUSD + r.launchCostMUSD + r.operationsCostMUSD;
             r.budgetLimitMUSD = scenario != null ? scenario.budgetLimitMUSD : 0f;
 
@@ -127,18 +146,18 @@ namespace MissionDesign.Simulation
             r.dataGeneratedGBPerDay = d.Instruments.Sum(i => i.dataVolumeGBPerDay * i.dutyCycle)
                                       * r.powerAvailabilityFraction
                                       + (bus != null ? bus.housekeepingDataGBPerDay : 0f);
-            r.downlinkRateMbps = antenna != null && orbit != null
-                ? antenna.GetDataRateMbps(orbit.groundStationRangeKm, orbit.groundGainFactor)
-                : 0f;
-            r.downlinkCapacityGBPerDay = orbit != null ? orbit.GetDailyDownlinkGB(antenna) : 0f;
+            r.downlinkRateMbps = orbit != null ? orbit.GetDataRateMbps(antenna, network) : 0f;
+            r.downlinkCapacityGBPerDay = orbit != null ? orbit.GetDailyDownlinkGB(antenna, network) : 0f;
+            r.contactHoursPerDay = contactHours;
+            r.onboardStorageGB = d.Computer != null ? d.Computer.storageGB : 0f;
+            r.storageDays = r.dataGeneratedGBPerDay > 0f ? r.onboardStorageGB / r.dataGeneratedGBPerDay : 0f;
             r.dataLostGBPerDay = Mathf.Max(0f, r.dataGeneratedGBPerDay - r.downlinkCapacityGBPerDay);
             r.dataReturnFraction = r.dataGeneratedGBPerDay > 0f
                 ? Mathf.Clamp01(r.downlinkCapacityGBPerDay / r.dataGeneratedGBPerDay)
                 : 1f;
 
             // CIENCIA
-            r.potentialScienceValue = d.Instruments.Sum(i =>
-                i.scienceValue * (orbit != null && i.IsPreferredOrbit(orbit.regime) ? 1f : OffOrbitScienceFactor));
+            r.potentialScienceValue = d.Instruments.Sum(i => InstrumentScience(i, orbit, d.AttitudeControl));
             r.expectedScienceValue = r.potentialScienceValue * r.dataReturnFraction * r.powerAvailabilityFraction;
 
             BuildReadings(r, d);
@@ -214,10 +233,11 @@ namespace MissionDesign.Simulation
             };
             // 5. Comunicaciones
             string band = d.Antenna != null ? d.Antenna.displayName : "sin antena";
+            string net = d.GroundNetwork != null ? d.GroundNetwork.displayName : "sin red terrena";
             var comms = new ResourceReading
             {
                 kind = ResourceKind.Comms, value = r.downlinkCapacityGBPerDay, limit = r.dataGeneratedGBPerDay, unit = "GB/día",
-                summary = $"{band} en {orbitName}: {r.downlinkRateMbps:N2} Mbps × {(d.Orbit != null ? d.Orbit.dailyContactHours : 0f):N1} h/día = {r.downlinkCapacityGBPerDay:N1} GB/día"
+                summary = $"{band} + {net} en {orbitName}: {r.downlinkRateMbps:N2} Mbps × {r.contactHoursPerDay:N1} h/día = {r.downlinkCapacityGBPerDay:N1} GB/día"
             };
             if (r.dataLostGBPerDay > 0f)
             {

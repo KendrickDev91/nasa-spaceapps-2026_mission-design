@@ -17,6 +17,8 @@ namespace MissionDesign.Simulation
         public int maxEvents = 2;
         /// <summary>Si se indica, se usan estos eventos en lugar de sortearlos (modo demo / pruebas).</summary>
         public List<RandomEventSO> forcedEvents;
+        /// <summary>Catálogo de misiones reales para el "Tu misión se parece a…".</summary>
+        public IEnumerable<RealMissionSO> realMissions;
     }
 
     /// <summary>
@@ -29,6 +31,8 @@ namespace MissionDesign.Simulation
         public const float DaysPerMonth = 30.44f;
         /// <summary>Por debajo de esta fracción de la ciencia objetivo la misión es un fallo.</summary>
         public const float PartialThreshold = 0.4f;
+        /// <summary>Días de datos que debe guardar la memoria para absorber un corte de enlace.</summary>
+        public const float StorageDaysToBufferOutage = 2f;
 
         public static MissionOutcomeReport Run(SpacecraftDesign d, IReadOnlyList<RandomEventSO> eventPool, SimulationSettings settings = null)
         {
@@ -42,6 +46,13 @@ namespace MissionDesign.Simulation
             var lv = d.LaunchVehicle;
             string regime = orbit != null ? orbit.regime.ToString() : "?";
             float days = o.plannedOperationsDays;
+
+            var similar = FindSimilarMission(d, t, settings.realMissions);
+            if (similar != null)
+            {
+                o.similarMission = $"{similar.displayName} ({similar.launchYear})";
+                o.similarMissionDescription = similar.description;
+            }
 
             // ───── 1. LANZAMIENTO ─────
             float reliability = lv != null ? lv.reliability : 0f;
@@ -73,7 +84,7 @@ namespace MissionDesign.Simulation
             Log(o, MissionPhase.ScienceOperations, 2, LogTone.Info,
                 $"Inicio de operaciones: {d.Instruments.Count} instrumento(s) generando {t.dataGeneratedGBPerDay:N1} GB/día.");
 
-            var selected = settings.forcedEvents ?? PickEvents(eventPool, orbit, rng, settings.minEvents, settings.maxEvents);
+            var selected = settings.forcedEvents ?? PickEvents(eventPool, orbit, rng, settings.minEvents, settings.maxEvents, d.GroundNetwork);
             var scheduled = selected.Where(e => e != null)
                 .Select(e => (evt: e, day: Mathf.Round(days * (0.1f + 0.8f * (float)rng.NextDouble()))))
                 .OrderBy(x => x.day).ToList();
@@ -87,58 +98,76 @@ namespace MissionDesign.Simulation
 
             foreach (var (evt, day) in scheduled)
             {
-                sciMult *= evt.scienceMultiplier;
-                dataMult *= evt.dataGenerationMultiplier;
-                commsMult *= evt.commsMultiplier;
-                powerLoss = 1f - (1f - powerLoss) * (1f - evt.permanentPowerLossFraction);
                 var impact = new List<string>();
+                bool radHardened = evt.eventType == RandomEventType.SingleEventUpset && d.Computer != null && d.Computer.radiationHardened;
+                bool buffered = evt.commsMultiplier < 1f && d.Computer != null && t.storageDays >= StorageDaysToBufferOutage;
 
-                if (evt.requiresSafeMode)
+                if (radHardened)
                 {
-                    float hk = d.Bus != null ? d.Bus.housekeepingPowerW : 0f;
-                    float genNow = midLifeGen * (1f - powerLoss);
-                    float usable = d.Battery != null ? d.Battery.UsableWh : 0f;
-                    float needWh = genNow >= hk
-                        ? hk * (orbit != null ? orbit.maxEclipseMinutes : 0f) / 60f
-                        : (hk - genNow) * evt.safeModeHours;
-                    if (needWh > usable)
+                    impact.Add($"{d.Computer.displayName} (endurecida contra radiación) corrigió el error sin reiniciar: sin efecto en la ciencia");
+                }
+                else
+                {
+                    sciMult *= evt.scienceMultiplier;
+                    dataMult *= evt.dataGenerationMultiplier;
+                    commsMult *= buffered ? 1f : evt.commsMultiplier;
+                    powerLoss = 1f - (1f - powerLoss) * (1f - evt.permanentPowerLossFraction);
+                    if (buffered)
+                        impact.Add($"la memoria a bordo ({t.onboardStorageGB:N0} GB ≈ {t.storageDays:N0} días de datos) guardó la ciencia hasta recuperar el enlace");
+
+                    if (evt.requiresSafeMode)
                     {
-                        o.survivedOperations = false;
-                        lossDay = day;
-                        impact.Add($"la batería ({usable:N0} Wh útiles) no sostuvo {evt.safeModeHours:N0} h de modo seguro: se necesitaban {needWh:N0} Wh. Se perdió la nave");
+                        float hk = d.Bus != null ? d.Bus.housekeepingPowerW : 0f;
+                        float genNow = midLifeGen * (1f - powerLoss);
+                        float usable = d.Battery != null ? d.Battery.UsableWh : 0f;
+                        float needWh = genNow >= hk
+                            ? hk * (orbit != null ? orbit.maxEclipseMinutes : 0f) / 60f
+                            : (hk - genNow) * evt.safeModeHours;
+                        if (needWh > usable)
+                        {
+                            o.survivedOperations = false;
+                            lossDay = day;
+                            impact.Add($"la batería ({usable:N0} Wh útiles) no sostuvo {evt.safeModeHours:N0} h de modo seguro: se necesitaban {needWh:N0} Wh. Se perdió la nave");
+                        }
+                        else
+                        {
+                            impact.Add($"modo seguro de {evt.safeModeHours:N0} h superado ({needWh:N0} de {usable:N0} Wh de batería)");
+                        }
                     }
-                    else
+
+                    if (o.survivedOperations && evt.componentFailureChance > 0f && rng.NextDouble() < evt.componentFailureChance)
                     {
-                        impact.Add($"modo seguro de {evt.safeModeHours:N0} h superado ({needWh:N0} de {usable:N0} Wh de batería)");
+                        var alive = d.Instruments.Where(i => !instrumentFailureDay.ContainsKey(i)).Distinct().ToList();
+                        if (alive.Count > 0)
+                        {
+                            var victim = alive[rng.Next(alive.Count)];
+                            instrumentFailureDay[victim] = day;
+                            failureCause[victim] = $"{evt.displayName} (día {day:N0})";
+                            impact.Add($"daño permanente en {victim.displayName}");
+                        }
+                        else
+                        {
+                            powerLoss = 1f - (1f - powerLoss) * 0.7f;
+                            impact.Add("daño en los paneles solares (−30% de potencia)");
+                        }
                     }
+
+                    impact.AddRange(DescribeMultipliers(evt, skipComms: buffered));
                 }
 
-                if (o.survivedOperations && evt.componentFailureChance > 0f && rng.NextDouble() < evt.componentFailureChance)
-                {
-                    var alive = d.Instruments.Where(i => !instrumentFailureDay.ContainsKey(i)).Distinct().ToList();
-                    if (alive.Count > 0)
-                    {
-                        var victim = alive[rng.Next(alive.Count)];
-                        instrumentFailureDay[victim] = day;
-                        failureCause[victim] = $"{evt.displayName} (día {day:N0})";
-                        impact.Add($"daño permanente en {victim.displayName}");
-                    }
-                    else
-                    {
-                        powerLoss = 1f - (1f - powerLoss) * 0.7f;
-                        impact.Add("daño en los paneles solares (−30% de potencia)");
-                    }
-                }
-
-                impact.AddRange(DescribeMultipliers(evt));
                 string text = impact.Count > 0 ? Capitalize(string.Join("; ", impact)) + "." : "Sin efectos medibles.";
                 var phase = evt.affectedPhase == MissionPhase.DataTransmission ? MissionPhase.DataTransmission : MissionPhase.ScienceOperations;
+                bool positive = evt.isPositive || radHardened || buffered;
                 o.events.Add(new EventOutcome
                 {
                     eventId = evt.eventId, displayName = evt.displayName, phase = phase, missionDay = day, positive = evt.isPositive,
+                    mitigated = radHardened || buffered,
+                    commsOnly = evt.commsMultiplier < 1f && !evt.requiresSafeMode && evt.componentFailureChance <= 0f
+                                && evt.permanentPowerLossFraction <= 0f && Mathf.Approximately(evt.scienceMultiplier, 1f)
+                                && Mathf.Approximately(evt.dataGenerationMultiplier, 1f),
                     impact = text, mitigation = evt.mitigationAdvice, educationalFact = evt.educationalFact
                 });
-                Log(o, phase, day, !o.survivedOperations ? LogTone.Critical : evt.isPositive ? LogTone.Positive : LogTone.Warning,
+                Log(o, phase, day, !o.survivedOperations ? LogTone.Critical : positive ? LogTone.Positive : LogTone.Warning,
                     $"{evt.displayName}: {text}");
 
                 if (!o.survivedOperations) break;
@@ -164,14 +193,13 @@ namespace MissionDesign.Simulation
             o.dataReturnedTotalTB = Mathf.Min(o.dataGeneratedGBPerDay, o.downlinkGBPerDay) * opsDays / 1000f;
             o.dataLostTotalTB = Mathf.Max(0f, o.dataGeneratedGBPerDay - o.downlinkGBPerDay) * opsDays / 1000f;
 
-            float potential = d.Instruments.Sum(i => i.scienceValue * Alive(i) *
-                (orbit != null && i.IsPreferredOrbit(orbit.regime) ? 1f : MissionTelemetry.OffOrbitScienceFactor));
+            float potential = d.Instruments.Sum(i => MissionTelemetry.InstrumentScience(i, orbit, d.AttitudeControl) * Alive(i));
             float timeFrac = days > 0f ? opsDays / days : 0f;
             float science = potential * sciMult * o.dataReturnFraction * powerFrac * timeFrac;
 
             // ───── 4. TRANSMISIÓN DE DATOS ─────
             Log(o, MissionPhase.DataTransmission, opsDays, o.dataReturnFraction >= 0.98f ? LogTone.Positive : LogTone.Warning,
-                $"{Name(d.Antenna)} entregó {o.downlinkGBPerDay:N1} GB/día frente a {o.dataGeneratedGBPerDay:N1} GB/día generados: " +
+                $"{Name(d.Antenna)} vía {NetworkName(d)} entregó {o.downlinkGBPerDay:N1} GB/día frente a {o.dataGeneratedGBPerDay:N1} GB/día generados: " +
                 $"{o.dataReturnedTotalTB:N1} TB recibidos en tierra ({o.dataReturnFraction:P0}).");
 
             // ───── Veredicto y explicación ─────
@@ -189,20 +217,26 @@ namespace MissionDesign.Simulation
 
         // ───────────────────────────── Eventos ─────────────────────────────
 
-        public static List<RandomEventSO> PickEvents(IReadOnlyList<RandomEventSO> pool, OrbitSO orbit, System.Random rng, int min, int max)
+        public static List<RandomEventSO> PickEvents(IReadOnlyList<RandomEventSO> pool, OrbitSO orbit, System.Random rng, int min, int max,
+            GroundNetworkSO network = null)
         {
             var result = new List<RandomEventSO>();
             if (pool == null || orbit == null) return result;
-            var candidates = pool.Where(e => e != null && e.GetProbability(orbit.regime) > 0f).ToList();
+
+            float Weight(RandomEventSO e) =>
+                e.GetProbability(orbit.regime) *
+                (e.eventType == RandomEventType.GroundStationOutage && network != null ? network.outageProbabilityMultiplier : 1f);
+
+            var candidates = pool.Where(e => e != null && Weight(e) > 0f).ToList();
             int count = Mathf.Min(candidates.Count, rng.Next(min, max + 1));
 
             for (int n = 0; n < count; n++)
             {
-                float total = candidates.Sum(e => e.GetProbability(orbit.regime));
+                float total = candidates.Sum(Weight);
                 double pick = rng.NextDouble() * total;
                 for (int i = 0; i < candidates.Count; i++)
                 {
-                    pick -= candidates[i].GetProbability(orbit.regime);
+                    pick -= Weight(candidates[i]);
                     if (pick <= 0 || i == candidates.Count - 1)
                     {
                         result.Add(candidates[i]);
@@ -214,12 +248,44 @@ namespace MissionDesign.Simulation
             return result;
         }
 
-        private static IEnumerable<string> DescribeMultipliers(RandomEventSO e)
+        private static IEnumerable<string> DescribeMultipliers(RandomEventSO e, bool skipComms)
         {
             if (!Mathf.Approximately(e.scienceMultiplier, 1f)) yield return $"ciencia ×{e.scienceMultiplier:0.##}";
             if (!Mathf.Approximately(e.dataGenerationMultiplier, 1f)) yield return $"datos generados ×{e.dataGenerationMultiplier:0.##}";
-            if (!Mathf.Approximately(e.commsMultiplier, 1f)) yield return $"capacidad de enlace ×{e.commsMultiplier:0.##}";
+            if (!skipComms && !Mathf.Approximately(e.commsMultiplier, 1f)) yield return $"capacidad de enlace ×{e.commsMultiplier:0.##}";
             if (e.permanentPowerLossFraction > 0f) yield return $"−{e.permanentPowerLossFraction:P0} de potencia solar permanente";
+        }
+
+        // ───────────────────────────── Misión real parecida ─────────────────────────────
+
+        /// <summary>
+        /// Puntúa cada misión real: órbita igual (+3), instrumento compartido (+4 c/u),
+        /// objetivo compartido (+1 c/u) y masa parecida (hasta +2).
+        /// </summary>
+        public static RealMissionSO FindSimilarMission(SpacecraftDesign d, TelemetryReport t, IEnumerable<RealMissionSO> missions)
+        {
+            if (missions == null) return null;
+            var ids = new HashSet<string>(d.Instruments.Select(i => i.componentId));
+            var tags = new HashSet<string>(d.Instruments.SelectMany(i => i.scienceObjectives ?? Array.Empty<string>()));
+            if (d.Scenario != null && !string.IsNullOrEmpty(d.Scenario.scienceObjectiveTag)) tags.Add(d.Scenario.scienceObjectiveTag);
+
+            RealMissionSO best = null;
+            float bestScore = 0f;
+            foreach (var m in missions.Where(m => m != null))
+            {
+                float score = 0f;
+                if (d.Orbit != null && d.Orbit.regime == m.regime) score += 3f;
+                score += 4f * (m.instrumentIds ?? Array.Empty<string>()).Count(ids.Contains);
+                score += (m.tags ?? Array.Empty<string>()).Count(tags.Contains);
+                if (m.massKg > 0f && t.totalMassKg > 0f)
+                    score += 2f * Mathf.Max(0f, 1f - Mathf.Abs(Mathf.Log10(t.totalMassKg / m.massKg)) / 2f);
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = m;
+                }
+            }
+            return best;
         }
 
         // ───────────────────────────── Explicación ─────────────────────────────
@@ -242,10 +308,25 @@ namespace MissionDesign.Simulation
                 o.explanations.Add($"{prefix}: {who}, pero la antena {Name(d.Antenna)} en órbita {regime} solo transmitió " +
                                    $"{o.downlinkGBPerDay:N0} GB/día. Se perdió el {1f - o.dataReturnFraction:P0} de los datos ({o.dataLostTotalTB:N1} TB).");
             }
+            else if (o.survivedOperations)
+            {
+                o.explanations.Add($"Bien: el enlace alcanzó — {Name(d.Antenna)} vía {NetworkName(d)} entregó el {o.dataReturnFraction:P0} de los datos ({o.dataReturnedTotalTB:N1} TB).");
+            }
 
             if (powerFrac < 0.98f)
                 o.explanations.Add($"{prefix}: los paneles dieron {genW:N0} W de media (eclipse y degradación incluidos) frente a {t.peakLoadW:N0} W de consumo pico; " +
                                    $"los instrumentos solo operaron el {powerFrac:P0} del tiempo.");
+            else if (o.survivedOperations)
+                o.explanations.Add($"Bien: energía con margen — {genW:N0} W de media para {t.peakLoadW:N0} W de consumo pico.");
+
+            float massMargin = Margin(t);
+            if (massMargin >= 0.1f)
+                o.explanations.Add($"Bien: margen de masa del {massMargin:P0} frente a la capacidad de {Name(d.LaunchVehicle)}.");
+
+            var poorlyPointed = d.Instruments.Where(i => MissionTelemetry.PointingFactor(i, d.AttitudeControl) < 0.99f).ToList();
+            foreach (var i in poorlyPointed)
+                o.explanations.Add($"{prefix}: {Name(d.AttitudeControl)} no apunta con la precisión que pide {i.displayName} " +
+                                   $"(±{i.requiredPointingDeg:0.###}°): obtuvo el {MissionTelemetry.PointingFactor(i, d.AttitudeControl):P0} de su ciencia.");
 
             if (lifeFrac < 1f)
                 o.explanations.Add($"{prefix}: el bus está diseñado para {t.estimatedLifeMonths:N0} meses y la misión planificaba {t.plannedOperationsMonths:N0}.");
@@ -255,11 +336,16 @@ namespace MissionDesign.Simulation
 
             foreach (var e in o.events.Where(e => e.positive))
                 o.explanations.Add($"A favor: {e.displayName} — {e.impact}");
+            foreach (var e in o.events.Where(e => e.mitigated && !e.positive))
+                o.explanations.Add($"A favor: tu diseño resistió {e.displayName} — {e.impact}");
 
-            // Eventos negativos superados: su coste también explica el resultado.
+            // Eventos negativos no mitigados: su coste también explica el resultado. Si solo recortaron
+            // el enlace y aun así llegó todo, el margen de diseño los absorbió (y eso es mérito del equipo).
             if (o.survivedOperations)
-                foreach (var e in o.events.Where(e => !e.positive))
-                    o.explanations.Add($"En contra: {e.displayName} — {e.impact}");
+                foreach (var e in o.events.Where(e => !e.positive && !e.mitigated))
+                    o.explanations.Add(e.commsOnly && o.dataReturnFraction >= 0.98f
+                        ? $"A favor: el margen del enlace absorbió {e.displayName} — aun con la capacidad recortada llegó el {o.dataReturnFraction:P0} de los datos."
+                        : $"En contra: {e.displayName} — {e.impact}");
 
             if (!o.survivedOperations)
             {
@@ -275,12 +361,30 @@ namespace MissionDesign.Simulation
                                    $"({(t.budgetLimitMUSD - t.totalCostMUSD) / t.budgetLimitMUSD:P0} de reserva) y {t.developmentMonths:N0} meses de desarrollo.");
         }
 
+        /// <summary>Reparte las explicaciones en las tarjetas "Lo que salió bien" / "Lo que falló".</summary>
+        private static void Classify(MissionOutcomeReport o)
+        {
+            o.wentWell.Clear();
+            o.wentWrong.Clear();
+            float reserve = o.budgetLimitMUSD > 0f ? (o.budgetLimitMUSD - o.totalCostMUSD) / o.budgetLimitMUSD : 0f;
+            foreach (var e in o.explanations)
+            {
+                bool good = e.StartsWith("Éxito") || e.StartsWith("A favor") || e.StartsWith("Bien")
+                            || (e.StartsWith("Programa:") && reserve >= MissionTelemetry.BudgetReserveFraction);
+                (good ? o.wentWell : o.wentWrong).Add(e);
+            }
+        }
+
+        public static string RankFor(int score) =>
+            score >= 90 ? "A" : score >= 75 ? "B" : score >= 60 ? "C" : score >= 40 ? "D" : "F";
+
         // ───────────────────────────── Utilidades ─────────────────────────────
 
         private static MissionOutcomeReport NewReport(SpacecraftDesign d, TelemetryReport t, int seed) => new MissionOutcomeReport
         {
             generatedAtUtc = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
             seed = seed,
+            difficulty = d.Difficulty,
             scenarioId = d.Scenario != null ? d.Scenario.scenarioId : string.Empty,
             scenarioName = d.Scenario != null ? d.Scenario.displayName : "(sin escenario)",
             orbit = d.Orbit != null ? d.Orbit.displayName : "(sin órbita)",
@@ -289,6 +393,9 @@ namespace MissionDesign.Simulation
             solarArray = Name(d.SolarArray),
             battery = Name(d.Battery),
             antenna = Name(d.Antenna),
+            groundNetwork = NetworkName(d),
+            computer = Name(d.Computer),
+            attitudeControl = Name(d.AttitudeControl),
             instruments = d.Instruments.Select(i => i.displayName).ToArray(),
             onboardDeltaVKmS = t.spacecraftDeltaVKmS,
             requiredOnboardDeltaVKmS = t.requiredOnboardDeltaVKmS,
@@ -306,6 +413,8 @@ namespace MissionDesign.Simulation
             o.verdictTitle = title;
             o.scienceAchieved = science;
             o.score = Score(o, t);
+            o.rank = RankFor(o.score);
+            Classify(o);
             Log(o, MissionPhase.PostMission, o.achievedOperationsDays, verdict == MissionVerdict.Success ? LogTone.Positive
                 : verdict == MissionVerdict.PartialSuccess ? LogTone.Warning : LogTone.Critical,
                 $"{MissionOutcomeReport.VerdictLabel(verdict)}: {title}.");
@@ -332,6 +441,7 @@ namespace MissionDesign.Simulation
 
         private static string Name(LaunchVehicleSO lv) => lv != null ? lv.displayName : "(sin lanzador)";
         private static string Name(SpacecraftComponentSO c) => c != null ? c.displayName : "(ninguno)";
+        private static string NetworkName(SpacecraftDesign d) => d.GroundNetwork != null ? d.GroundNetwork.displayName : "(sin red terrena)";
 
         private static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s.Substring(1);
     }

@@ -27,7 +27,6 @@ MonoBehaviour:
   maxEclipseMinutes: 72
   groundStationRangeKm: 38000
   dailyContactHours: 24
-  groundGainFactor: 1
   radiationLevel: 0.6
   debrisRisk: 0.2
   educationalNote: "Contacto 24/7 con una estaci\xF3n fija, pero 19\xD7 m\xE1s lejos

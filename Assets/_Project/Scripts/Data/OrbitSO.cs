@@ -32,10 +32,8 @@ namespace MissionDesign.Data
         [Header("Comunicaciones")]
         [Tooltip("Distancia típica satélite-estación terrena (km).")]
         [Min(1)] public float groundStationRangeKm;
-        [Tooltip("Horas de contacto con estaciones terrenas por día.")]
+        [Tooltip("Horas de contacto al día con una red terrena estándar (la red elegida lo multiplica).")]
         [Range(0f, 24f)] public float dailyContactHours;
-        [Tooltip("Ganancia relativa de la red terrena (1 = Near Space Network ~11 m; DSN 34 m ≈ 30).")]
-        [Min(0)] public float groundGainFactor = 1f;
 
         [Header("Riesgos de entorno (0-1)")]
         [Range(0f, 1f)] public float radiationLevel;
@@ -46,13 +44,18 @@ namespace MissionDesign.Data
         public DataConfidence dataConfidence = DataConfidence.Approximate;
         public string sourceUrl;
 
-        /// <summary>Capacidad diaria de bajada en GB/día para una antena dada.</summary>
-        public float GetDailyDownlinkGB(AntennaSO antenna)
+        public float GetContactHours(GroundNetworkSO network) =>
+            Mathf.Min(24f, dailyContactHours * (network != null ? network.contactHoursMultiplier : 1f));
+
+        public float GetDataRateMbps(AntennaSO antenna, GroundNetworkSO network) =>
+            antenna != null ? antenna.GetDataRateMbps(groundStationRangeKm, network != null ? network.gainFactor : 1f) : 0f;
+
+        /// <summary>Capacidad diaria de bajada en GB/día para una antena y red terrena dadas.</summary>
+        public float GetDailyDownlinkGB(AntennaSO antenna, GroundNetworkSO network = null)
         {
             if (antenna == null) return 0f;
-            float mbps = antenna.GetDataRateMbps(groundStationRangeKm, groundGainFactor);
             // Mbps · s / 8 bits / 1000 MB → GB
-            return mbps * dailyContactHours * 3600f / 8f / 1000f;
+            return GetDataRateMbps(antenna, network) * GetContactHours(network) * 3600f / 8f / 1000f;
         }
     }
 }

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cb1b6cd950c570489e9f1d7e64eeb3b, type: 3}
+  m_Name: CDH_RAD
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.OnboardComputerSO
+  componentId: CDH_RAD
+  displayName: Computadora endurecida (clase RAD750)
+  description: "Procesador tolerante a radiaci\xF3n usado en misiones cient\xEDficas
+    de la NASA."
+  heritage: 
+  massKg: 6
+  costMUSD: 4
+  peakPowerW: 20
+  developmentMonths: 12
+  technologyReadinessLevel: 9
+  advancedOnly: 1
+  prefab: {fileID: 0}
+  socket: 6
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://www.nasa.gov/smallsat-institute/sst-soa/small-spacecraft-avionics/
+  sourceNotes: Valores representativos de la clase; no de un producto concreto.
+  storageGB: 256
+  radiationHardened: 1

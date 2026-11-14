@@ -1,6 +1,19 @@
-# Mission Design Game — NASA Space Apps Challenge 2026
+# MISSION TRADE-OFF — proyecto para NASA Space Apps Challenge 2026
 
 Unity 6000.5.5f1 · URP · TextMeshPro · Input System · Arquitectura data-driven (ScriptableObjects).
+
+> Título provisional: se cambia en un solo lugar, `Assets/_Project/Scripts/Core/GameInfo.cs`.
+> No usar nombres de instalaciones reales de la NASA (p. ej. "Mission Design Lab" de Goddard) ni sus logos.
+
+## Funciones clave para el jurado
+
+- **Dos dificultades.** Básico: piezas esenciales, 1 evento y el cohete no falla. Avanzado: añade computadora de a bordo
+  (memoria que absorbe cortes de enlace y electrónica endurecida contra radiación) y control de orientación (el apuntamiento limita la ciencia).
+- **Segmento terreno.** El rol Telecom elige la red de estaciones (Near Space Network, red comercial, Deep Space Network): ganancia, horas de contacto, costo y fiabilidad.
+- **Tooltips educativos con vista previa.** Cada opción del catálogo muestra qué es, sus números con la fuente y su nivel de confianza, y
+  qué le pasaría a tu misión si la eliges ("Provocaría: Masa excede la capacidad del lanzador…"). Las barras de recursos explican cada recurso.
+- **Post-misión en 3 tarjetas.** "Lo que salió bien", "Lo que falló" y la puntuación con rango A-F.
+- **"Tu misión se parece a…":** la misión real de la NASA más parecida a tu diseño (Terra, OCO-2, NISAR, GEDI, GOES-16, LRO, CAPSTONE).
 
 ## Estructura
 

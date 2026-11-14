@@ -208,6 +208,36 @@ namespace MissionDesign.Simulation
                     $"Más allá de la órbita terrestre solo la Red del Espacio Profundo puede seguir la nave; {design.Antenna.displayName} no es compatible.");
             }
 
+            // ── Segmento terreno ──
+            var network = design.GroundNetwork;
+            if (orbit != null && network != null && !network.Supports(orbit.regime))
+            {
+                Add(issues, IssueSeverity.Blocking, ResourceKind.Comms, MissionRole.TelecomLaunchEngineer,
+                    $"{network.displayName} no cubre {orbit.regime}",
+                    $"Esa red atiende {string.Join("/", network.supportedRegimes ?? Array.Empty<OrbitRegime>())}. " +
+                    $"A {orbit.groundStationRangeKm:N0} km hace falta una red con antenas adecuadas para esa distancia.");
+            }
+
+            // ── Subsistemas de dificultad Avanzada ──
+            if (design.AttitudeControl != null)
+            {
+                var poorly = design.Instruments.Where(i => MissionTelemetry.PointingFactor(i, design.AttitudeControl) < 0.99f).ToList();
+                if (poorly.Count > 0)
+                {
+                    Add(issues, IssueSeverity.Warning, ResourceKind.Data, MissionRole.SystemsEngineer,
+                        "Apuntamiento insuficiente",
+                        $"{design.AttitudeControl.displayName} apunta con ±{design.AttitudeControl.pointingAccuracyDeg:0.###}°, pero " +
+                        string.Join(", ", poorly.Select(i => $"{i.displayName} necesita ±{i.requiredPointingDeg:0.###}° ({MissionTelemetry.PointingFactor(i, design.AttitudeControl):P0} de su ciencia)")) + ".");
+                }
+            }
+            if (design.Computer != null && t.dataGeneratedGBPerDay > 0f && t.storageDays < 1f)
+            {
+                Add(issues, IssueSeverity.Warning, ResourceKind.Data, MissionRole.SystemsEngineer,
+                    "Memoria a bordo pequeña",
+                    $"{design.Computer.displayName} guarda {t.onboardStorageGB:N0} GB: menos de un día de datos ({t.dataGeneratedGBPerDay:N0} GB/día). " +
+                    "Cualquier corte de enlace hará perder ciencia.");
+            }
+
             // ── Presupuesto y calendario ──
             if (scenario != null)
             {
@@ -254,6 +284,9 @@ namespace MissionDesign.Simulation
             if (d.SolarArray == null) Missing(issues, MissionRole.SystemsEngineer, ResourceKind.Power, "paneles solares");
             if (d.Battery == null) Missing(issues, MissionRole.SystemsEngineer, ResourceKind.Power, "batería");
             if (d.Antenna == null) Missing(issues, MissionRole.TelecomLaunchEngineer, ResourceKind.Comms, "antena");
+            if (d.GroundNetwork == null) Missing(issues, MissionRole.TelecomLaunchEngineer, ResourceKind.Comms, "red de estaciones terrenas (segmento terreno)");
+            if (d.IsAdvanced && d.Computer == null) Missing(issues, MissionRole.SystemsEngineer, ResourceKind.Data, "computadora de a bordo");
+            if (d.IsAdvanced && d.AttitudeControl == null) Missing(issues, MissionRole.SystemsEngineer, ResourceKind.Power, "control de orientación (ADCS)");
             if (d.Instruments.Count == 0) Missing(issues, MissionRole.PrincipalScientist, ResourceKind.Data, "al menos un instrumento científico");
         }
 

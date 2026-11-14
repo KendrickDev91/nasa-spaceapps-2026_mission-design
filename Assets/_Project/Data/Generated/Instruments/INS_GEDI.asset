@@ -22,6 +22,7 @@ MonoBehaviour:
   peakPowerW: 600
   developmentMonths: 40
   technologyReadinessLevel: 9
+  advancedOnly: 0
   prefab: {fileID: 0}
   socket: 1
   icon: {fileID: 0}
@@ -33,6 +34,7 @@ MonoBehaviour:
   averagePowerW: 450
   dutyCycle: 1
   scienceValue: 70
+  requiredPointingDeg: 0.01
   preferredOrbits: 00000000
   scienceObjectives:
   - tierra
