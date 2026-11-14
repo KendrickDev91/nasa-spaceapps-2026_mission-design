@@ -39,7 +39,7 @@ MonoBehaviour:
   reliability: 0.95
   launchCostMUSD: 2200
   leadTimeMonths: 36
-  prefab: {fileID: 0}
+  prefab: {fileID: 919132149155446097, guid: 2ab00475f2a5a6747a6aa917674c87d7, type: 3}
   icon: {fileID: 0}
   dataConfidence: 1
   sourceUrl: https://www.nasa.gov/humans-in-space/space-launch-system/

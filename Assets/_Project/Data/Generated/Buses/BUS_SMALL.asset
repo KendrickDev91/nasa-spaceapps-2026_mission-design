@@ -22,7 +22,7 @@ MonoBehaviour:
   developmentMonths: 18
   technologyReadinessLevel: 9
   advancedOnly: 0
-  prefab: {fileID: 0}
+  prefab: {fileID: 919132149155446097, guid: d76b5ca1b682f244c9b9adbbd6a383a9, type: 3}
   socket: 0
   icon: {fileID: 0}
   dataConfidence: 2
@@ -37,3 +37,4 @@ MonoBehaviour:
   housekeepingPowerW: 60
   housekeepingDataGBPerDay: 0.05
   designLifeYears: 3
+  operationsCostScale: 1

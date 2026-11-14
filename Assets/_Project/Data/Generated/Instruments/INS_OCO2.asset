@@ -17,22 +17,22 @@ MonoBehaviour:
   description: "Tres espectr\xF3metros de rejilla de alta resoluci\xF3n que miden
     CO2 atmosf\xE9rico con precisi\xF3n de 1 ppm."
   heritage: Orbiting Carbon Observatory-2 (2014)
-  massKg: 140
+  massKg: 131
   costMUSD: 120
-  peakPowerW: 130
+  peakPowerW: 125
   developmentMonths: 42
   technologyReadinessLevel: 9
   advancedOnly: 0
-  prefab: {fileID: 0}
+  prefab: {fileID: 919132149155446097, guid: 459e97444e7d39743b837e0222de0478, type: 3}
   socket: 1
   icon: {fileID: 0}
-  dataConfidence: 2
-  sourceUrl: https://ocov2.jpl.nasa.gov/
-  sourceNotes: Masa/potencia/datos aproximados a partir del observatorio completo
-    (~450 kg). Validar antes de la final.
+  dataConfidence: 1
+  sourceUrl: https://www.jpl.nasa.gov/news/press_kits/oco2-launch-press-kit.pdf
+  sourceNotes: "Kit de prensa JPL: instrumento de 131 kg; ~125 W (Spaceflight101).
+    Volumen de datos y costo: estimaci\xF3n de juego."
   instrumentType: 1
   dataVolumeGBPerDay: 15
-  averagePowerW: 105
+  averagePowerW: 110
   dutyCycle: 1
   scienceValue: 65
   requiredPointingDeg: 0.05

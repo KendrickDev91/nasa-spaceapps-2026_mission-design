@@ -40,7 +40,7 @@ MonoBehaviour:
   reliability: 0.99
   launchCostMUSD: 69.75
   leadTimeMonths: 12
-  prefab: {fileID: 0}
+  prefab: {fileID: 919132149155446097, guid: b155589fc6e8cf04a9b7cb2a6d292d9d, type: 3}
   icon: {fileID: 0}
   dataConfidence: 1
   sourceUrl: https://www.spacex.com/vehicles/falcon-9/

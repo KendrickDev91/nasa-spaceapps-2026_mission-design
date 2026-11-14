@@ -23,7 +23,7 @@ namespace MissionDesign.Editor
     /// tuya: re-estiliza, cambia placeholders por tus prefabs de Blender, etc.
     /// Batch: -executeMethod MissionDesign.Editor.MainSceneBuilder.Build
     /// </summary>
-    public static class MainSceneBuilder
+    public static partial class MainSceneBuilder
     {
         public const string ScenePath = "Assets/_Project/Scenes/MissionDesign_Main.unity";
         private const string DatabasePath = "Assets/_Project/Data/Generated/NasaDatabase.asset";
@@ -57,10 +57,12 @@ namespace MissionDesign.Editor
             Wire(manager, "database", db);
             var roles = systems.AddComponent<RoleTurnManager>();
             var runner = systems.AddComponent<MissionSimulationRunner>();
+            Wire(systems.AddComponent<CollaborationTracker>(), "roles", roles);
 
-            BuildSpacecraft();
-            BuildControlRoom();
+            var assembler = BuildSpacecraft();
+            var room = BuildControlRoom();
             BuildUi(camera, roles, runner);
+            BuildAreas(systems, camera, assembler, room, runner);
 
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath) ?? "Assets");
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -146,7 +148,7 @@ namespace MissionDesign.Editor
 
         // ───────────────────────────── NAVE ─────────────────────────────
 
-        private static void BuildSpacecraft()
+        private static ModularSpacecraftAssembler BuildSpacecraft()
         {
             var root = new GameObject("Spacecraft");
             root.transform.position = new Vector3(0f, 2.1f, 0f);
@@ -161,6 +163,7 @@ namespace MissionDesign.Editor
             Wire(assembler, "antennaSocket", Socket(root, "AntennaSocket", new Vector3(0f, 0.1f, -0.75f), Vector3.zero));
             Wire(assembler, "thrusterSocket", Socket(root, "ThrusterSocket", new Vector3(0f, -0.8f, 0f), new Vector3(180f, 0f, 0f)));
             Wire(assembler, "internalBay", Socket(root, "InternalBay", new Vector3(0f, -0.2f, 0.45f), Vector3.zero));
+            return assembler;
         }
 
         private static Transform Socket(GameObject root, string name, Vector3 pos, Vector3 euler)
@@ -174,7 +177,7 @@ namespace MissionDesign.Editor
 
         // ───────────────────────── SALA DE CONTROL ─────────────────────────
 
-        private static void BuildControlRoom()
+        private static GameObject BuildControlRoom()
         {
             var room = new GameObject("ControlRoom");
             room.transform.position = new Vector3(40f, 0f, 0f);   // fuera de cámara: escena 3D de la sala (Mixamo)
@@ -202,6 +205,7 @@ namespace MissionDesign.Editor
                 element.FindPropertyRelative("animator").objectReferenceValue = animator;
             }
             so.ApplyModifiedPropertiesWithoutUndo();
+            return room;
         }
 
         // ───────────────────────────── HUD ─────────────────────────────
@@ -229,7 +233,104 @@ namespace MissionDesign.Editor
             BuildValidation(root, roles);
             BuildSimulation(root, runner);
             BuildPostMission(root);
+            var library = BuildDesignLibrary(root, roles);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(designsButton.onClick, library.Toggle);
+            BuildMenus(root, roles, runner);
             BuildTooltip(root);
+        }
+
+        private static Button designsButton;
+
+        /// <summary>Ventana modal "Diseños": equipo, guardar, lista de guardados y comparación.</summary>
+        private static DesignLibraryPanel BuildDesignLibrary(Transform root, RoleTurnManager roles)
+        {
+            var overlay = Panel("DesignLibraryOverlay", root, new Color(0f, 0f, 0f, 0.7f));
+            Stretch(overlay);
+            var group = overlay.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f; group.interactable = false; group.blocksRaycasts = false;
+
+            var card = Panel("Card", overlay, new Color(0.04f, 0.06f, 0.11f, 1f));
+            Place(card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400, 820));
+
+            var title = Text("Title", card, "DISEÑOS: GUARDAR, CARGAR Y COMPARAR", 24, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
+            Place(title.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -24), new Vector2(-64, 34));
+            var hint = Text("Hint", card, "Guarda alternativas para el mismo objetivo y compáralas: casi nunca hay una única solución perfecta.", 15, UiTheme.TextDim, TextAlignmentOptions.TopLeft);
+            Place(hint.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -62), new Vector2(-64, 24));
+
+            var teamLabel = Text("TeamLabel", card, "Equipo", 15, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft);
+            Place(teamLabel.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(32, -100), new Vector2(200, 24));
+            var team = MakeInput("TeamInput", card, "Nombre del equipo");
+            Place((RectTransform)team.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(32, -126), new Vector2(300, 44));
+            var nameLabel = Text("NameLabel", card, "Nombre del diseño", 15, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft);
+            Place(nameLabel.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(352, -100), new Vector2(300, 24));
+            var designName = MakeInput("DesignNameInput", card, "p. ej. Opción barata LEO");
+            Place((RectTransform)designName.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(352, -126), new Vector2(330, 44));
+            var save = MakeButton("SaveButton", card, "<b>Guardar diseño actual</b>", UiTheme.Accent, 17, 0);
+            Place((RectTransform)save.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(702, -126), new Vector2(240, 44));
+            var close = MakeButton("CloseButton", card, "Cerrar", UiTheme.AccentDim, 17, 0);
+            Place((RectTransform)close.transform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-32, -20), new Vector2(130, 44));
+            var status = Text("StatusText", card, "", 15, UiTheme.Warning, TextAlignmentOptions.MidlineLeft);
+            Place(status.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -178), new Vector2(-64, 24));
+
+            // Lista de guardados (izquierda) y comparación (derecha).
+            var listTitle = Text("ListTitle", card, "GUARDADOS", 16, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
+            Place(listTitle.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(32, -212), new Vector2(600, 24));
+            var list = NewRect("List", card);
+            Place(list, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(32, -242), new Vector2(620, -274));
+            var vlg = list.gameObject.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 6; vlg.childControlWidth = vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true; vlg.childForceExpandHeight = false;
+
+            var item = Panel("ItemTemplate", list, UiTheme.PanelLight);
+            item.gameObject.AddComponent<LayoutElement>().preferredHeight = 52;
+            var info = NewRect("Info", item);
+            Place(info, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0, 0.5f), new Vector2(12, 0), new Vector2(-250, -8));
+            var itemName = Text("Name", info, "Diseño", 16, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            Place(itemName.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), Vector2.zero, new Vector2(0, 22));
+            var itemDetail = Text("Detail", info, "", 12, UiTheme.TextDim, TextAlignmentOptions.TopLeft);
+            Place(itemDetail.rectTransform, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), Vector2.zero, new Vector2(0, 18));
+            var load = MakeButton("LoadButton", item, "Cargar", UiTheme.AccentDim, 15, 0);
+            Place((RectTransform)load.transform, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-124, 0), new Vector2(100, 38));
+            var compare = MakeButton("CompareButton", item, "Comparar", UiTheme.Accent, 15, 0);
+            Place((RectTransform)compare.transform, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-12, 0), new Vector2(106, 38));
+
+            var compareCard = Panel("ComparisonCard", card, new Color(0.08f, 0.11f, 0.19f, 1f));
+            Place(compareCard, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(672, -212), new Vector2(696, -244));
+            var comparison = Text("ComparisonText", compareCard, "", 15, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            comparison.lineSpacing = 6;
+            Place(comparison.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(-32, -28));
+
+            var view = overlay.gameObject.AddComponent<DesignLibraryPanel>();
+            Wire(view, "group", group);
+            Wire(view, "roles", roles);
+            Wire(view, "teamInput", team);
+            Wire(view, "designNameInput", designName);
+            Wire(view, "saveButton", save);
+            Wire(view, "closeButton", close);
+            Wire(view, "listContent", list);
+            Wire(view, "itemTemplate", item);
+            Wire(view, "comparisonText", comparison);
+            Wire(view, "statusText", status);
+            return view;
+        }
+
+        private static TMP_InputField MakeInput(string name, Transform parent, string placeholder)
+        {
+            var go = TMP_DefaultControls.CreateInputField(new TMP_DefaultControls.Resources());
+            go.name = name;
+            go.layer = UiLayer;
+            foreach (Transform t in go.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = UiLayer;
+            go.transform.SetParent(parent, false);
+            go.GetComponent<Image>().color = UiTheme.PanelLight;
+            var input = go.GetComponent<TMP_InputField>();
+            input.pointSize = 17;
+            input.textComponent.color = UiTheme.Text;
+            if (input.placeholder is TMP_Text ph)
+            {
+                ph.text = placeholder;
+                ph.color = UiTheme.TextDim;
+            }
+            return input;
         }
 
         private static void BuildSimulation(Transform root, MissionSimulationRunner runner)
@@ -288,13 +389,15 @@ namespace MissionDesign.Editor
             Place(scoreCard, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(982, -160), new Vector2(486, -270));
             var scoreTitle = Text("Title", scoreCard, "PUNTUACIÓN", 18, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
             Place(scoreTitle.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -16), new Vector2(-40, 26));
-            var rank = Text("RankText", scoreCard, "A", 110, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
-            Place(rank.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -42), new Vector2(-40, 120));
-            var similar = Text("SimilarText", scoreCard, "", 16, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            Place(similar.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -170), new Vector2(-40, 130));
-            var metrics = Text("MetricsText", scoreCard, "", 16, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            metrics.lineSpacing = 12;
-            Place(metrics.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -310), new Vector2(-40, -330));
+            var rank = Text("RankText", scoreCard, "A", 96, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
+            Place(rank.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -40), new Vector2(-40, 100));
+            var similar = Text("SimilarText", scoreCard, "", 15, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            Place(similar.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -145), new Vector2(-40, 95));
+            var metrics = Text("MetricsText", scoreCard, "", 15, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            metrics.lineSpacing = 4;
+            Place(metrics.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -245), new Vector2(-40, 175));
+            var leaderboard = Text("LeaderboardText", scoreCard, "", 14, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            Place(leaderboard.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -428), new Vector2(-40, -440));
 
             var export = Text("ExportText", card, "", 13, UiTheme.TextDim, TextAlignmentOptions.BottomLeft);
             Place(export.rectTransform, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(-250, 34), new Vector2(-564, 44));
@@ -310,6 +413,7 @@ namespace MissionDesign.Editor
             Wire(view, "rankText", rank);
             Wire(view, "similarText", similar);
             Wire(view, "metricsText", metrics);
+            Wire(view, "leaderboardText", leaderboard);
             Wire(view, "exportText", export);
             Wire(view, "openReportsButton", open);
             Wire(view, "backButton", back);
@@ -375,21 +479,23 @@ namespace MissionDesign.Editor
             Place(title.rectTransform, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(24, 0), new Vector2(420, 0));
 
             var row = NewRect("RoleTabs", bar);
-            Place(row, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0, 0.5f), new Vector2(450, 0), new Vector2(-466, -20));
+            Place(row, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0, 0.5f), new Vector2(430, 0), new Vector2(-446, -20));
             var hlg = row.gameObject.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 10; hlg.childAlignment = TextAnchor.MiddleLeft;
+            hlg.spacing = 8; hlg.childAlignment = TextAnchor.MiddleLeft;
             hlg.childControlWidth = hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false; hlg.childForceExpandHeight = true;
 
             var view = bar.gameObject.AddComponent<RoleTabsView>();
             var roleButtons = new Object[RoleTurnManager.AllRoles.Length];
             for (int i = 0; i < roleButtons.Length; i++)
-                roleButtons[i] = MakeButton($"Role_{RoleTurnManager.AllRoles[i]}", row, RoleTurnManager.RoleDisplayName(RoleTurnManager.AllRoles[i]), UiTheme.PanelLight, 18, 250);
+                roleButtons[i] = MakeButton($"Role_{RoleTurnManager.AllRoles[i]}", row, RoleTurnManager.RoleDisplayName(RoleTurnManager.AllRoles[i]), UiTheme.PanelLight, 17, 210);
 
-            var players = MakeButton("PlayersButton", row, "4 jugadores", UiTheme.AccentDim, 18, 150);
-            var next = MakeButton("NextTurnButton", row, "Siguiente turno »", UiTheme.AccentDim, 18, 190);
+            var designs = MakeButton("DesignsButton", row, "Diseños", UiTheme.AccentDim, 17, 120);
+            var players = MakeButton("PlayersButton", row, "4 jugadores", UiTheme.AccentDim, 17, 130);
+            var next = MakeButton("NextTurnButton", row, "Siguiente turno »", UiTheme.AccentDim, 17, 170);
             var turn = Text("TurnText", row, "Turno:", 18, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft);
-            turn.gameObject.AddComponent<LayoutElement>().preferredWidth = 200;
+            turn.gameObject.AddComponent<LayoutElement>().preferredWidth = 150;
+            designsButton = designs;
 
             Wire(view, "roles", roles);
             WireArray(view, "roleButtons", roleButtons);
@@ -402,6 +508,7 @@ namespace MissionDesign.Editor
         private static void BuildCatalog(Transform root, RoleTurnManager roles)
         {
             var panel = Panel("CatalogPanel", root, UiTheme.Panel);
+            SetPhases(panel.gameObject, MissionPhase.Design);
             Place(panel, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(16, -40), new Vector2(530, -128));
 
             var title = Text("Title", panel, "ROL", 24, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
@@ -456,6 +563,7 @@ namespace MissionDesign.Editor
         private static void BuildTelemetry(Transform root)
         {
             var panel = Panel("TelemetryPanel", root, UiTheme.Panel);
+            SetPhases(panel.gameObject, MissionPhase.Design);
             Place(panel, new Vector2(1, 0), new Vector2(1, 1), new Vector2(1, 0.5f), new Vector2(-16, -40), new Vector2(580, -128));
 
             var title = Text("Title", panel, "TELEMETRÍA DE MISIÓN", 24, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);

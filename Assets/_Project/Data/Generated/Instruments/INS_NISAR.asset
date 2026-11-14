@@ -23,15 +23,15 @@ MonoBehaviour:
   developmentMonths: 72
   technologyReadinessLevel: 9
   advancedOnly: 0
-  prefab: {fileID: 0}
+  prefab: {fileID: 919132149155446097, guid: cbfc61350c93f824d9c4f3fdc968bc48, type: 3}
   socket: 1
   icon: {fileID: 0}
   dataConfidence: 2
   sourceUrl: https://nisar.jpl.nasa.gov/
-  sourceNotes: "Instrumento pesado y de alt\xEDsimo volumen (orden de TB/d\xEDa).
-    Dise\xF1ado para forzar trade-offs de masa, energ\xEDa y enlace Ka."
+  sourceNotes: "NASA: hasta 26 Tb/d\xEDa (\u22483 250 GB) bajados en banda Ka a 3.5
+    Gbps. Masa y potencia del radar: estimaci\xF3n de juego."
   instrumentType: 2
-  dataVolumeGBPerDay: 3000
+  dataVolumeGBPerDay: 3250
   averagePowerW: 2500
   dutyCycle: 1
   scienceValue: 95

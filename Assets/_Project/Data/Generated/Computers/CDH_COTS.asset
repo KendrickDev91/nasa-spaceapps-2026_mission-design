@@ -22,7 +22,7 @@ MonoBehaviour:
   developmentMonths: 6
   technologyReadinessLevel: 9
   advancedOnly: 1
-  prefab: {fileID: 0}
+  prefab: {fileID: 919132149155446097, guid: e7aac840c86d4aa428680cb0485ce079, type: 3}
   socket: 6
   icon: {fileID: 0}
   dataConfidence: 2

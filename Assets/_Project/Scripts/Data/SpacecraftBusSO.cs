@@ -22,6 +22,8 @@ namespace MissionDesign.Data
         [Tooltip("Telemetría de salud del satélite (GB/día).")]
         [Min(0)] public float housekeepingDataGBPerDay = 0.05f;
         [Min(0)] public float designLifeYears = 5f;
+        [Tooltip("Escala del costo del equipo de operaciones (CubeSat universitario ≈ 0.05).")]
+        [Min(0)] public float operationsCostScale = 1f;
 
         public float WetMassKg => massKg + propellantMassKg;
 

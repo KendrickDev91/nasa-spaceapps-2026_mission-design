@@ -67,6 +67,22 @@ namespace MissionDesign.UI.Visual3D
             manager.Design.ComponentRemoved -= Unmount;
         }
 
+        /// <summary>Copia solo-visual de la nave montada (para otras vistas, p. ej. el sobrevuelo lunar).</summary>
+        public GameObject CreateVisualCopy(Transform parent)
+        {
+            var root = new GameObject("SpacecraftCopy");
+            root.transform.SetParent(parent, false);
+            foreach (var go in MountedInstances)
+            {
+                if (go == null) continue;
+                var c = Instantiate(go, root.transform);
+                c.transform.localPosition = transform.InverseTransformPoint(go.transform.position);
+                c.transform.localRotation = Quaternion.Inverse(transform.rotation) * go.transform.rotation;
+                c.transform.localScale = go.transform.lossyScale;
+            }
+            return root;
+        }
+
         public Transform GetSocket(SpacecraftSocket socket)
         {
             switch (socket)

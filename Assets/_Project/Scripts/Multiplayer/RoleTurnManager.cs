@@ -24,6 +24,13 @@ namespace MissionDesign.Multiplayer
         [Range(1, 4)] [SerializeField] private int playerCount = 4;
         [SerializeField] private string[] playerNames = { "Jugador 1", "Jugador 2", "Jugador 3", "Jugador 4" };
         [SerializeField] private MissionRole startingRole = MissionRole.MissionDirector;
+        [SerializeField] private string teamName = "Equipo 1";
+
+        public string TeamName
+        {
+            get => teamName;
+            set => teamName = string.IsNullOrWhiteSpace(value) ? teamName : value.Trim();
+        }
 
         private readonly HashSet<MissionRole> approvals = new HashSet<MissionRole>();
         private MissionStateManager manager;

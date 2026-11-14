@@ -30,6 +30,12 @@ namespace MissionDesign.Tests
             SceneManager.LoadScene(SceneName);
             yield return null;
             yield return null;
+            // El menú principal aparece al iniciar; las pruebas juegan directamente.
+            var menus = Object.FindAnyObjectByType<GameMenus>();
+            Assert.IsNotNull(menus, "Falta el menú principal en la escena.");
+            Assert.IsTrue(menus.IsBlocking, "El menú principal debe mostrarse al iniciar.");
+            menus.CloseAll();
+            Assert.IsFalse(menus.IsBlocking);
         }
 
         [UnityTest]
@@ -71,16 +77,22 @@ namespace MissionDesign.Tests
 
             var runner = Object.FindAnyObjectByType<MissionSimulationRunner>();
             runner.FixedSeed = 7;
-            runner.SecondsPerPhase = 1f;
+            runner.SecondsPerPhase = 2.5f;
 
             Assert.IsTrue(roles.TryRequestLaunch(out string msg), msg);
             Assert.AreEqual(MissionPhase.Launch, mgr.Phase);
 
-            // A mitad de la reproducción: consola de simulación.
+            // Cada set 3D durante la reproducción: plataforma, órbita y sala de control.
+            yield return new WaitForSeconds(1.9f);
+            yield return Capture("Logs/screenshot_03_launch.png");
             float t0 = Time.realtimeSinceStartup;
-            while (mgr.Phase < MissionPhase.ScienceOperations && Time.realtimeSinceStartup - t0 < 10f) yield return null;
-            yield return new WaitForSeconds(0.3f);
-            yield return Capture("Logs/screenshot_03_simulation.png");
+            while (mgr.Phase < MissionPhase.ScienceOperations && Time.realtimeSinceStartup - t0 < 15f) yield return null;
+            yield return new WaitForSeconds(0.8f);
+            yield return Capture("Logs/screenshot_03_orbit.png");
+            t0 = Time.realtimeSinceStartup;
+            while (mgr.Phase < MissionPhase.DataTransmission && Time.realtimeSinceStartup - t0 < 20f) yield return null;
+            yield return new WaitForSeconds(0.5f);
+            yield return Capture("Logs/screenshot_03_control_room.png");
 
             runner.SkipToEnd();
             t0 = Time.realtimeSinceStartup;
@@ -149,6 +161,20 @@ namespace MissionDesign.Tests
             Assert.AreEqual(MissionPhase.Design, mgr.Phase);
 
             yield return Capture("Logs/screenshot_02_conflict.png");
+        }
+
+        [UnityTest]
+        public IEnumerator MainMenuAndTutorial_Render()
+        {
+            var menus = Object.FindAnyObjectByType<GameMenus>();
+            menus.ShowMainMenu();
+            Assert.IsTrue(menus.IsBlocking);
+            yield return Capture("Logs/screenshot_00_main_menu.png");
+            menus.CloseAll();
+            menus.OpenTutorial();
+            yield return Capture("Logs/screenshot_00_tutorial.png");
+            menus.CloseAll();
+            Assert.IsFalse(menus.IsBlocking);
         }
 
         private static void Select(MissionStateManager mgr, NasaDatabaseSO db, params string[] ids)

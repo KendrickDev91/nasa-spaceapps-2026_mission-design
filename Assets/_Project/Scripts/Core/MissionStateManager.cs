@@ -106,6 +106,13 @@ namespace MissionDesign.Core
             if (CanEdit()) Design.SetGroundNetwork(network);
         }
 
+        /// <summary>Carga un diseño guardado. Devuelve los ids que el catálogo actual no tiene.</summary>
+        public System.Collections.Generic.List<string> LoadSnapshot(DesignSnapshot snapshot)
+        {
+            if (!CanEdit() || snapshot == null || database == null) return new System.Collections.Generic.List<string>();
+            return snapshot.ApplyTo(Design, database);
+        }
+
         public void SetDifficulty(DifficultyLevel level)
         {
             if (CanEdit()) Design.SetDifficulty(level);

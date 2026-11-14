@@ -80,6 +80,9 @@ namespace MissionDesign.Simulation
         public string rank;
         public string similarMission;
         public string similarMissionDescription;
+        /// <summary>Trabajo en equipo 0-10 (roles que aportaron + conflictos resueltos).</summary>
+        public int collaborationScore;
+        public string collaborationNotes;
 
         [Header("Fases")]
         public bool launchSucceeded;

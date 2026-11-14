@@ -241,13 +241,13 @@ namespace MissionDesign.Simulation
             // ── Presupuesto y calendario ──
             if (scenario != null)
             {
-                if (t.totalCostMUSD > t.budgetLimitMUSD)
+                if (t.budgetLimitMUSD > 0f && t.totalCostMUSD > t.budgetLimitMUSD)
                 {
                     Add(issues, IssueSeverity.Blocking, ResourceKind.Budget, MissionRole.MissionDirector,
                         "Presupuesto excedido",
                         $"Costo total ${t.totalCostMUSD:N1} M frente a un límite de ${t.budgetLimitMUSD:N0} M (exceso ${t.totalCostMUSD - t.budgetLimitMUSD:N1} M).");
                 }
-                if (t.developmentMonths > t.maxDevelopmentMonths)
+                if (t.maxDevelopmentMonths > 0f && t.developmentMonths > t.maxDevelopmentMonths)
                 {
                     Add(issues, IssueSeverity.Warning, ResourceKind.Time, MissionRole.MissionDirector,
                         "Calendario fuera de plazo",

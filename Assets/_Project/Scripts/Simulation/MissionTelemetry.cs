@@ -95,7 +95,8 @@ namespace MissionDesign.Simulation
             float launchLead = lv != null ? lv.leadTimeMonths : 0f;
             // Los subsistemas se desarrollan en paralelo; el camino crítico es el más lento.
             r.developmentMonths = Mathf.Max(longestComponent, launchLead) + IntegrationAndTestMonths;
-            r.maxDevelopmentMonths = scenario != null ? scenario.maxDevelopmentMonths : 0f;
+            bool sandbox = scenario != null && scenario.isSandbox;
+            r.maxDevelopmentMonths = scenario != null && !sandbox ? scenario.maxDevelopmentMonths : 0f;
 
             // 1. MASA
             r.instrumentMassKg = d.Instruments.Sum(i => i.massKg);
@@ -137,10 +138,11 @@ namespace MissionDesign.Simulation
             r.hardwareCostMUSD = d.AllComponents.Sum(c => c.costMUSD);
             r.launchCostMUSD = lv != null ? lv.launchCostMUSD : 0f;
             r.operationsCostMUSD = orbit != null
-                ? r.plannedOperationsMonths * (OperationsCostPerMonth(orbit.regime) + (network != null ? network.costPerMonthMUSD : 0f))
+                ? r.plannedOperationsMonths * (OperationsCostPerMonth(orbit.regime) * (bus != null ? bus.operationsCostScale : 1f)
+                                               + (network != null ? network.costPerMonthMUSD : 0f))
                 : 0f;
             r.totalCostMUSD = r.hardwareCostMUSD + r.launchCostMUSD + r.operationsCostMUSD;
-            r.budgetLimitMUSD = scenario != null ? scenario.budgetLimitMUSD : 0f;
+            r.budgetLimitMUSD = scenario != null && !sandbox ? scenario.budgetLimitMUSD : 0f;
 
             // 4. DATOS  /  5. COMUNICACIONES
             r.dataGeneratedGBPerDay = d.Instruments.Sum(i => i.dataVolumeGBPerDay * i.dutyCycle)

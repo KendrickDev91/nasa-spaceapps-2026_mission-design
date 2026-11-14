@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4be6a4f07b67e104ca702222b2fb5386, type: 3}
+  m_Name: LV_Rideshare
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.LaunchVehicleSO
+  vehicleId: LV_RIDESHARE
+  displayName: Lanzamiento compartido CubeSat (rideshare)
+  operatorName: NASA CSLI / proveedor
+  country: EE.UU.
+  description: "Tu CubeSat viaja en un dispensador junto a la carga principal de
+    otro cohete. Barato, pero sin elegir fecha ni \xF3rbita."
+  payloadCapacities:
+  - regime: 0
+    payloadKg: 24
+    confidence: 1
+    note: Un dispensador de 12U (~24 kg).
+  fairingDiameterM: 0
+  reliability: 0.95
+  launchCostMUSD: 0.3
+  leadTimeMonths: 18
+  prefab: {fileID: 919132149155446097, guid: b155589fc6e8cf04a9b7cb2a6d292d9d, type: 3}
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.nasa.gov/smallsat-institute/cubesat-101/
+  sourceNotes: "CubeSat 101: la NASA cubre hasta ~$300 000 de lanzamiento, t\xEDpicamente
+    suficiente para un 3U a LEO; el manifiesto puede tardar de 1 a 36 meses."

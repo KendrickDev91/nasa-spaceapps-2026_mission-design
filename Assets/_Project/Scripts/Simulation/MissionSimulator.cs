@@ -375,6 +375,15 @@ namespace MissionDesign.Simulation
             }
         }
 
+        /// <summary>Añade la evaluación del trabajo en equipo (la mide el CollaborationTracker) al reporte.</summary>
+        public static void ApplyCollaboration(MissionOutcomeReport o, int score, string notes)
+        {
+            o.collaborationScore = Mathf.Clamp(score, 0, 10);
+            o.collaborationNotes = notes;
+            o.explanations.Add($"{(o.collaborationScore >= 6 ? "Bien" : "Atención")}: trabajo en equipo {o.collaborationScore}/10 — {notes}.");
+            Classify(o);
+        }
+
         public static string RankFor(int score) =>
             score >= 90 ? "A" : score >= 75 ? "B" : score >= 60 ? "C" : score >= 40 ? "D" : "F";
 

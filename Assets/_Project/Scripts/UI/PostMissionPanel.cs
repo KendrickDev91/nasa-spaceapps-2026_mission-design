@@ -23,6 +23,7 @@ namespace MissionDesign.UI
         [SerializeField] private TMP_Text similarText;
         [SerializeField] private TMP_Text metricsText;
         [SerializeField] private TMP_Text exportText;
+        [SerializeField] private TMP_Text leaderboardText;
         [SerializeField] private Button openReportsButton;
         [SerializeField] private Button backButton;
         [SerializeField] private int maxLinesPerCard = 6;
@@ -80,8 +81,23 @@ namespace MissionDesign.UI
                     $"<color={dim}>Datos recibidos</color>  {o.dataReturnedTotalTB:N1} TB ({o.dataReturnFraction:P0})\n" +
                     $"<color={dim}>Operación</color>  {o.achievedOperationsDays:N0} / {o.plannedOperationsDays:N0} días\n" +
                     $"<color={dim}>Energía disponible</color>  {o.powerAvailabilityFraction:P0}\n" +
-                    $"<color={dim}>Costo</color>  ${o.totalCostMUSD:N0}M / ${o.budgetLimitMUSD:N0}M\n" +
+                    $"<color={dim}>Costo</color>  ${o.totalCostMUSD:N1}M / {(o.budgetLimitMUSD > 0f ? $"${o.budgetLimitMUSD:N0}M" : "sin límite")}\n" +
+                    $"<color={dim}>Trabajo en equipo</color>  {o.collaborationScore}/10\n" +
                     $"<color={dim}>Dificultad · semilla</color>  {(o.difficulty == DifficultyLevel.Basic ? "Básico" : "Avanzado")} · {o.seed}";
+            }
+
+            if (leaderboardText != null)
+            {
+                var top = Leaderboard.Top(o.scenarioId, 5);
+                var sb = new StringBuilder($"<color={UiTheme.Hex(UiTheme.TextDim)}>RANKING · {o.scenarioName}</color>\n");
+                for (int i = 0; i < top.Count; i++)
+                {
+                    var e = top[i];
+                    bool mine = e.seed == o.seed && e.dateUtc == o.generatedAtUtc;
+                    string line = $"{i + 1}. {e.team}<pos=62%>{e.rank} · {e.score}<pos=84%>eq. {e.collaboration}";
+                    sb.AppendLine(mine ? $"<color={UiTheme.Hex(UiTheme.Ok)}><b>» {line}</b></color>" : line);
+                }
+                leaderboardText.text = sb.ToString();
             }
 
             if (exportText != null)

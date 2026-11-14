@@ -26,6 +26,7 @@ namespace MissionDesign.Simulation
         [SerializeField] private int fixedSeed = -1;
         [SerializeField] private bool allowLaunchFailure = true;
         [SerializeField] private bool exportReport = true;
+        [SerializeField] private bool recordLeaderboard = true;
 
         private MissionStateManager manager;
         private Coroutine playback;
@@ -78,6 +79,14 @@ namespace MissionDesign.Simulation
                 realMissions = db != null ? db.realMissions : null
             };
             Current = MissionSimulator.Run(manager.Design, db != null ? db.randomEvents : null, settings);
+
+            // Trabajo en equipo medido durante el diseño (si hay tracker en la escena).
+            var tracker = FindAnyObjectByType<Multiplayer.CollaborationTracker>();
+            if (tracker != null)
+            {
+                MissionSimulator.ApplyCollaboration(Current, tracker.Log.Score, tracker.Log.Notes);
+                tracker.Log.Reset();
+            }
             if (playback != null) StopCoroutine(playback);
             skipRequested = false;
             playback = StartCoroutine(Play(Current));
@@ -118,6 +127,13 @@ namespace MissionDesign.Simulation
                 catch (Exception ex) { Debug.LogWarning($"[Simulation] No se pudo exportar el reporte: {ex.Message}"); }
             }
             if (path != null) Debug.Log($"[Simulation] Reporte exportado: {path}");
+
+            if (recordLeaderboard)
+            {
+                var roles = FindAnyObjectByType<Multiplayer.RoleTurnManager>();
+                try { Leaderboard.Add(Leaderboard.From(outcome, roles != null ? roles.TeamName : null)); }
+                catch (Exception ex) { Debug.LogWarning($"[Simulation] No se pudo guardar el ranking: {ex.Message}"); }
+            }
 
             playback = null;
             manager.CompleteMission(outcome, path);

@@ -22,3 +22,4 @@ MonoBehaviour:
   targetMissionLifeMonths: 60
   minScienceValue: 120
   allowedOrbits: 00000000
+  isSandbox: 0

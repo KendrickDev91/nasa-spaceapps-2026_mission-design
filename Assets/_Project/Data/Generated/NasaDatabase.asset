@@ -17,6 +17,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 90908a5b3e363a2409b6e041ee762c94, type: 2}
   - {fileID: 11400000, guid: 2136e223d8617a1499042d7d3b0445c4, type: 2}
   - {fileID: 11400000, guid: 0fccc85faa52d0348ada55b374665bbe, type: 2}
+  - {fileID: 11400000, guid: 8af7fbb9f0455884b88d3fe397e23623, type: 2}
   orbits:
   - {fileID: 11400000, guid: 1172c052dc932d24aaecdd98cdaf3ee5, type: 2}
   - {fileID: 11400000, guid: d4d1581c0040c2a449272ac400bfac3a, type: 2}
@@ -29,23 +30,30 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 00f6d85355621f84a8be58b9933e16db, type: 2}
   - {fileID: 11400000, guid: 399217004d2163546878d1f2fc28ebf6, type: 2}
   - {fileID: 11400000, guid: 2829d0e3f5f9d714d8412712d0cee258, type: 2}
+  - {fileID: 11400000, guid: b25d2811e2801cd4a999479df7b20ba9, type: 2}
+  - {fileID: 11400000, guid: 6eb88487481b3334a89902c326a0d479, type: 2}
   buses:
   - {fileID: 11400000, guid: 7c6bcb732a1678048b3e36b45150d4d7, type: 2}
   - {fileID: 11400000, guid: fc87a5075788fb34dbf6d27fdc0b5125, type: 2}
   - {fileID: 11400000, guid: c0a5eb25308da6d45ac554cea22a5a36, type: 2}
+  - {fileID: 11400000, guid: 307bacd9d2642764fa27e3dea5b19d0f, type: 2}
+  - {fileID: 11400000, guid: 7999da487b3c24f4fb44988497f97657, type: 2}
   solarArrays:
   - {fileID: 11400000, guid: 60b57d4434c3f5d48b8c64d36d2ac90d, type: 2}
   - {fileID: 11400000, guid: f51ca91320a7c4c4fbdb998646ef7599, type: 2}
   - {fileID: 11400000, guid: 464a8f463c4525b47bdca5092a9854ea, type: 2}
+  - {fileID: 11400000, guid: cd05a7ccc53dbaa40ae238e06b8b07d6, type: 2}
   batteries:
   - {fileID: 11400000, guid: 59958b518484dc145beb5d5f586046a4, type: 2}
   - {fileID: 11400000, guid: 86849c3f64580ea49a543c988038946f, type: 2}
   - {fileID: 11400000, guid: 0ff34dc6efd6128459d28d98d7cc48b5, type: 2}
+  - {fileID: 11400000, guid: 07c5466df92c6634da8de7cae91761d5, type: 2}
   antennas:
   - {fileID: 11400000, guid: 5fcb9fa573311304caa85d5c6ade7202, type: 2}
   - {fileID: 11400000, guid: 091b71a6b8aa9f4458af3ee34f190017, type: 2}
   - {fileID: 11400000, guid: 98783e8de0dddde4fa981d88eddf09cf, type: 2}
   - {fileID: 11400000, guid: 8df459fb91ad4f74e8ab3a7504686a45, type: 2}
+  - {fileID: 11400000, guid: 694865b48c77d8247b9d0d9711dc38f9, type: 2}
   computers:
   - {fileID: 11400000, guid: 7ded750c07e078e4aaf520fe2e8e8edf, type: 2}
   - {fileID: 11400000, guid: fc7fa4da9b993734f9ec77d3e6525a94, type: 2}
@@ -58,6 +66,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bf3793b9695430e499d3973174fbea6a, type: 2}
   - {fileID: 11400000, guid: 0c3499593290aba4ab94d13065007314, type: 2}
   - {fileID: 11400000, guid: 6347a181f54eac64fb02decee2a1f2cd, type: 2}
+  - {fileID: 11400000, guid: 36cc1fe3f3cac4f4e85c0e051bb5a256, type: 2}
   randomEvents:
   - {fileID: 11400000, guid: c684350777633c64caee980be0e291ce, type: 2}
   - {fileID: 11400000, guid: 81d04fecf068c4f4e990662c482e0776, type: 2}
@@ -68,6 +77,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: dd404d8fda188cd48897c6d613df0ca8, type: 2}
   - {fileID: 11400000, guid: 8d0da3c47908bfd4190e2393ef9546b2, type: 2}
   - {fileID: 11400000, guid: 01cf28a0e2756b6489cbc9334cd504da, type: 2}
+  - {fileID: 11400000, guid: e3d9a6c10d1a299419fd9a4e4e7580fc, type: 2}
+  - {fileID: 11400000, guid: 3e47b2f1507d4a34ba54e70211b3d2f5, type: 2}
   realMissions:
   - {fileID: 11400000, guid: ca58b2bfc4ec5404cbcb46e4eb0cf0eb, type: 2}
   - {fileID: 11400000, guid: 8393a86749d74394c952bdb9b5c9866d, type: 2}
@@ -76,3 +87,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4aeae1af6fcefe341a2104dce6f89d97, type: 2}
   - {fileID: 11400000, guid: d0f240ebd2ffbbf4c8d7d75fa0f16b1f, type: 2}
   - {fileID: 11400000, guid: b124212496e43ef4aa4cd6d3d4b24bdf, type: 2}
+  - {fileID: 11400000, guid: 82fdeb3cfe096ab43985be140d86685b, type: 2}

@@ -34,6 +34,9 @@ namespace MissionDesign.Editor
             db.randomEvents = CreateRandomEvents();
             db.scenarios = CreateScenarios();
             db.realMissions = CreateRealMissions();
+            AddCubeSatAndSandbox(db);
+            int models = ModelLinker.LinkAll(db);
+            Debug.Log($"[NASA DB] Modelos 3D vinculados: {models}");
 
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
@@ -185,24 +188,24 @@ namespace MissionDesign.Editor
 
             list.Add(Instrument("INS_ABI", "ABI (GOES-R)", InstrumentType.MultispectralImager,
                 "Advanced Baseline Imager: 16 bandas, imagen del disco completo cada 10 min desde GEO para meteorología.",
-                "GOES-16/17/18/19", mass: 450f, cost: 300f, peakW: 500f, avgW: 450f, dataGB: 320f, science: 80, months: 60,
+                "GOES-16/17/18/19", mass: 338f, cost: 300f, peakW: 500f, avgW: 450f, dataGB: 713f, science: 80, months: 60,
                 orbits: new[] { OrbitRegime.GEO }, tags: new[] { "clima", "meteorologia", "tormentas" },
                 conf: DataConfidence.Approximate, url: "https://www.goes-r.gov/spacesegment/abi.html",
-                notes: "Masa y potencia redondeadas de documentación pública; volumen de datos aproximado. Costo: estimación de juego."));
+                notes: "WMO OSCAR: 338 kg, 450 W y 66 Mbps (≈713 GB/día). Costo: estimación de juego."));
 
             list.Add(Instrument("INS_OCO2", "Espectrómetro OCO-2", InstrumentType.Spectrometer,
                 "Tres espectrómetros de rejilla de alta resolución que miden CO2 atmosférico con precisión de 1 ppm.",
-                "Orbiting Carbon Observatory-2 (2014)", mass: 140f, cost: 120f, peakW: 130f, avgW: 105f, dataGB: 15f, science: 65, months: 42,
+                "Orbiting Carbon Observatory-2 (2014)", mass: 131f, cost: 120f, peakW: 125f, avgW: 110f, dataGB: 15f, science: 65, months: 42,
                 orbits: new[] { OrbitRegime.LEO }, tags: new[] { "clima", "carbono", "atmosfera" },
-                conf: DataConfidence.GameEstimate, url: "https://ocov2.jpl.nasa.gov/",
-                notes: "Masa/potencia/datos aproximados a partir del observatorio completo (~450 kg). Validar antes de la final."));
+                conf: DataConfidence.Approximate, url: "https://www.jpl.nasa.gov/news/press_kits/oco2-launch-press-kit.pdf",
+                notes: "Kit de prensa JPL: instrumento de 131 kg; ~125 W (Spaceflight101). Volumen de datos y costo: estimación de juego."));
 
             list.Add(Instrument("INS_NISAR", "Radar de apertura sintética NISAR", InstrumentType.Radar,
                 "Radar SAR banda L (NASA) + S (ISRO) con reflector de 12 m: mide deformación del suelo de cm en todo clima, día y noche.",
-                "NISAR (NASA-ISRO, 2025)", mass: 1300f, cost: 600f, peakW: 4000f, avgW: 2500f, dataGB: 3000f, science: 95, months: 72,
+                "NISAR (NASA-ISRO, 2025)", mass: 1300f, cost: 600f, peakW: 4000f, avgW: 2500f, dataGB: 3250f, science: 95, months: 72,
                 orbits: new[] { OrbitRegime.LEO }, tags: new[] { "tierra", "terremotos", "hielo", "agricultura" },
                 conf: DataConfidence.GameEstimate, url: "https://nisar.jpl.nasa.gov/",
-                notes: "Instrumento pesado y de altísimo volumen (orden de TB/día). Diseñado para forzar trade-offs de masa, energía y enlace Ka."));
+                notes: "NASA: hasta 26 Tb/día (≈3 250 GB) bajados en banda Ka a 3.5 Gbps. Masa y potencia del radar: estimación de juego."));
 
             list.Add(Instrument("INS_LROC", "Cámara LROC (LRO)", InstrumentType.Camera,
                 "Dos cámaras de ángulo estrecho (0.5 m/píxel) y una gran angular que cartografían la superficie lunar.",
@@ -213,10 +216,10 @@ namespace MissionDesign.Editor
 
             list.Add(Instrument("INS_GEDI", "Lidar GEDI", InstrumentType.Lidar,
                 "Lidar de onda completa de 3 láseres que mide la estructura 3D de los bosques y la biomasa.",
-                "GEDI en la ISS (2018)", mass: 520f, cost: 100f, peakW: 600f, avgW: 450f, dataGB: 25f, science: 70, months: 40,
+                "GEDI en la ISS (2018)", mass: 519f, cost: 100f, peakW: 450f, avgW: 400f, dataGB: 25f, science: 70, months: 40,
                 orbits: new[] { OrbitRegime.LEO }, tags: new[] { "tierra", "bosques", "carbono" },
-                conf: DataConfidence.GameEstimate, url: "https://gedi.umd.edu/",
-                notes: "Masa ~520 kg aproximada; potencia y datos son estimaciones de juego."));
+                conf: DataConfidence.Approximate, url: "https://ntrs.nasa.gov/api/citations/20190030790/downloads/20190030790.pdf",
+                notes: "NASA NTRS: 519 kg y 400 W de media en la ISS. Volumen de datos y costo: estimación de juego."));
 
             // Precisión de apuntamiento requerida (grados): estimaciones de juego por clase de instrumento.
             var pointing = new Dictionary<string, float>
@@ -318,6 +321,77 @@ namespace MissionDesign.Editor
             Save(dsn);
 
             return new List<GroundNetworkSO> { nsn, commercial, dsn };
+        }
+
+        // ─────────────────── CUBESAT (NASA CubeSat 101) Y SANDBOX ───────────────────
+
+        /// <summary>
+        /// Escenario educativo CubeSat con datos de la guía "CubeSat 101" (NASA CSLI): 1U ≈ 1-1.33 kg,
+        /// la NASA cubre hasta ~$300 000 de lanzamiento compartido a LEO, operación con estaciones universitarias.
+        /// </summary>
+        private static void AddCubeSatAndSandbox(NasaDatabaseSO db)
+        {
+            const string cubesat101 = "https://www.nasa.gov/smallsat-institute/cubesat-101/";
+
+            var b6 = Bus("BUS_CUBESAT_6U", "CubeSat 6U (estructura + aviónica)", "Estándar de 6 unidades (2 × 3U): ~12 kg máximo. Muy barato, muy limitado.",
+                "Clase Dellingr / MarCO", dry: 6, prop: 0.5f, isp: 70, maxPayload: 4, maxPower: 30, slots: 1, hk: 8, life: 2, cost: 1.5f, months: 12);
+            b6.operationsCostScale = 0.05f; b6.sourceUrl = cubesat101; Save(b6);
+            var b12 = Bus("BUS_CUBESAT_12U", "CubeSat 12U (estructura + aviónica)", "Estándar de 12 unidades: ~24 kg máximo, dos ranuras de carga útil.",
+                "Clase Lunar Flashlight / CAPSTONE", dry: 11, prop: 1, isp: 220, maxPayload: 9, maxPower: 60, slots: 2, hk: 15, life: 3, cost: 3, months: 15);
+            b12.operationsCostScale = 0.08f; b12.sourceUrl = cubesat101; Save(b12);
+            db.buses.AddRange(new[] { b6, b12 });
+
+            db.solarArrays.Add(Solar("SOL_CUBESAT", "Alas desplegables CubeSat", "Paneles de triple unión que se despliegan tras la eyección del dispensador.",
+                60, 0.6f, 0.15f, 0.03f, 4, SpacecraftSocket.SolarWingLeft));
+            db.batteries.Add(Battery("BAT_CUBESAT", "Li-ion 80 Wh (CubeSat)", 80, 0.6f, 0.05f));
+            db.antennas.Add(Antenna("ANT_S_CUBESAT", "Banda S CubeSat (parche)", CommBand.S,
+                "Transmisor compacto de banda S para CubeSats.", 2f, 2000, 4f, false, 0.2f, 0.08f, 6, 3));
+
+            var cam = Instrument("INS_CUBECAM", "Cámara multiespectral CubeSat", InstrumentType.MultispectralImager,
+                "Cámara de 4 bandas tipo constelación comercial: imágenes de cultivos y bosques a ~3-5 m.",
+                "Clase CubeSat de observación terrestre", mass: 1.2f, cost: 0.5f, peakW: 12, avgW: 8, dataGB: 0.5f, science: 20, months: 9,
+                orbits: new[] { OrbitRegime.LEO }, tags: new[] { "tierra", "agricultura" },
+                conf: DataConfidence.GameEstimate, url: "https://www.nasa.gov/smallsat-institute/sst-soa/", notes: "Valores representativos de la clase.");
+            cam.requiredPointingDeg = 0.5f; Save(cam);
+            var minxss = Instrument("INS_MINXSS", "Espectrómetro de rayos X solares (clase MinXSS)", InstrumentType.Spectrometer,
+                "Mide los rayos X suaves de las fulguraciones solares y su efecto en la alta atmósfera.",
+                "MinXSS (Univ. de Colorado, 2016)", mass: 1f, cost: 0.8f, peakW: 5, avgW: 4, dataGB: 0.05f, science: 25, months: 12,
+                orbits: new[] { OrbitRegime.LEO }, tags: new[] { "sol", "clima_espacial" },
+                conf: DataConfidence.GameEstimate, url: "https://lasp.colorado.edu/minxss/", notes: "CubeSat citado como ejemplo en CubeSat 101; valores aproximados.");
+            minxss.requiredPointingDeg = 1f; Save(minxss);
+            db.instruments.AddRange(new[] { cam, minxss });
+
+            var ride = GetOrCreate<LaunchVehicleSO>($"{Root}/LaunchVehicles/LV_Rideshare.asset");
+            ride.vehicleId = "LV_RIDESHARE"; ride.displayName = "Lanzamiento compartido CubeSat (rideshare)"; ride.operatorName = "NASA CSLI / proveedor";
+            ride.country = "EE.UU."; ride.description = "Tu CubeSat viaja en un dispensador junto a la carga principal de otro cohete. Barato, pero sin elegir fecha ni órbita.";
+            ride.payloadCapacities = new List<OrbitPayloadCapacity> { Cap(OrbitRegime.LEO, 24, DataConfidence.Approximate, "Un dispensador de 12U (~24 kg).") };
+            ride.fairingDiameterM = 0f; ride.reliability = 0.95f; ride.launchCostMUSD = 0.3f; ride.leadTimeMonths = 18;
+            ride.dataConfidence = DataConfidence.Approximate; ride.sourceUrl = cubesat101;
+            ride.sourceNotes = "CubeSat 101: la NASA cubre hasta ~$300 000 de lanzamiento, típicamente suficiente para un 3U a LEO; el manifiesto puede tardar de 1 a 36 meses.";
+            Save(ride);
+            db.launchVehicles.Add(ride);
+
+            var uni = GetOrCreate<GroundNetworkSO>($"{Root}/GroundNetworks/GND_UNIVERSITY.asset");
+            uni.networkId = "GND_UNIVERSITY"; uni.displayName = "Estación universitaria (radioaficionados)";
+            uni.description = "Antena propia en el campus, con apoyo de la comunidad de radioaficionados.";
+            uni.supportedRegimes = new[] { OrbitRegime.LEO };
+            uni.gainFactor = 0.3f; uni.contactHoursMultiplier = 0.6f; uni.outageProbabilityMultiplier = 1.3f; uni.costPerMonthMUSD = 0.005f;
+            uni.educationalNote = "CubeSat 101: \"lanzar con una estación terrena inadecuada es un asesino de misiones\". Pruébala temprano y a menudo.";
+            uni.dataConfidence = DataConfidence.GameEstimate; uni.sourceUrl = cubesat101;
+            Save(uni);
+            db.groundNetworks.Add(uni);
+
+            db.scenarios.Add(Scenario("SCN_CUBESAT_EDU", "CubeSat universitario",
+                "Tu universidad tiene un hueco en un lanzamiento compartido. Con muy poco presupuesto, ¿cuánta ciencia puedes devolver? Ojo con el enlace de datos.",
+                "sol", budget: 9, devMonths: 30, lifeMonths: 12, minScience: 30, orbits: new[] { OrbitRegime.LEO }));
+            var sandbox = Scenario("SCN_SANDBOX", "Sandbox: laboratorio libre",
+                "Sin límites de presupuesto, calendario ni órbita. Experimenta con cualquier combinación y compara resultados.",
+                "", budget: 0, devMonths: 0, lifeMonths: 60, minScience: 0, orbits: new OrbitRegime[0]);
+            sandbox.isSandbox = true; Save(sandbox);
+            db.scenarios.Add(sandbox);
+
+            db.realMissions.Add(Real("REAL_MINXSS", "MinXSS-1", 2016, OrbitRegime.LEO, new[] { "INS_MINXSS" }, new[] { "sol", "clima_espacial" }, 4,
+                "CubeSat 3U de la Universidad de Colorado desplegado desde la ISS para estudiar los rayos X del Sol.", "https://lasp.colorado.edu/minxss/"));
         }
 
         // ─────────────────── MISIONES REALES DE REFERENCIA ───────────────────

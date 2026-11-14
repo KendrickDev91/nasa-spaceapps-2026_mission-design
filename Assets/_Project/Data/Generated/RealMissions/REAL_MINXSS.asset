@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 832ba81e4f5e5eb439a08a57f8d28da0, type: 3}
+  m_Name: REAL_MINXSS
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RealMissionSO
+  missionId: REAL_MINXSS
+  displayName: MinXSS-1
+  launchYear: 2016
+  regime: 0
+  instrumentIds:
+  - INS_MINXSS
+  tags:
+  - sol
+  - clima_espacial
+  massKg: 4
+  description: CubeSat 3U de la Universidad de Colorado desplegado desde la ISS para
+    estudiar los rayos X del Sol.
+  sourceUrl: https://lasp.colorado.edu/minxss/

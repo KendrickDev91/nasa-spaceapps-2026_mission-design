@@ -17,21 +17,22 @@ MonoBehaviour:
   description: "Lidar de onda completa de 3 l\xE1seres que mide la estructura 3D
     de los bosques y la biomasa."
   heritage: GEDI en la ISS (2018)
-  massKg: 520
+  massKg: 519
   costMUSD: 100
-  peakPowerW: 600
+  peakPowerW: 450
   developmentMonths: 40
   technologyReadinessLevel: 9
   advancedOnly: 0
-  prefab: {fileID: 0}
+  prefab: {fileID: 919132149155446097, guid: 881015635d8ad09419e8d747a4ea582f, type: 3}
   socket: 1
   icon: {fileID: 0}
-  dataConfidence: 2
-  sourceUrl: https://gedi.umd.edu/
-  sourceNotes: Masa ~520 kg aproximada; potencia y datos son estimaciones de juego.
+  dataConfidence: 1
+  sourceUrl: https://ntrs.nasa.gov/api/citations/20190030790/downloads/20190030790.pdf
+  sourceNotes: "NASA NTRS: 519 kg y 400 W de media en la ISS. Volumen de datos y
+    costo: estimaci\xF3n de juego."
   instrumentType: 3
   dataVolumeGBPerDay: 25
-  averagePowerW: 450
+  averagePowerW: 400
   dutyCycle: 1
   scienceValue: 70
   requiredPointingDeg: 0.01

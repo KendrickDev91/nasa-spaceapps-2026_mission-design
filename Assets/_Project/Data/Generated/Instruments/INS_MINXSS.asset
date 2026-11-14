@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e8f3ae732869945812ae38dafb5527, type: 3}
+  m_Name: INS_MINXSS
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.InstrumentSO
+  componentId: INS_MINXSS
+  displayName: "Espectr\xF3metro de rayos X solares (clase MinXSS)"
+  description: "Mide los rayos X suaves de las fulguraciones solares y su efecto
+    en la alta atm\xF3sfera."
+  heritage: MinXSS (Univ. de Colorado, 2016)
+  massKg: 1
+  costMUSD: 0.8
+  peakPowerW: 5
+  developmentMonths: 12
+  technologyReadinessLevel: 9
+  advancedOnly: 0
+  prefab: {fileID: 919132149155446097, guid: 91bf6f2ae457cd64c89e026f64a3097d, type: 3}
+  socket: 1
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://lasp.colorado.edu/minxss/
+  sourceNotes: CubeSat citado como ejemplo en CubeSat 101; valores aproximados.
+  instrumentType: 1
+  dataVolumeGBPerDay: 0.05
+  averagePowerW: 4
+  dutyCycle: 1
+  scienceValue: 25
+  requiredPointingDeg: 1
+  preferredOrbits: 00000000
+  scienceObjectives:
+  - sol
+  - clima_espacial

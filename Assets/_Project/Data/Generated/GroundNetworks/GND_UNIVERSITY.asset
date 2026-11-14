@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 608693d040085d1469cecb66735884d7, type: 3}
+  m_Name: GND_UNIVERSITY
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.GroundNetworkSO
+  networkId: GND_UNIVERSITY
+  displayName: "Estaci\xF3n universitaria (radioaficionados)"
+  description: Antena propia en el campus, con apoyo de la comunidad de radioaficionados.
+  supportedRegimes: 00000000
+  gainFactor: 0.3
+  contactHoursMultiplier: 0.6
+  outageProbabilityMultiplier: 1.3
+  costPerMonthMUSD: 0.005
+  educationalNote: "CubeSat 101: \"lanzar con una estaci\xF3n terrena inadecuada
+    es un asesino de misiones\". Pru\xE9bala temprano y a menudo."
+  dataConfidence: 2
+  sourceUrl: https://www.nasa.gov/smallsat-institute/cubesat-101/

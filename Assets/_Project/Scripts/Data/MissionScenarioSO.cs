@@ -21,5 +21,9 @@ namespace MissionDesign.Data
         [Tooltip("Valor científico mínimo para declarar éxito total.")]
         [Min(0)] public int minScienceValue;
         public OrbitRegime[] allowedOrbits;
+
+        [Header("Modo sandbox")]
+        [Tooltip("Sin límite de presupuesto, calendario ni órbita: para experimentar libremente.")]
+        public bool isSandbox;
     }
 }

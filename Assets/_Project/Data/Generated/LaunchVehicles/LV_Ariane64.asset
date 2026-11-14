@@ -39,7 +39,7 @@ MonoBehaviour:
   reliability: 0.95
   launchCostMUSD: 125
   leadTimeMonths: 18
-  prefab: {fileID: 0}
+  prefab: {fileID: 919132149155446097, guid: 3dc641f155896324ba2a9dd3c347a5ef, type: 3}
   icon: {fileID: 0}
   dataConfidence: 1
   sourceUrl: https://www.esa.int/Enabling_Support/Space_Transportation/Ariane
