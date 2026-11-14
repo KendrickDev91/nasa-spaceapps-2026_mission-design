@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e8f3ae732869945812ae38dafb5527, type: 3}
+  m_Name: INS_OCO2
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.InstrumentSO
+  componentId: INS_OCO2
+  displayName: "Espectr\xF3metro OCO-2"
+  description: "Tres espectr\xF3metros de rejilla de alta resoluci\xF3n que miden
+    CO\u2082 atmosf\xE9rico con precisi\xF3n de 1 ppm."
+  heritage: Orbiting Carbon Observatory-2 (2014)
+  massKg: 140
+  costMUSD: 120
+  peakPowerW: 130
+  developmentMonths: 42
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 1
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://ocov2.jpl.nasa.gov/
+  sourceNotes: Masa/potencia/datos aproximados a partir del observatorio completo
+    (~450 kg). Validar antes de la final.
+  instrumentType: 1
+  dataVolumeGBPerDay: 15
+  averagePowerW: 105
+  dutyCycle: 1
+  scienceValue: 65
+  preferredOrbits: 00000000
+  scienceObjectives:
+  - clima
+  - carbono
+  - atmosfera

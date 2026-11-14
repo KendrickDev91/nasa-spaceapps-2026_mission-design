@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e072841796e3a7498ff46dac3d2cdf8, type: 3}
+  m_Name: BUS_MEDIUM
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.SpacecraftBusSO
+  componentId: BUS_MEDIUM
+  displayName: Bus mediano (clase LEOStar-2)
+  description: "Plataforma probada en misiones cient\xEDficas medianas de NASA."
+  heritage: Clase LEOStar-2 (OCO-2, SORCE)
+  massKg: 400
+  costMUSD: 90
+  peakPowerW: 250
+  developmentMonths: 30
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 0
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: 
+  sourceNotes: "Valores representativos de la clase de plataforma, no de un modelo
+    comercial espec\xEDfico."
+  maxPayloadMassKg: 400
+  maxPayloadPowerW: 800
+  payloadSlots: 3
+  propellantMassKg: 200
+  propulsionIspSeconds: 300
+  housekeepingPowerW: 250
+  housekeepingDataGBPerDay: 0.05
+  designLifeYears: 5

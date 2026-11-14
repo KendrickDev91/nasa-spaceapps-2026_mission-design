@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e8f3ae732869945812ae38dafb5527, type: 3}
+  m_Name: INS_ABI
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.InstrumentSO
+  componentId: INS_ABI
+  displayName: ABI (GOES-R)
+  description: "Advanced Baseline Imager: 16 bandas, imagen del disco completo cada
+    10 min desde GEO para meteorolog\xEDa."
+  heritage: GOES-16/17/18/19
+  massKg: 450
+  costMUSD: 300
+  peakPowerW: 500
+  developmentMonths: 60
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 1
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.goes-r.gov/spacesegment/abi.html
+  sourceNotes: "Masa y potencia redondeadas de documentaci\xF3n p\xFAblica; volumen
+    de datos aproximado. Costo: estimaci\xF3n de juego."
+  instrumentType: 0
+  dataVolumeGBPerDay: 320
+  averagePowerW: 450
+  dutyCycle: 1
+  scienceValue: 80
+  preferredOrbits: 02000000
+  scienceObjectives:
+  - clima
+  - meteorologia
+  - tormentas

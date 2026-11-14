@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3135e8f823be73840b08cc17cbfa1739, type: 3}
+  m_Name: ORB_MEO
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.OrbitSO
+  orbitId: ORB_MEO
+  displayName: MEO (20 200 km, tipo GPS)
+  regime: 1
+  description: "\xD3rbita media usada por constelaciones de navegaci\xF3n (GPS, Galileo).
+    Atraviesa el cintur\xF3n de Van Allen exterior."
+  altitudeKm: 20200
+  inclinationDeg: 55
+  orbitalPeriodMinutes: 718
+  requiredDeltaVKmS: 11.8
+  onboardDeltaVKmS: 0.3
+  sunDistanceAU: 1
+  eclipseFraction: 0.04
+  maxEclipseMinutes: 56
+  groundStationRangeKm: 22000
+  dailyContactHours: 10
+  groundGainFactor: 1
+  radiationLevel: 0.85
+  debrisRisk: 0.1
+  educationalNote: "La radiaci\xF3n del cintur\xF3n de Van Allen degrada paneles
+    y provoca Single Event Upsets: requiere electr\xF3nica endurecida."
+  dataConfidence: 2
+  sourceUrl: https://www.gps.gov/systems/gps/space/

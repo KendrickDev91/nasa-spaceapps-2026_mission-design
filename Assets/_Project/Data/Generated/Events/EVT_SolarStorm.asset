@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1127b33910611634dbf6776a933b1d10, type: 3}
+  m_Name: EVT_SolarStorm
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RandomEventSO
+  eventId: EVT_SOLAR_STORM
+  displayName: Tormenta solar (CME + evento de protones)
+  eventType: 0
+  description: "Una eyecci\xF3n de masa coronal alcanza la nave. Los protones energ\xE9ticos
+    degradan las celdas solares y exigen modo seguro."
+  isPositive: 0
+  baseProbability: 0.35
+  orbitModifiers:
+  - regime: 0
+    multiplier: 0.6
+  - regime: 1
+    multiplier: 1.2
+  - regime: 2
+    multiplier: 1
+  - regime: 3
+    multiplier: 1.5
+  affectedPhase: 3
+  scienceMultiplier: 0.85
+  dataGenerationMultiplier: 0.8
+  commsMultiplier: 0.9
+  permanentPowerLossFraction: 0.03
+  componentFailureChance: 0.05
+  requiresSafeMode: 1
+  safeModeHours: 24
+  mitigationAdvice: "Dimensiona la bater\xEDa para sobrevivir 24 h con consumo m\xEDnimo
+    y a\xF1ade margen de potencia del 20-30%."
+  educationalFact: "La NOAA clasifica las tormentas de radiaci\xF3n de S1 a S5. Fuera
+    de la magnetosfera (Luna) el riesgo es mayor."
+  dataConfidence: 1
+  sourceUrl: https://www.swpc.noaa.gov/noaa-scales-explanation

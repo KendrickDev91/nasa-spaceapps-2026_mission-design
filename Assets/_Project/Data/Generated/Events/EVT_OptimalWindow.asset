@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1127b33910611634dbf6776a933b1d10, type: 3}
+  m_Name: EVT_OptimalWindow
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RandomEventSO
+  eventId: EVT_OPTIMAL_WINDOW
+  displayName: "Ventana de observaci\xF3n \xF3ptima"
+  eventType: 2
+  description: "Cielo despejado y geometr\xEDa solar ideal: los instrumentos capturan
+    datos excepcionales... y muchos m\xE1s datos."
+  isPositive: 1
+  baseProbability: 0.3
+  orbitModifiers:
+  - regime: 0
+    multiplier: 1.2
+  - regime: 2
+    multiplier: 1
+  - regime: 3
+    multiplier: 1
+  - regime: 1
+    multiplier: 0.5
+  affectedPhase: 3
+  scienceMultiplier: 1.25
+  dataGenerationMultiplier: 1.2
+  commsMultiplier: 1
+  permanentPowerLossFraction: 0
+  componentFailureChance: 0
+  requiresSafeMode: 0
+  safeModeHours: 0
+  mitigationAdvice: "Aprovecharla requiere margen en el enlace de bajada: m\xE1s
+    datos generados que no se transmiten se pierden."
+  educationalFact: "Las misiones helios\xEDncronas eligen la hora de cruce (ej. 10:30
+    a. m.) para minimizar nubes y sombras."
+  dataConfidence: 2
+  sourceUrl: https://landsat.gsfc.nasa.gov/satellites/landsat-9/

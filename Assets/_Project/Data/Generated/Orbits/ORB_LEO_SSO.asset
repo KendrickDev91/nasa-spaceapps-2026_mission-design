@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3135e8f823be73840b08cc17cbfa1739, type: 3}
+  m_Name: ORB_LEO_SSO
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.OrbitSO
+  orbitId: ORB_LEO_SSO
+  displayName: "LEO helios\xEDncrona (705 km)"
+  regime: 0
+  description: "\xD3rbita baja polar helios\xEDncrona usada por Terra, Aqua y Landsat:
+    cruza el ecuador a la misma hora solar."
+  altitudeKm: 705
+  inclinationDeg: 98.2
+  orbitalPeriodMinutes: 98.9
+  requiredDeltaVKmS: 9.4
+  onboardDeltaVKmS: 0.05
+  sunDistanceAU: 1
+  eclipseFraction: 0.35
+  maxEclipseMinutes: 35
+  groundStationRangeKm: 2000
+  dailyContactHours: 2
+  groundGainFactor: 1
+  radiationLevel: 0.25
+  debrisRisk: 0.6
+  educationalNote: "\u22489.4 km/s de \u0394v: ~7.8 km/s orbitales + ~1.5 km/s de
+    p\xE9rdidas por gravedad y arrastre. Solo hay contacto con tierra en pasadas
+    de ~10 min."
+  dataConfidence: 1
+  sourceUrl: https://landsat.gsfc.nasa.gov/satellites/landsat-9/

@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1127b33910611634dbf6776a933b1d10, type: 3}
+  m_Name: EVT_SingleEventUpset
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RandomEventSO
+  eventId: EVT_SEU
+  displayName: "Single Event Upset (radiaci\xF3n)"
+  eventType: 4
+  description: "Un ion pesado invierte un bit en la computadora de vuelo; el sat\xE9lite
+    se reinicia en modo seguro."
+  isPositive: 0
+  baseProbability: 0.2
+  orbitModifiers:
+  - regime: 0
+    multiplier: 0.7
+  - regime: 1
+    multiplier: 2
+  - regime: 2
+    multiplier: 1.2
+  - regime: 3
+    multiplier: 1.3
+  affectedPhase: 3
+  scienceMultiplier: 0.95
+  dataGenerationMultiplier: 0.9
+  commsMultiplier: 1
+  permanentPowerLossFraction: 0
+  componentFailureChance: 0
+  requiresSafeMode: 1
+  safeModeHours: 6
+  mitigationAdvice: "Electr\xF3nica endurecida, memoria con EDAC y watchdogs. La
+    Anomal\xEDa del Atl\xE1ntico Sur concentra eventos en LEO."
+  educationalFact: 'Los cinturones de Van Allen atrapan protones y electrones: MEO
+    los atraviesa de lleno.'
+  dataConfidence: 1
+  sourceUrl: https://nepp.nasa.gov/

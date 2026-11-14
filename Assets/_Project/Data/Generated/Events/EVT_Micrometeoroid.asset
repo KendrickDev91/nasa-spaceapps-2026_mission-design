@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1127b33910611634dbf6776a933b1d10, type: 3}
+  m_Name: EVT_Micrometeoroid
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RandomEventSO
+  eventId: EVT_MMOD
+  displayName: Impacto de micrometeoroide / desecho orbital
+  eventType: 1
+  description: "Una part\xEDcula de mil\xEDmetros a ~10 km/s perfora un panel solar
+    o un radiador."
+  isPositive: 0
+  baseProbability: 0.15
+  orbitModifiers:
+  - regime: 0
+    multiplier: 2
+  - regime: 1
+    multiplier: 0.5
+  - regime: 2
+    multiplier: 0.7
+  - regime: 3
+    multiplier: 0.6
+  affectedPhase: 3
+  scienceMultiplier: 0.95
+  dataGenerationMultiplier: 1
+  commsMultiplier: 1
+  permanentPowerLossFraction: 0.1
+  componentFailureChance: 0.25
+  requiresSafeMode: 0
+  safeModeHours: 0
+  mitigationAdvice: Usa blindaje Whipple, redundancia de cadenas de paneles y margen
+    de potencia.
+  educationalFact: "El modelo ORDEM de la NASA estima el flujo de desechos; LEO entre
+    700 y 1 000 km es la zona m\xE1s poblada."
+  dataConfidence: 1
+  sourceUrl: https://orbitaldebris.jsc.nasa.gov/modeling/ordem.html

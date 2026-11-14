@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e072841796e3a7498ff46dac3d2cdf8, type: 3}
+  m_Name: BUS_LARGE
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.SpacecraftBusSO
+  componentId: BUS_LARGE
+  displayName: Bus pesado (clase A2100 / LS-1300)
+  description: Plataforma de gran potencia para GEO o cargas pesadas.
+  heritage: Clase A2100 (GOES-R)
+  massKg: 1800
+  costMUSD: 250
+  peakPowerW: 1200
+  developmentMonths: 36
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 0
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: 
+  sourceNotes: "Valores representativos de la clase de plataforma, no de un modelo
+    comercial espec\xEDfico."
+  maxPayloadMassKg: 1500
+  maxPayloadPowerW: 5000
+  payloadSlots: 4
+  propellantMassKg: 2000
+  propulsionIspSeconds: 315
+  housekeepingPowerW: 1200
+  housekeepingDataGBPerDay: 0.05
+  designLifeYears: 15

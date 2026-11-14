@@ -1,0 +1,476 @@
+using System.Collections.Generic;
+using System.IO;
+using MissionDesign.Core;
+using MissionDesign.Data;
+using UnityEditor;
+using UnityEngine;
+
+namespace MissionDesign.Editor
+{
+    /// <summary>
+    /// Genera (o actualiza en el sitio, conservando GUIDs y prefabs asignados) la base de datos inicial.
+    /// Valores marcados con DataConfidence: Official / Approximate / GameEstimate.
+    /// Ejecutable también en batch: -executeMethod MissionDesign.Editor.NasaDatabaseGenerator.Generate
+    /// </summary>
+    public static class NasaDatabaseGenerator
+    {
+        private const string Root = "Assets/_Project/Data/Generated";
+
+        [MenuItem("NASA SpaceApps/Generate Initial NASA Database")]
+        public static void Generate()
+        {
+            var db = GetOrCreate<NasaDatabaseSO>($"{Root}/NasaDatabase.asset");
+
+            db.orbits = CreateOrbits();
+            db.launchVehicles = CreateLaunchVehicles();
+            db.instruments = CreateInstruments();
+            db.buses = CreateBuses();
+            db.solarArrays = CreateSolarArrays();
+            db.batteries = CreateBatteries();
+            db.antennas = CreateAntennas();
+            db.randomEvents = CreateRandomEvents();
+            db.scenarios = CreateScenarios();
+
+            EditorUtility.SetDirty(db);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log($"[NASA DB] OK → {Root}: {db.launchVehicles.Count} cohetes, {db.orbits.Count} órbitas, " +
+                      $"{db.instruments.Count} instrumentos, {db.buses.Count} buses, {db.solarArrays.Count} paneles, " +
+                      $"{db.batteries.Count} baterías, {db.antennas.Count} antenas, {db.randomEvents.Count} eventos, " +
+                      $"{db.scenarios.Count} escenarios.");
+            LogCommsSanityTable(db);
+            Selection.activeObject = db;
+        }
+
+        // ───────────────────────────── ÓRBITAS ─────────────────────────────
+
+        private static List<OrbitSO> CreateOrbits()
+        {
+            var list = new List<OrbitSO>();
+
+            var leo = GetOrCreate<OrbitSO>($"{Root}/Orbits/ORB_LEO_SSO.asset");
+            leo.orbitId = "ORB_LEO_SSO"; leo.displayName = "LEO heliosíncrona (705 km)"; leo.regime = OrbitRegime.LEO;
+            leo.description = "Órbita baja polar heliosíncrona usada por Terra, Aqua y Landsat: cruza el ecuador a la misma hora solar.";
+            leo.altitudeKm = 705; leo.inclinationDeg = 98.2f; leo.orbitalPeriodMinutes = 98.9f; leo.requiredDeltaVKmS = 9.4f; leo.onboardDeltaVKmS = 0.05f;
+            leo.sunDistanceAU = 1f; leo.eclipseFraction = 0.35f; leo.maxEclipseMinutes = 35;
+            leo.groundStationRangeKm = 2000; leo.dailyContactHours = 2f; leo.groundGainFactor = 1f;
+            leo.radiationLevel = 0.25f; leo.debrisRisk = 0.6f;
+            leo.educationalNote = "≈9.4 km/s de Δv: ~7.8 km/s orbitales + ~1.5 km/s de pérdidas por gravedad y arrastre. Solo hay contacto con tierra en pasadas de ~10 min.";
+            leo.dataConfidence = DataConfidence.Approximate; leo.sourceUrl = "https://landsat.gsfc.nasa.gov/satellites/landsat-9/";
+            Save(leo); list.Add(leo);
+
+            var meo = GetOrCreate<OrbitSO>($"{Root}/Orbits/ORB_MEO.asset");
+            meo.orbitId = "ORB_MEO"; meo.displayName = "MEO (20 200 km, tipo GPS)"; meo.regime = OrbitRegime.MEO;
+            meo.description = "Órbita media usada por constelaciones de navegación (GPS, Galileo). Atraviesa el cinturón de Van Allen exterior.";
+            meo.altitudeKm = 20200; meo.inclinationDeg = 55f; meo.orbitalPeriodMinutes = 718f; meo.requiredDeltaVKmS = 11.8f; meo.onboardDeltaVKmS = 0.3f;
+            meo.sunDistanceAU = 1f; meo.eclipseFraction = 0.04f; meo.maxEclipseMinutes = 56;
+            meo.groundStationRangeKm = 22000; meo.dailyContactHours = 10f; meo.groundGainFactor = 1f;
+            meo.radiationLevel = 0.85f; meo.debrisRisk = 0.1f;
+            meo.educationalNote = "La radiación del cinturón de Van Allen degrada paneles y provoca Single Event Upsets: requiere electrónica endurecida.";
+            meo.dataConfidence = DataConfidence.GameEstimate; meo.sourceUrl = "https://www.gps.gov/systems/gps/space/";
+            Save(meo); list.Add(meo);
+
+            var geo = GetOrCreate<OrbitSO>($"{Root}/Orbits/ORB_GEO.asset");
+            geo.orbitId = "ORB_GEO"; geo.displayName = "GEO (35 786 km)"; geo.regime = OrbitRegime.GEO;
+            geo.description = "Órbita geoestacionaria: el satélite ve siempre el mismo hemisferio (GOES-R, TDRS).";
+            geo.altitudeKm = 35786; geo.inclinationDeg = 0f; geo.orbitalPeriodMinutes = 1436f; geo.requiredDeltaVKmS = 13.0f; geo.onboardDeltaVKmS = 1.5f;
+            geo.sunDistanceAU = 1f; geo.eclipseFraction = 0.01f; geo.maxEclipseMinutes = 72;
+            geo.groundStationRangeKm = 38000; geo.dailyContactHours = 24f; geo.groundGainFactor = 1f;
+            geo.radiationLevel = 0.6f; geo.debrisRisk = 0.2f;
+            geo.educationalNote = "Contacto 24/7 con una estación fija, pero 19× más lejos que LEO: la señal llega ~360 veces más débil (1/r²).";
+            geo.dataConfidence = DataConfidence.Approximate; geo.sourceUrl = "https://www.goes-r.gov/mission/mission.html";
+            Save(geo); list.Add(geo);
+
+            var lunar = GetOrCreate<OrbitSO>($"{Root}/Orbits/ORB_LUNAR.asset");
+            lunar.orbitId = "ORB_LUNAR"; lunar.displayName = "Órbita lunar polar (50 km)"; lunar.regime = OrbitRegime.Lunar;
+            lunar.description = "Órbita polar baja alrededor de la Luna, como Lunar Reconnaissance Orbiter (LRO).";
+            lunar.altitudeKm = 50; lunar.inclinationDeg = 90f; lunar.orbitalPeriodMinutes = 113f; lunar.requiredDeltaVKmS = 15.5f; lunar.onboardDeltaVKmS = 0.85f;
+            lunar.sunDistanceAU = 1f; lunar.eclipseFraction = 0.30f; lunar.maxEclipseMinutes = 48;
+            lunar.groundStationRangeKm = 384400; lunar.dailyContactHours = 8f; lunar.groundGainFactor = 30f;
+            lunar.radiationLevel = 0.7f; lunar.debrisRisk = 0.05f;
+            lunar.educationalNote = "Sin magnetosfera que proteja de partículas solares. Las antenas de 34 m de la DSN compensan los 384 400 km de distancia.";
+            lunar.dataConfidence = DataConfidence.Approximate; lunar.sourceUrl = "https://science.nasa.gov/mission/lro/";
+            Save(lunar); list.Add(lunar);
+
+            return list;
+        }
+
+        // ───────────────────────────── COHETES ─────────────────────────────
+
+        private static List<LaunchVehicleSO> CreateLaunchVehicles()
+        {
+            var list = new List<LaunchVehicleSO>();
+
+            var f9 = GetOrCreate<LaunchVehicleSO>($"{Root}/LaunchVehicles/LV_Falcon9.asset");
+            f9.vehicleId = "LV_FALCON9"; f9.displayName = "Falcon 9 (booster reutilizable)"; f9.operatorName = "SpaceX"; f9.country = "EE.UU.";
+            f9.description = "Cohete de dos etapas con primera etapa recuperable. Lanzó misiones NASA como TESS, DART, PACE y SWOT.";
+            f9.payloadCapacities = new List<OrbitPayloadCapacity>
+            {
+                Cap(OrbitRegime.LEO, 17500, DataConfidence.Approximate, "Reutilizable; 22 800 kg en modo desechable."),
+                Cap(OrbitRegime.MEO, 4000, DataConfidence.GameEstimate, "Referencia: satélites GPS III (~4 400 kg) a órbita de transferencia."),
+                Cap(OrbitRegime.GEO, 5500, DataConfidence.Official, "Valor a GTO (reutilizable); el satélite circulariza con su motor de apogeo."),
+                Cap(OrbitRegime.Lunar, 3000, DataConfidence.GameEstimate, "Inyección translunar estimada (ref. IM-1 Nova-C ~1 900 kg).")
+            };
+            f9.fairingDiameterM = 5.2f; f9.reliability = 0.99f; f9.launchCostMUSD = 69.75f; f9.leadTimeMonths = 12;
+            f9.dataConfidence = DataConfidence.Approximate; f9.sourceUrl = "https://www.spacex.com/vehicles/falcon-9/";
+            f9.sourceNotes = "Costo: precio de lista publicado por SpaceX (~$69.75 M). Confiabilidad >99% histórica.";
+            Save(f9); list.Add(f9);
+
+            var el = GetOrCreate<LaunchVehicleSO>($"{Root}/LaunchVehicles/LV_Electron.asset");
+            el.vehicleId = "LV_ELECTRON"; el.displayName = "Electron"; el.operatorName = "Rocket Lab"; el.country = "EE.UU. / Nueva Zelanda";
+            el.description = "Lanzador dedicado de pequeños satélites. Lanzó CAPSTONE (NASA) hacia la Luna con la etapa Photon.";
+            el.payloadCapacities = new List<OrbitPayloadCapacity>
+            {
+                Cap(OrbitRegime.LEO, 300, DataConfidence.Official, "300 kg a LEO baja; ~200 kg a SSO 500 km."),
+                Cap(OrbitRegime.MEO, 0, DataConfidence.Official, "No ofrecido."),
+                Cap(OrbitRegime.GEO, 0, DataConfidence.Official, "No ofrecido."),
+                Cap(OrbitRegime.Lunar, 30, DataConfidence.Approximate, "Con etapa Photon; CAPSTONE pesaba ~25 kg.")
+            };
+            el.fairingDiameterM = 1.2f; el.reliability = 0.92f; el.launchCostMUSD = 7.5f; el.leadTimeMonths = 6;
+            el.dataConfidence = DataConfidence.Approximate; el.sourceUrl = "https://www.rocketlabusa.com/launch/electron/";
+            el.sourceNotes = "Costo aproximado por lanzamiento dedicado. Confiabilidad redondeada del historial de vuelos.";
+            Save(el); list.Add(el);
+
+            var sls = GetOrCreate<LaunchVehicleSO>($"{Root}/LaunchVehicles/LV_SLS_Block1.asset");
+            sls.vehicleId = "LV_SLS_B1"; sls.displayName = "SLS Block 1"; sls.operatorName = "NASA"; sls.country = "EE.UU.";
+            sls.description = "Space Launch System, cohete superpesado del programa Artemis. Artemis I (2022) envió Orion a la Luna.";
+            sls.payloadCapacities = new List<OrbitPayloadCapacity>
+            {
+                Cap(OrbitRegime.LEO, 95000, DataConfidence.Official, "95 t a LEO."),
+                Cap(OrbitRegime.MEO, 40000, DataConfidence.GameEstimate, "No es un perfil de misión de SLS; estimación de juego."),
+                Cap(OrbitRegime.GEO, 32000, DataConfidence.GameEstimate, "No es un perfil de misión de SLS; estimación de juego."),
+                Cap(OrbitRegime.Lunar, 27000, DataConfidence.Official, ">27 t a inyección translunar (TLI).")
+            };
+            sls.fairingDiameterM = 8.4f; sls.reliability = 0.95f; sls.launchCostMUSD = 2200f; sls.leadTimeMonths = 36;
+            sls.dataConfidence = DataConfidence.Approximate; sls.sourceUrl = "https://www.nasa.gov/humans-in-space/space-launch-system/";
+            sls.sourceNotes = "Costo de producción y operación por lanzamiento ~$2.2 mil M según auditoría de NASA OIG (2022). Confiabilidad: 1/1 vuelos, valor de juego.";
+            Save(sls); list.Add(sls);
+
+            var a6 = GetOrCreate<LaunchVehicleSO>($"{Root}/LaunchVehicles/LV_Ariane64.asset");
+            a6.vehicleId = "LV_ARIANE64"; a6.displayName = "Ariane 6 (A64)"; a6.operatorName = "Arianespace / ESA"; a6.country = "Europa";
+            a6.description = "Lanzador europeo con 4 propulsores sólidos P120C y etapa superior Vinci reencendible.";
+            a6.payloadCapacities = new List<OrbitPayloadCapacity>
+            {
+                Cap(OrbitRegime.LEO, 21650, DataConfidence.Official, "A64 a LEO."),
+                Cap(OrbitRegime.MEO, 7000, DataConfidence.GameEstimate, "Estimación de juego para inserción directa MEO."),
+                Cap(OrbitRegime.GEO, 11500, DataConfidence.Official, "A64 a GTO."),
+                Cap(OrbitRegime.Lunar, 8600, DataConfidence.Approximate, "Inyección translunar anunciada por ArianeGroup.")
+            };
+            a6.fairingDiameterM = 5.4f; a6.reliability = 0.95f; a6.launchCostMUSD = 125f; a6.leadTimeMonths = 18;
+            a6.dataConfidence = DataConfidence.Approximate; a6.sourceUrl = "https://www.esa.int/Enabling_Support/Space_Transportation/Ariane";
+            a6.sourceNotes = "Costo ≈ €115 M convertido a USD (aprox.). Confiabilidad: valor de juego por historial corto.";
+            Save(a6); list.Add(a6);
+
+            return list;
+        }
+
+        // ─────────────────────────── INSTRUMENTOS ───────────────────────────
+
+        private static List<InstrumentSO> CreateInstruments()
+        {
+            var list = new List<InstrumentSO>();
+
+            list.Add(Instrument("INS_MODIS", "MODIS (Terra/Aqua)", InstrumentType.MultispectralImager,
+                "Espectrorradiómetro de 36 bandas que cubre toda la Tierra cada 1-2 días: incendios, nubes, color del océano.",
+                "Terra (1999), Aqua (2002)", mass: 228.7f, cost: 150f, peakW: 225f, avgW: 162.5f, dataGB: 66f, science: 70, months: 48,
+                orbits: new[] { OrbitRegime.LEO }, tags: new[] { "clima", "tierra", "oceano", "incendios" },
+                conf: DataConfidence.Approximate, url: "https://modis.gsfc.nasa.gov/about/specifications.php",
+                notes: "Masa 228.7 kg y potencia media 162.5 W según ficha MODIS; 6.1 Mbps de media orbital ≈ 66 GB/día. Costo: estimación de juego."));
+
+            list.Add(Instrument("INS_ABI", "ABI (GOES-R)", InstrumentType.MultispectralImager,
+                "Advanced Baseline Imager: 16 bandas, imagen del disco completo cada 10 min desde GEO para meteorología.",
+                "GOES-16/17/18/19", mass: 450f, cost: 300f, peakW: 500f, avgW: 450f, dataGB: 320f, science: 80, months: 60,
+                orbits: new[] { OrbitRegime.GEO }, tags: new[] { "clima", "meteorologia", "tormentas" },
+                conf: DataConfidence.Approximate, url: "https://www.goes-r.gov/spacesegment/abi.html",
+                notes: "Masa y potencia redondeadas de documentación pública; volumen de datos aproximado. Costo: estimación de juego."));
+
+            list.Add(Instrument("INS_OCO2", "Espectrómetro OCO-2", InstrumentType.Spectrometer,
+                "Tres espectrómetros de rejilla de alta resolución que miden CO₂ atmosférico con precisión de 1 ppm.",
+                "Orbiting Carbon Observatory-2 (2014)", mass: 140f, cost: 120f, peakW: 130f, avgW: 105f, dataGB: 15f, science: 65, months: 42,
+                orbits: new[] { OrbitRegime.LEO }, tags: new[] { "clima", "carbono", "atmosfera" },
+                conf: DataConfidence.GameEstimate, url: "https://ocov2.jpl.nasa.gov/",
+                notes: "Masa/potencia/datos aproximados a partir del observatorio completo (~450 kg). Validar antes de la final."));
+
+            list.Add(Instrument("INS_NISAR", "Radar de apertura sintética NISAR", InstrumentType.Radar,
+                "Radar SAR banda L (NASA) + S (ISRO) con reflector de 12 m: mide deformación del suelo de cm en todo clima, día y noche.",
+                "NISAR (NASA-ISRO, 2025)", mass: 1300f, cost: 600f, peakW: 4000f, avgW: 2500f, dataGB: 3000f, science: 95, months: 72,
+                orbits: new[] { OrbitRegime.LEO }, tags: new[] { "tierra", "terremotos", "hielo", "agricultura" },
+                conf: DataConfidence.GameEstimate, url: "https://nisar.jpl.nasa.gov/",
+                notes: "Instrumento pesado y de altísimo volumen (orden de TB/día). Diseñado para forzar trade-offs de masa, energía y enlace Ka."));
+
+            list.Add(Instrument("INS_LROC", "Cámara LROC (LRO)", InstrumentType.Camera,
+                "Dos cámaras de ángulo estrecho (0.5 m/píxel) y una gran angular que cartografían la superficie lunar.",
+                "Lunar Reconnaissance Orbiter (2009)", mass: 16.4f, cost: 35f, peakW: 30f, avgW: 22f, dataGB: 40f, science: 75, months: 36,
+                orbits: new[] { OrbitRegime.Lunar }, tags: new[] { "luna", "superficie", "artemis" },
+                conf: DataConfidence.Approximate, url: "https://www.lroc.asu.edu/about",
+                notes: "LRO baja ~460 Gb/día en banda Ka; LROC es el mayor generador. Costo: estimación de juego."));
+
+            list.Add(Instrument("INS_GEDI", "Lidar GEDI", InstrumentType.Lidar,
+                "Lidar de onda completa de 3 láseres que mide la estructura 3D de los bosques y la biomasa.",
+                "GEDI en la ISS (2018)", mass: 520f, cost: 100f, peakW: 600f, avgW: 450f, dataGB: 25f, science: 70, months: 40,
+                orbits: new[] { OrbitRegime.LEO }, tags: new[] { "tierra", "bosques", "carbono" },
+                conf: DataConfidence.GameEstimate, url: "https://gedi.umd.edu/",
+                notes: "Masa ~520 kg aproximada; potencia y datos son estimaciones de juego."));
+
+            return list;
+        }
+
+        private static InstrumentSO Instrument(string id, string name, InstrumentType type, string desc, string heritage,
+            float mass, float cost, float peakW, float avgW, float dataGB, int science, float months,
+            OrbitRegime[] orbits, string[] tags, DataConfidence conf, string url, string notes)
+        {
+            var i = GetOrCreate<InstrumentSO>($"{Root}/Instruments/{id}.asset");
+            i.componentId = id; i.displayName = name; i.instrumentType = type; i.description = desc; i.heritage = heritage;
+            i.massKg = mass; i.costMUSD = cost; i.peakPowerW = peakW; i.averagePowerW = avgW; i.dutyCycle = 1f;
+            i.dataVolumeGBPerDay = dataGB; i.scienceValue = science; i.developmentMonths = months; i.technologyReadinessLevel = 9;
+            i.preferredOrbits = orbits; i.scienceObjectives = tags; i.socket = SpacecraftSocket.TopPayloadSocket;
+            i.dataConfidence = conf; i.sourceUrl = url; i.sourceNotes = notes;
+            Save(i);
+            return i;
+        }
+
+        // ─────────────────────── HARDWARE GENÉRICO (clase) ───────────────────────
+
+        private static List<SpacecraftBusSO> CreateBuses()
+        {
+            return new List<SpacecraftBusSO>
+            {
+                Bus("BUS_SMALL", "Bus pequeño (clase ESPA ~180 kg)", "Plataforma tipo ESPA para misiones de bajo costo.", "Clase ESPA / SmallSat",
+                    dry: 90, prop: 20, isp: 220, maxPayload: 60, maxPower: 150, slots: 2, hk: 60, life: 3, cost: 25, months: 18),
+                Bus("BUS_MEDIUM", "Bus mediano (clase LEOStar-2)", "Plataforma probada en misiones científicas medianas de NASA.", "Clase LEOStar-2 (OCO-2, SORCE)",
+                    dry: 400, prop: 200, isp: 300, maxPayload: 400, maxPower: 800, slots: 3, hk: 250, life: 5, cost: 90, months: 30),
+                Bus("BUS_LARGE", "Bus pesado (clase A2100 / LS-1300)", "Plataforma de gran potencia para GEO o cargas pesadas.", "Clase A2100 (GOES-R)",
+                    dry: 1800, prop: 2000, isp: 315, maxPayload: 1500, maxPower: 5000, slots: 4, hk: 1200, life: 15, cost: 250, months: 36)
+            };
+        }
+
+        private static SpacecraftBusSO Bus(string id, string name, string desc, string heritage, float dry, float prop, float isp,
+            float maxPayload, float maxPower, int slots, float hk, float life, float cost, float months)
+        {
+            var b = GetOrCreate<SpacecraftBusSO>($"{Root}/Buses/{id}.asset");
+            b.componentId = id; b.displayName = name; b.description = desc; b.heritage = heritage;
+            b.massKg = dry; b.propellantMassKg = prop; b.propulsionIspSeconds = isp; b.maxPayloadMassKg = maxPayload; b.maxPayloadPowerW = maxPower;
+            b.payloadSlots = slots; b.housekeepingPowerW = hk; b.peakPowerW = hk; b.housekeepingDataGBPerDay = 0.05f;
+            b.designLifeYears = life; b.costMUSD = cost; b.developmentMonths = months; b.technologyReadinessLevel = 9;
+            b.socket = SpacecraftSocket.CoreBus; b.dataConfidence = DataConfidence.GameEstimate;
+            b.sourceNotes = "Valores representativos de la clase de plataforma, no de un modelo comercial específico.";
+            Save(b);
+            return b;
+        }
+
+        private static List<SolarArraySO> CreateSolarArrays()
+        {
+            return new List<SolarArraySO>
+            {
+                Solar("SOL_BODY", "Paneles fijos al cuerpo", "Celdas de triple unión montadas sobre la estructura: simples y baratas.", 300, 15, 2, 0.03f, 6, SpacecraftSocket.InternalBay),
+                Solar("SOL_WINGS", "Alas desplegables rígidas (par)", "Dos alas con orientación al Sol (SADA), estándar en misiones medianas.", 2500, 60, 12, 0.025f, 12, SpacecraftSocket.SolarWingLeft),
+                Solar("SOL_ROSA", "ROSA enrollables (par)", "Roll-Out Solar Array: alas flexibles de alta potencia por kg, probadas en la ISS (iROSA).", 8000, 110, 35, 0.02f, 18, SpacecraftSocket.SolarWingLeft)
+            };
+        }
+
+        private static SolarArraySO Solar(string id, string name, string desc, float p1au, float mass, float cost, float deg, float months, SpacecraftSocket socket)
+        {
+            var s = GetOrCreate<SolarArraySO>($"{Root}/SolarArrays/{id}.asset");
+            s.componentId = id; s.displayName = name; s.description = desc;
+            s.powerAt1AU_W = p1au; s.massKg = mass; s.costMUSD = cost; s.annualDegradation = deg; s.developmentMonths = months;
+            s.peakPowerW = 0; s.socket = socket; s.dataConfidence = DataConfidence.GameEstimate;
+            s.sourceUrl = "https://www.nasa.gov/smallsat-institute/sst-soa/power-subsystems/";
+            s.sourceNotes = "Densidades de potencia coherentes con el estado del arte (NASA SmallSat SOA, Power).";
+            Save(s);
+            return s;
+        }
+
+        private static List<BatterySO> CreateBatteries()
+        {
+            return new List<BatterySO>
+            {
+                Battery("BAT_500", "Li-ion 500 Wh", 500, 5, 1),
+                Battery("BAT_2000", "Li-ion 2 000 Wh", 2000, 16, 3),
+                Battery("BAT_8000", "Li-ion 8 000 Wh", 8000, 60, 8)
+            };
+        }
+
+        private static BatterySO Battery(string id, string name, float wh, float mass, float cost)
+        {
+            var b = GetOrCreate<BatterySO>($"{Root}/Batteries/{id}.asset");
+            b.componentId = id; b.displayName = name; b.description = "Paquete de celdas Li-ion con electrónica de control (~130-150 Wh/kg a nivel de paquete).";
+            b.capacityWh = wh; b.maxDepthOfDischarge = 0.6f; b.massKg = mass; b.costMUSD = cost; b.developmentMonths = 4;
+            b.socket = SpacecraftSocket.InternalBay; b.dataConfidence = DataConfidence.GameEstimate;
+            b.sourceUrl = "https://www.nasa.gov/smallsat-institute/sst-soa/power-subsystems/";
+            Save(b);
+            return b;
+        }
+
+        private static List<AntennaSO> CreateAntennas()
+        {
+            return new List<AntennaSO>
+            {
+                Antenna("ANT_UHF", "UHF omnidireccional", CommBand.UHF, "Antena de látigo para telemetría básica.", 0.0096f, 1000, 0.0096f, false, 1, 0.3f, 5, 2),
+                Antenna("ANT_S", "Banda S (parche)", CommBand.S, "Enlace de telemetría y comandos de baja tasa, robusto y omnidireccional.", 2f, 2000, 2f, true, 2, 1.5f, 15, 4),
+                Antenna("ANT_X", "Banda X de alta tasa", CommBand.X, "Enlace de ciencia tipo Landsat hacia estaciones de la Near Space Network.", 384f, 2000, 800f, true, 10, 8, 60, 8),
+                Antenna("ANT_KA", "Banda Ka HGA orientable 1 m", CommBand.Ka, "Antena de alta ganancia con cardán, tipo LRO/GOES-R: muy alta tasa a gran distancia.", 150f, 40000, 3500f, true, 35, 25, 150, 14)
+            };
+        }
+
+        private static AntennaSO Antenna(string id, string name, CommBand band, string desc, float refRate, float refRange,
+            float maxRate, bool dsn, float mass, float cost, float power, float months)
+        {
+            var a = GetOrCreate<AntennaSO>($"{Root}/Antennas/{id}.asset");
+            a.componentId = id; a.displayName = name; a.band = band; a.description = desc;
+            a.referenceDataRateMbps = refRate; a.referenceRangeKm = refRange; a.maxDataRateMbps = maxRate; a.dsnCompatible = dsn;
+            a.massKg = mass; a.costMUSD = cost; a.peakPowerW = power; a.developmentMonths = months;
+            a.socket = SpacecraftSocket.AntennaSocket; a.dataConfidence = DataConfidence.GameEstimate;
+            a.sourceUrl = "https://www.nasa.gov/smallsat-institute/sst-soa/soa-communications/";
+            a.sourceNotes = "Modelo simplificado: tasa ∝ 1/r² desde la distancia de referencia, limitada por el módem.";
+            Save(a);
+            return a;
+        }
+
+        // ───────────────────────── EVENTOS ALEATORIOS ─────────────────────────
+
+        private static List<RandomEventSO> CreateRandomEvents()
+        {
+            var list = new List<RandomEventSO>();
+
+            var storm = GetOrCreate<RandomEventSO>($"{Root}/Events/EVT_SolarStorm.asset");
+            storm.eventId = "EVT_SOLAR_STORM"; storm.displayName = "Tormenta solar (CME + evento de protones)"; storm.eventType = RandomEventType.SolarStorm;
+            storm.description = "Una eyección de masa coronal alcanza la nave. Los protones energéticos degradan las celdas solares y exigen modo seguro.";
+            storm.isPositive = false; storm.baseProbability = 0.35f; storm.affectedPhase = MissionPhase.ScienceOperations;
+            storm.orbitModifiers = Mods((OrbitRegime.LEO, 0.6f), (OrbitRegime.MEO, 1.2f), (OrbitRegime.GEO, 1.0f), (OrbitRegime.Lunar, 1.5f));
+            storm.scienceMultiplier = 0.85f; storm.dataGenerationMultiplier = 0.8f; storm.commsMultiplier = 0.9f;
+            storm.permanentPowerLossFraction = 0.03f; storm.componentFailureChance = 0.05f;
+            storm.requiresSafeMode = true; storm.safeModeHours = 24;
+            storm.mitigationAdvice = "Dimensiona la batería para sobrevivir 24 h con consumo mínimo y añade margen de potencia del 20-30%.";
+            storm.educationalFact = "La NOAA clasifica las tormentas de radiación de S1 a S5. Fuera de la magnetosfera (Luna) el riesgo es mayor.";
+            storm.dataConfidence = DataConfidence.Approximate; storm.sourceUrl = "https://www.swpc.noaa.gov/noaa-scales-explanation";
+            Save(storm); list.Add(storm);
+
+            var mmod = GetOrCreate<RandomEventSO>($"{Root}/Events/EVT_Micrometeoroid.asset");
+            mmod.eventId = "EVT_MMOD"; mmod.displayName = "Impacto de micrometeoroide / desecho orbital"; mmod.eventType = RandomEventType.MicrometeoroidImpact;
+            mmod.description = "Una partícula de milímetros a ~10 km/s perfora un panel solar o un radiador.";
+            mmod.isPositive = false; mmod.baseProbability = 0.15f; mmod.affectedPhase = MissionPhase.ScienceOperations;
+            mmod.orbitModifiers = Mods((OrbitRegime.LEO, 2.0f), (OrbitRegime.MEO, 0.5f), (OrbitRegime.GEO, 0.7f), (OrbitRegime.Lunar, 0.6f));
+            mmod.scienceMultiplier = 0.95f; mmod.permanentPowerLossFraction = 0.10f; mmod.componentFailureChance = 0.25f;
+            mmod.mitigationAdvice = "Usa blindaje Whipple, redundancia de cadenas de paneles y margen de potencia.";
+            mmod.educationalFact = "El modelo ORDEM de la NASA estima el flujo de desechos; LEO entre 700 y 1 000 km es la zona más poblada.";
+            mmod.dataConfidence = DataConfidence.Approximate; mmod.sourceUrl = "https://orbitaldebris.jsc.nasa.gov/modeling/ordem.html";
+            Save(mmod); list.Add(mmod);
+
+            var window = GetOrCreate<RandomEventSO>($"{Root}/Events/EVT_OptimalWindow.asset");
+            window.eventId = "EVT_OPTIMAL_WINDOW"; window.displayName = "Ventana de observación óptima"; window.eventType = RandomEventType.OptimalObservationWindow;
+            window.description = "Cielo despejado y geometría solar ideal: los instrumentos capturan datos excepcionales... y muchos más datos.";
+            window.isPositive = true; window.baseProbability = 0.30f; window.affectedPhase = MissionPhase.ScienceOperations;
+            window.orbitModifiers = Mods((OrbitRegime.LEO, 1.2f), (OrbitRegime.GEO, 1.0f), (OrbitRegime.Lunar, 1.0f), (OrbitRegime.MEO, 0.5f));
+            window.scienceMultiplier = 1.25f; window.dataGenerationMultiplier = 1.2f;
+            window.mitigationAdvice = "Aprovecharla requiere margen en el enlace de bajada: más datos generados que no se transmiten se pierden.";
+            window.educationalFact = "Las misiones heliosíncronas eligen la hora de cruce (ej. 10:30 a. m.) para minimizar nubes y sombras.";
+            window.dataConfidence = DataConfidence.GameEstimate; window.sourceUrl = "https://landsat.gsfc.nasa.gov/satellites/landsat-9/";
+            Save(window); list.Add(window);
+
+            var dsn = GetOrCreate<RandomEventSO>($"{Root}/Events/EVT_GroundOutage.asset");
+            dsn.eventId = "EVT_GROUND_OUTAGE"; dsn.displayName = "Conflicto de agenda DSN / falla de estación terrena"; dsn.eventType = RandomEventType.GroundStationOutage;
+            dsn.description = "Una misión prioritaria ocupa las antenas o una estación queda fuera de servicio: se reduce el tiempo de contacto.";
+            dsn.isPositive = false; dsn.baseProbability = 0.20f; dsn.affectedPhase = MissionPhase.DataTransmission;
+            dsn.orbitModifiers = Mods((OrbitRegime.LEO, 0.8f), (OrbitRegime.MEO, 1.0f), (OrbitRegime.GEO, 0.5f), (OrbitRegime.Lunar, 1.8f));
+            dsn.commsMultiplier = 0.6f;
+            dsn.mitigationAdvice = "Añade memoria a bordo y margen de enlace; reserva más horas de contacto o una antena de mayor ganancia.";
+            dsn.educationalFact = "La DSN tiene complejos en Goldstone, Madrid y Canberra, separados ~120° para cubrir el cielo las 24 h; su demanda supera su capacidad.";
+            dsn.dataConfidence = DataConfidence.Approximate; dsn.sourceUrl = "https://www.nasa.gov/communicating-with-missions/dsn/";
+            Save(dsn); list.Add(dsn);
+
+            var seu = GetOrCreate<RandomEventSO>($"{Root}/Events/EVT_SingleEventUpset.asset");
+            seu.eventId = "EVT_SEU"; seu.displayName = "Single Event Upset (radiación)"; seu.eventType = RandomEventType.SingleEventUpset;
+            seu.description = "Un ion pesado invierte un bit en la computadora de vuelo; el satélite se reinicia en modo seguro.";
+            seu.isPositive = false; seu.baseProbability = 0.20f; seu.affectedPhase = MissionPhase.ScienceOperations;
+            seu.orbitModifiers = Mods((OrbitRegime.LEO, 0.7f), (OrbitRegime.MEO, 2.0f), (OrbitRegime.GEO, 1.2f), (OrbitRegime.Lunar, 1.3f));
+            seu.dataGenerationMultiplier = 0.9f; seu.scienceMultiplier = 0.95f;
+            seu.requiresSafeMode = true; seu.safeModeHours = 6;
+            seu.mitigationAdvice = "Electrónica endurecida, memoria con EDAC y watchdogs. La Anomalía del Atlántico Sur concentra eventos en LEO.";
+            seu.educationalFact = "Los cinturones de Van Allen atrapan protones y electrones: MEO los atraviesa de lleno.";
+            seu.dataConfidence = DataConfidence.Approximate; seu.sourceUrl = "https://nepp.nasa.gov/";
+            Save(seu); list.Add(seu);
+
+            return list;
+        }
+
+        // ───────────────────────────── ESCENARIOS ─────────────────────────────
+
+        private static List<MissionScenarioSO> CreateScenarios()
+        {
+            return new List<MissionScenarioSO>
+            {
+                Scenario("SCN_EARTH_CLIMATE", "Vigilancia climática de la Tierra",
+                    "El Consejo de Ciencias de la Tierra necesita datos globales de nubes, incendios y carbono. Diseña un observatorio en órbita baja.",
+                    "clima", budget: 600, devMonths: 60, lifeMonths: 60, minScience: 120, orbits: new[] { OrbitRegime.LEO }),
+                Scenario("SCN_GEO_WEATHER", "Centinela meteorológico geoestacionario",
+                    "Vigila huracanes en tiempo real sobre las Américas. El enlace de datos 24/7 es crítico.",
+                    "meteorologia", budget: 1200, devMonths: 72, lifeMonths: 120, minScience: 80, orbits: new[] { OrbitRegime.GEO }),
+                Scenario("SCN_LUNAR_RECON", "Reconocimiento lunar para Artemis",
+                    "Cartografía zonas de alunizaje en el polo sur lunar. La distancia exige la DSN.",
+                    "luna", budget: 800, devMonths: 48, lifeMonths: 24, minScience: 75, orbits: new[] { OrbitRegime.Lunar })
+            };
+        }
+
+        private static MissionScenarioSO Scenario(string id, string name, string briefing, string tag, float budget,
+            float devMonths, float lifeMonths, int minScience, OrbitRegime[] orbits)
+        {
+            var s = GetOrCreate<MissionScenarioSO>($"{Root}/Scenarios/{id}.asset");
+            s.scenarioId = id; s.displayName = name; s.briefing = briefing; s.scienceObjectiveTag = tag;
+            s.budgetLimitMUSD = budget; s.maxDevelopmentMonths = devMonths; s.targetMissionLifeMonths = lifeMonths;
+            s.minScienceValue = minScience; s.allowedOrbits = orbits;
+            Save(s);
+            return s;
+        }
+
+        // ───────────────────────────── VERIFICACIÓN ─────────────────────────────
+
+        /// <summary>Imprime la capacidad de bajada de cada antena en cada órbita para calibrar trade-offs.</summary>
+        private static void LogCommsSanityTable(NasaDatabaseSO db)
+        {
+            var sb = new System.Text.StringBuilder("[NASA DB] Capacidad de bajada (GB/día) por antena y órbita:\n");
+            foreach (var a in db.antennas)
+            {
+                sb.Append($"  {a.displayName,-30}");
+                foreach (var o in db.orbits)
+                    sb.Append($" | {o.regime}: {o.GetDailyDownlinkGB(a),9:F1}");
+                sb.AppendLine();
+            }
+            Debug.Log(sb.ToString());
+        }
+
+        // ───────────────────────────── UTILIDADES ─────────────────────────────
+
+        private static OrbitPayloadCapacity Cap(OrbitRegime r, float kg, DataConfidence c, string note) =>
+            new OrbitPayloadCapacity { regime = r, payloadKg = kg, confidence = c, note = note };
+
+        private static List<OrbitProbabilityModifier> Mods(params (OrbitRegime regime, float mult)[] mods)
+        {
+            var list = new List<OrbitProbabilityModifier>();
+            foreach (var m in mods) list.Add(new OrbitProbabilityModifier { regime = m.regime, multiplier = m.mult });
+            return list;
+        }
+
+        /// <summary>Carga el asset si existe (conserva GUID y referencias a prefabs) o lo crea.</summary>
+        private static T GetOrCreate<T>(string path) where T : ScriptableObject
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (asset != null) return asset;
+
+            EnsureFolder(Path.GetDirectoryName(path)?.Replace('\\', '/'));
+            asset = ScriptableObject.CreateInstance<T>();
+            AssetDatabase.CreateAsset(asset, path);
+            return asset;
+        }
+
+        private static void EnsureFolder(string folder)
+        {
+            if (string.IsNullOrEmpty(folder) || AssetDatabase.IsValidFolder(folder)) return;
+            string parent = Path.GetDirectoryName(folder)?.Replace('\\', '/');
+            EnsureFolder(parent);
+            AssetDatabase.CreateFolder(parent, Path.GetFileName(folder));
+        }
+
+        private static void Save(Object o) => EditorUtility.SetDirty(o);
+    }
+}

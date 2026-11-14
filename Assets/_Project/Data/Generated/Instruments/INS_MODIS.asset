@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e8f3ae732869945812ae38dafb5527, type: 3}
+  m_Name: INS_MODIS
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.InstrumentSO
+  componentId: INS_MODIS
+  displayName: MODIS (Terra/Aqua)
+  description: "Espectrorradi\xF3metro de 36 bandas que cubre toda la Tierra cada
+    1-2 d\xEDas: incendios, nubes, color del oc\xE9ano."
+  heritage: Terra (1999), Aqua (2002)
+  massKg: 228.7
+  costMUSD: 150
+  peakPowerW: 225
+  developmentMonths: 48
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 1
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://modis.gsfc.nasa.gov/about/specifications.php
+  sourceNotes: "Masa 228.7 kg y potencia media 162.5 W seg\xFAn ficha MODIS; 6.1
+    Mbps de media orbital \u2248 66 GB/d\xEDa. Costo: estimaci\xF3n de juego."
+  instrumentType: 0
+  dataVolumeGBPerDay: 66
+  averagePowerW: 162.5
+  dutyCycle: 1
+  scienceValue: 70
+  preferredOrbits: 00000000
+  scienceObjectives:
+  - clima
+  - tierra
+  - oceano
+  - incendios

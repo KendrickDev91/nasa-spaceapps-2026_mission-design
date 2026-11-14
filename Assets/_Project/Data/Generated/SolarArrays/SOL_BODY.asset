@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b240230b07a508b449b949c5259815e9, type: 3}
+  m_Name: SOL_BODY
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.SolarArraySO
+  componentId: SOL_BODY
+  displayName: Paneles fijos al cuerpo
+  description: "Celdas de triple uni\xF3n montadas sobre la estructura: simples y
+    baratas."
+  heritage: 
+  massKg: 15
+  costMUSD: 2
+  peakPowerW: 0
+  developmentMonths: 6
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 6
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://www.nasa.gov/smallsat-institute/sst-soa/power-subsystems/
+  sourceNotes: Densidades de potencia coherentes con el estado del arte (NASA SmallSat
+    SOA, Power).
+  powerAt1AU_W: 300
+  annualDegradation: 0.03

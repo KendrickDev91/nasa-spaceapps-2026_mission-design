@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cece4998b0649bb40bf68df97f1e1748, type: 3}
+  m_Name: NasaDatabase
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.NasaDatabaseSO
+  launchVehicles:
+  - {fileID: 11400000, guid: 65289ba33bfe9844194d309f5b583665, type: 2}
+  - {fileID: 11400000, guid: 90908a5b3e363a2409b6e041ee762c94, type: 2}
+  - {fileID: 11400000, guid: 2136e223d8617a1499042d7d3b0445c4, type: 2}
+  - {fileID: 11400000, guid: 0fccc85faa52d0348ada55b374665bbe, type: 2}
+  orbits:
+  - {fileID: 11400000, guid: 1172c052dc932d24aaecdd98cdaf3ee5, type: 2}
+  - {fileID: 11400000, guid: d4d1581c0040c2a449272ac400bfac3a, type: 2}
+  - {fileID: 11400000, guid: cdfe305b5d08f0141b1b1095bd0b1430, type: 2}
+  - {fileID: 11400000, guid: 119dc5205af9a4e48b7798874943f5fd, type: 2}
+  instruments:
+  - {fileID: 11400000, guid: a14a10efcdf9ac04b90710f31ee3ad89, type: 2}
+  - {fileID: 11400000, guid: 273b57df52998754da35dde172082ce7, type: 2}
+  - {fileID: 11400000, guid: 61dda48897f63da4aab5452bf6747c57, type: 2}
+  - {fileID: 11400000, guid: 00f6d85355621f84a8be58b9933e16db, type: 2}
+  - {fileID: 11400000, guid: 399217004d2163546878d1f2fc28ebf6, type: 2}
+  - {fileID: 11400000, guid: 2829d0e3f5f9d714d8412712d0cee258, type: 2}
+  buses:
+  - {fileID: 11400000, guid: 7c6bcb732a1678048b3e36b45150d4d7, type: 2}
+  - {fileID: 11400000, guid: fc87a5075788fb34dbf6d27fdc0b5125, type: 2}
+  - {fileID: 11400000, guid: c0a5eb25308da6d45ac554cea22a5a36, type: 2}
+  solarArrays:
+  - {fileID: 11400000, guid: 60b57d4434c3f5d48b8c64d36d2ac90d, type: 2}
+  - {fileID: 11400000, guid: f51ca91320a7c4c4fbdb998646ef7599, type: 2}
+  - {fileID: 11400000, guid: 464a8f463c4525b47bdca5092a9854ea, type: 2}
+  batteries:
+  - {fileID: 11400000, guid: 59958b518484dc145beb5d5f586046a4, type: 2}
+  - {fileID: 11400000, guid: 86849c3f64580ea49a543c988038946f, type: 2}
+  - {fileID: 11400000, guid: 0ff34dc6efd6128459d28d98d7cc48b5, type: 2}
+  antennas:
+  - {fileID: 11400000, guid: 5fcb9fa573311304caa85d5c6ade7202, type: 2}
+  - {fileID: 11400000, guid: 091b71a6b8aa9f4458af3ee34f190017, type: 2}
+  - {fileID: 11400000, guid: 98783e8de0dddde4fa981d88eddf09cf, type: 2}
+  - {fileID: 11400000, guid: 8df459fb91ad4f74e8ab3a7504686a45, type: 2}
+  randomEvents:
+  - {fileID: 11400000, guid: c684350777633c64caee980be0e291ce, type: 2}
+  - {fileID: 11400000, guid: 81d04fecf068c4f4e990662c482e0776, type: 2}
+  - {fileID: 11400000, guid: 0204b55cdf594da4a98127c169207da0, type: 2}
+  - {fileID: 11400000, guid: bef73f615b17b0940ae29b76a1f3f77b, type: 2}
+  - {fileID: 11400000, guid: 7960e606170571c49b990402cf2733e5, type: 2}
+  scenarios:
+  - {fileID: 11400000, guid: dd404d8fda188cd48897c6d613df0ca8, type: 2}
+  - {fileID: 11400000, guid: 8d0da3c47908bfd4190e2393ef9546b2, type: 2}
+  - {fileID: 11400000, guid: 01cf28a0e2756b6489cbc9334cd504da, type: 2}

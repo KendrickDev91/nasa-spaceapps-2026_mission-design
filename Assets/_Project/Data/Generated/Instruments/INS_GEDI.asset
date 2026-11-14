@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e8f3ae732869945812ae38dafb5527, type: 3}
+  m_Name: INS_GEDI
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.InstrumentSO
+  componentId: INS_GEDI
+  displayName: Lidar GEDI
+  description: "Lidar de onda completa de 3 l\xE1seres que mide la estructura 3D
+    de los bosques y la biomasa."
+  heritage: GEDI en la ISS (2018)
+  massKg: 520
+  costMUSD: 100
+  peakPowerW: 600
+  developmentMonths: 40
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 1
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://gedi.umd.edu/
+  sourceNotes: Masa ~520 kg aproximada; potencia y datos son estimaciones de juego.
+  instrumentType: 3
+  dataVolumeGBPerDay: 25
+  averagePowerW: 450
+  dutyCycle: 1
+  scienceValue: 70
+  preferredOrbits: 00000000
+  scienceObjectives:
+  - tierra
+  - bosques
+  - carbono

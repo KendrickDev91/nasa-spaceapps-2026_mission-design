@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e072841796e3a7498ff46dac3d2cdf8, type: 3}
+  m_Name: BUS_SMALL
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.SpacecraftBusSO
+  componentId: BUS_SMALL
+  displayName: "Bus peque\xF1o (clase ESPA ~180 kg)"
+  description: Plataforma tipo ESPA para misiones de bajo costo.
+  heritage: Clase ESPA / SmallSat
+  massKg: 90
+  costMUSD: 25
+  peakPowerW: 60
+  developmentMonths: 18
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 0
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: 
+  sourceNotes: "Valores representativos de la clase de plataforma, no de un modelo
+    comercial espec\xEDfico."
+  maxPayloadMassKg: 60
+  maxPayloadPowerW: 150
+  payloadSlots: 2
+  propellantMassKg: 20
+  propulsionIspSeconds: 220
+  housekeepingPowerW: 60
+  housekeepingDataGBPerDay: 0.05
+  designLifeYears: 3

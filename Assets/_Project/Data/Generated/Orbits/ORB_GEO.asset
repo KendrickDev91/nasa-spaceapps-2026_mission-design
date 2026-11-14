@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3135e8f823be73840b08cc17cbfa1739, type: 3}
+  m_Name: ORB_GEO
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.OrbitSO
+  orbitId: ORB_GEO
+  displayName: GEO (35 786 km)
+  regime: 2
+  description: "\xD3rbita geoestacionaria: el sat\xE9lite ve siempre el mismo hemisferio
+    (GOES-R, TDRS)."
+  altitudeKm: 35786
+  inclinationDeg: 0
+  orbitalPeriodMinutes: 1436
+  requiredDeltaVKmS: 13
+  onboardDeltaVKmS: 1.5
+  sunDistanceAU: 1
+  eclipseFraction: 0.01
+  maxEclipseMinutes: 72
+  groundStationRangeKm: 38000
+  dailyContactHours: 24
+  groundGainFactor: 1
+  radiationLevel: 0.6
+  debrisRisk: 0.2
+  educationalNote: "Contacto 24/7 con una estaci\xF3n fija, pero 19\xD7 m\xE1s lejos
+    que LEO: la se\xF1al llega ~360 veces m\xE1s d\xE9bil (1/r\xB2)."
+  dataConfidence: 1
+  sourceUrl: https://www.goes-r.gov/mission/mission.html

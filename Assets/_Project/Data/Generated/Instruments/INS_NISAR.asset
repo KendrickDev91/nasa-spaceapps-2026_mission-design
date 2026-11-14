@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e8f3ae732869945812ae38dafb5527, type: 3}
+  m_Name: INS_NISAR
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.InstrumentSO
+  componentId: INS_NISAR
+  displayName: "Radar de apertura sint\xE9tica NISAR"
+  description: "Radar SAR banda L (NASA) + S (ISRO) con reflector de 12 m: mide deformaci\xF3n
+    del suelo de cm en todo clima, d\xEDa y noche."
+  heritage: NISAR (NASA-ISRO, 2025)
+  massKg: 1300
+  costMUSD: 600
+  peakPowerW: 4000
+  developmentMonths: 72
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 1
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://nisar.jpl.nasa.gov/
+  sourceNotes: "Instrumento pesado y de alt\xEDsimo volumen (orden de TB/d\xEDa).
+    Dise\xF1ado para forzar trade-offs de masa, energ\xEDa y enlace Ka."
+  instrumentType: 2
+  dataVolumeGBPerDay: 3000
+  averagePowerW: 2500
+  dutyCycle: 1
+  scienceValue: 95
+  preferredOrbits: 00000000
+  scienceObjectives:
+  - tierra
+  - terremotos
+  - hielo
+  - agricultura

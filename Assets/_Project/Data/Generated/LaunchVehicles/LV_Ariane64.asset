@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4be6a4f07b67e104ca702222b2fb5386, type: 3}
+  m_Name: LV_Ariane64
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.LaunchVehicleSO
+  vehicleId: LV_ARIANE64
+  displayName: Ariane 6 (A64)
+  operatorName: Arianespace / ESA
+  country: Europa
+  description: "Lanzador europeo con 4 propulsores s\xF3lidos P120C y etapa superior
+    Vinci reencendible."
+  payloadCapacities:
+  - regime: 0
+    payloadKg: 21650
+    confidence: 0
+    note: A64 a LEO.
+  - regime: 1
+    payloadKg: 7000
+    confidence: 2
+    note: "Estimaci\xF3n de juego para inserci\xF3n directa MEO."
+  - regime: 2
+    payloadKg: 11500
+    confidence: 0
+    note: A64 a GTO.
+  - regime: 3
+    payloadKg: 8600
+    confidence: 1
+    note: "Inyecci\xF3n translunar anunciada por ArianeGroup."
+  fairingDiameterM: 5.4
+  reliability: 0.95
+  launchCostMUSD: 125
+  leadTimeMonths: 18
+  prefab: {fileID: 0}
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.esa.int/Enabling_Support/Space_Transportation/Ariane
+  sourceNotes: "Costo \u2248 \u20AC115 M convertido a USD (aprox.). Confiabilidad:
+    valor de juego por historial corto."

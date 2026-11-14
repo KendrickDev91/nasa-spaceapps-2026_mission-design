@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8af0deda2731fab4887aab64f35837da, type: 3}
+  m_Name: ANT_KA
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.AntennaSO
+  componentId: ANT_KA
+  displayName: Banda Ka HGA orientable 1 m
+  description: "Antena de alta ganancia con card\xE1n, tipo LRO/GOES-R: muy alta
+    tasa a gran distancia."
+  heritage: 
+  massKg: 35
+  costMUSD: 25
+  peakPowerW: 150
+  developmentMonths: 14
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 4
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://www.nasa.gov/smallsat-institute/sst-soa/soa-communications/
+  sourceNotes: "Modelo simplificado: tasa \u221D 1/r\xB2 desde la distancia de referencia,
+    limitada por el m\xF3dem."
+  band: 3
+  referenceDataRateMbps: 150
+  referenceRangeKm: 40000
+  maxDataRateMbps: 3500
+  dsnCompatible: 1

@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4be6a4f07b67e104ca702222b2fb5386, type: 3}
+  m_Name: LV_SLS_Block1
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.LaunchVehicleSO
+  vehicleId: LV_SLS_B1
+  displayName: SLS Block 1
+  operatorName: NASA
+  country: EE.UU.
+  description: "Space Launch System, cohete superpesado del programa Artemis. Artemis
+    I (2022) envi\xF3 Orion a la Luna."
+  payloadCapacities:
+  - regime: 0
+    payloadKg: 95000
+    confidence: 0
+    note: 95 t a LEO.
+  - regime: 1
+    payloadKg: 40000
+    confidence: 2
+    note: "No es un perfil de misi\xF3n de SLS; estimaci\xF3n de juego."
+  - regime: 2
+    payloadKg: 32000
+    confidence: 2
+    note: "No es un perfil de misi\xF3n de SLS; estimaci\xF3n de juego."
+  - regime: 3
+    payloadKg: 27000
+    confidence: 0
+    note: ">27 t a inyecci\xF3n translunar (TLI)."
+  fairingDiameterM: 8.4
+  reliability: 0.95
+  launchCostMUSD: 2200
+  leadTimeMonths: 36
+  prefab: {fileID: 0}
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.nasa.gov/humans-in-space/space-launch-system/
+  sourceNotes: "Costo de producci\xF3n y operaci\xF3n por lanzamiento ~$2.2 mil M
+    seg\xFAn auditor\xEDa de NASA OIG (2022). Confiabilidad: 1/1 vuelos, valor de
+    juego."

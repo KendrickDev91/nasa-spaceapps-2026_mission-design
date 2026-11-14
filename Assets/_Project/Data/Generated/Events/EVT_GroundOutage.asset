@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1127b33910611634dbf6776a933b1d10, type: 3}
+  m_Name: EVT_GroundOutage
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.RandomEventSO
+  eventId: EVT_GROUND_OUTAGE
+  displayName: "Conflicto de agenda DSN / falla de estaci\xF3n terrena"
+  eventType: 3
+  description: "Una misi\xF3n prioritaria ocupa las antenas o una estaci\xF3n queda
+    fuera de servicio: se reduce el tiempo de contacto."
+  isPositive: 0
+  baseProbability: 0.2
+  orbitModifiers:
+  - regime: 0
+    multiplier: 0.8
+  - regime: 1
+    multiplier: 1
+  - regime: 2
+    multiplier: 0.5
+  - regime: 3
+    multiplier: 1.8
+  affectedPhase: 4
+  scienceMultiplier: 1
+  dataGenerationMultiplier: 1
+  commsMultiplier: 0.6
+  permanentPowerLossFraction: 0
+  componentFailureChance: 0
+  requiresSafeMode: 0
+  safeModeHours: 0
+  mitigationAdvice: "A\xF1ade memoria a bordo y margen de enlace; reserva m\xE1s
+    horas de contacto o una antena de mayor ganancia."
+  educationalFact: "La DSN tiene complejos en Goldstone, Madrid y Canberra, separados
+    ~120\xB0 para cubrir el cielo las 24 h; su demanda supera su capacidad."
+  dataConfidence: 1
+  sourceUrl: https://www.nasa.gov/communicating-with-missions/dsn/

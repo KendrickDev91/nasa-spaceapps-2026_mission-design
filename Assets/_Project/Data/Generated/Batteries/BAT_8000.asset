@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37f4cfe53d372674b8694aa5d65e963c, type: 3}
+  m_Name: BAT_8000
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.BatterySO
+  componentId: BAT_8000
+  displayName: Li-ion 8 000 Wh
+  description: "Paquete de celdas Li-ion con electr\xF3nica de control (~130-150
+    Wh/kg a nivel de paquete)."
+  heritage: 
+  massKg: 60
+  costMUSD: 8
+  peakPowerW: 0
+  developmentMonths: 4
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 6
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://www.nasa.gov/smallsat-institute/sst-soa/power-subsystems/
+  sourceNotes: 
+  capacityWh: 8000
+  maxDepthOfDischarge: 0.6

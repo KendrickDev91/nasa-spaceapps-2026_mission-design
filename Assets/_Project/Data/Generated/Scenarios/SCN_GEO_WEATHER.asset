@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b60e119576b1c1d449cc69271dba3a40, type: 3}
+  m_Name: SCN_GEO_WEATHER
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.MissionScenarioSO
+  scenarioId: SCN_GEO_WEATHER
+  displayName: "Centinela meteorol\xF3gico geoestacionario"
+  briefing: "Vigila huracanes en tiempo real sobre las Am\xE9ricas. El enlace de
+    datos 24/7 es cr\xEDtico."
+  scienceObjectiveTag: meteorologia
+  budgetLimitMUSD: 1200
+  maxDevelopmentMonths: 72
+  targetMissionLifeMonths: 120
+  minScienceValue: 80
+  allowedOrbits: 02000000

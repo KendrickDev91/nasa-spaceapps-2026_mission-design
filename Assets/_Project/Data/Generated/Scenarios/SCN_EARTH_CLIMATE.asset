@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b60e119576b1c1d449cc69271dba3a40, type: 3}
+  m_Name: SCN_EARTH_CLIMATE
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.MissionScenarioSO
+  scenarioId: SCN_EARTH_CLIMATE
+  displayName: "Vigilancia clim\xE1tica de la Tierra"
+  briefing: "El Consejo de Ciencias de la Tierra necesita datos globales de nubes,
+    incendios y carbono. Dise\xF1a un observatorio en \xF3rbita baja."
+  scienceObjectiveTag: clima
+  budgetLimitMUSD: 600
+  maxDevelopmentMonths: 60
+  targetMissionLifeMonths: 60
+  minScienceValue: 120
+  allowedOrbits: 00000000

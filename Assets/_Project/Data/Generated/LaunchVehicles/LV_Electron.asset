@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4be6a4f07b67e104ca702222b2fb5386, type: 3}
+  m_Name: LV_Electron
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.LaunchVehicleSO
+  vehicleId: LV_ELECTRON
+  displayName: Electron
+  operatorName: Rocket Lab
+  country: EE.UU. / Nueva Zelanda
+  description: "Lanzador dedicado de peque\xF1os sat\xE9lites. Lanz\xF3 CAPSTONE
+    (NASA) hacia la Luna con la etapa Photon."
+  payloadCapacities:
+  - regime: 0
+    payloadKg: 300
+    confidence: 0
+    note: 300 kg a LEO baja; ~200 kg a SSO 500 km.
+  - regime: 1
+    payloadKg: 0
+    confidence: 0
+    note: No ofrecido.
+  - regime: 2
+    payloadKg: 0
+    confidence: 0
+    note: No ofrecido.
+  - regime: 3
+    payloadKg: 30
+    confidence: 1
+    note: Con etapa Photon; CAPSTONE pesaba ~25 kg.
+  fairingDiameterM: 1.2
+  reliability: 0.92
+  launchCostMUSD: 7.5
+  leadTimeMonths: 6
+  prefab: {fileID: 0}
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.rocketlabusa.com/launch/electron/
+  sourceNotes: Costo aproximado por lanzamiento dedicado. Confiabilidad redondeada
+    del historial de vuelos.

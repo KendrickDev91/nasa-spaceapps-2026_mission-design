@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8af0deda2731fab4887aab64f35837da, type: 3}
+  m_Name: ANT_S
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.AntennaSO
+  componentId: ANT_S
+  displayName: Banda S (parche)
+  description: "Enlace de telemetr\xEDa y comandos de baja tasa, robusto y omnidireccional."
+  heritage: 
+  massKg: 2
+  costMUSD: 1.5
+  peakPowerW: 15
+  developmentMonths: 4
+  technologyReadinessLevel: 9
+  prefab: {fileID: 0}
+  socket: 4
+  icon: {fileID: 0}
+  dataConfidence: 2
+  sourceUrl: https://www.nasa.gov/smallsat-institute/sst-soa/soa-communications/
+  sourceNotes: "Modelo simplificado: tasa \u221D 1/r\xB2 desde la distancia de referencia,
+    limitada por el m\xF3dem."
+  band: 1
+  referenceDataRateMbps: 2
+  referenceRangeKm: 2000
+  maxDataRateMbps: 2
+  dsnCompatible: 1

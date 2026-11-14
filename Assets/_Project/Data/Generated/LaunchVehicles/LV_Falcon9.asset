@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4be6a4f07b67e104ca702222b2fb5386, type: 3}
+  m_Name: LV_Falcon9
+  m_EditorClassIdentifier: MissionDesign.Runtime::MissionDesign.Data.LaunchVehicleSO
+  vehicleId: LV_FALCON9
+  displayName: Falcon 9 (booster reutilizable)
+  operatorName: SpaceX
+  country: EE.UU.
+  description: "Cohete de dos etapas con primera etapa recuperable. Lanz\xF3 misiones
+    NASA como TESS, DART, PACE y SWOT."
+  payloadCapacities:
+  - regime: 0
+    payloadKg: 17500
+    confidence: 1
+    note: Reutilizable; 22 800 kg en modo desechable.
+  - regime: 1
+    payloadKg: 4000
+    confidence: 2
+    note: "Referencia: sat\xE9lites GPS III (~4 400 kg) a \xF3rbita de transferencia."
+  - regime: 2
+    payloadKg: 5500
+    confidence: 0
+    note: "Valor a GTO (reutilizable); el sat\xE9lite circulariza con su motor de
+      apogeo."
+  - regime: 3
+    payloadKg: 3000
+    confidence: 2
+    note: "Inyecci\xF3n translunar estimada (ref. IM-1 Nova-C ~1 900 kg)."
+  fairingDiameterM: 5.2
+  reliability: 0.99
+  launchCostMUSD: 69.75
+  leadTimeMonths: 12
+  prefab: {fileID: 0}
+  icon: {fileID: 0}
+  dataConfidence: 1
+  sourceUrl: https://www.spacex.com/vehicles/falcon-9/
+  sourceNotes: "Costo: precio de lista publicado por SpaceX (~$69.75 M). Confiabilidad
+    >99% hist\xF3rica."
