@@ -36,6 +36,7 @@ namespace MissionDesign.Editor
             db.realMissions = CreateRealMissions();
             AddCubeSatAndSandbox(db);
             AddCrewedArtemis(db);
+            AddExplorationCameras(db);
             int models = ModelLinker.LinkAll(db);
             Debug.Log($"[NASA DB] Modelos 3D vinculados: {models}");
 
@@ -541,6 +542,41 @@ namespace MissionDesign.Editor
             m.instrumentIds = instruments; m.tags = tags; m.massKg = mass; m.description = desc; m.sourceUrl = url;
             Save(m);
             return m;
+        }
+
+        /// <summary>
+        /// Cámaras de exploración: si la misión llega a la Luna toman fotografías que aparecen en el informe de exploración.
+        /// Incluye un kit genérico y ligero que cabe en cualquier nave (también CubeSats).
+        /// </summary>
+        private static void AddExplorationCameras(NasaDatabaseSO db)
+        {
+            var kit = Instrument("INS_EXPLORER_CAMS", "Kit de cámaras de exploración (4 cámaras)", InstrumentType.Camera,
+                "Cuatro cámaras compactas (gran angular, 35 mm, teleobjetivo y cámara de ingeniería) para documentar el viaje. " +
+                "Si la nave llega a la Luna, sus fotografías aparecen en el informe de la exploración.",
+                "Clase cámaras de ingeniería de naves pequeñas", mass: 3, cost: 1.5f, peakW: 30, avgW: 18, dataGB: 40, science: 20, months: 6,
+                orbits: new[] { OrbitRegime.Lunar, OrbitRegime.LunarFlyby }, tags: new[] { "luna", "fotografia", "divulgacion" },
+                conf: DataConfidence.GameEstimate, url: "https://www.nasa.gov/smallsat-institute/sst-soa/",
+                notes: "Valores de juego representativos de cámaras compactas para naves pequeñas.");
+            kit.requiredPointingDeg = 2f;
+            Save(kit);
+            if (!db.instruments.Contains(kit)) db.instruments.Add(kit);
+
+            var perDay = new Dictionary<string, int>
+            {
+                { "INS_ORION_CAMERAS", 6500 },   // ~10 000 fotos en total junto con las de la tripulación (Artemis II)
+                { "INS_CREW_CAMERAS", 3500 },
+                { "INS_EXPLORER_CAMS", 1800 },
+                { "INS_LROC", 450 },
+                { "INS_CUBECAM", 300 },
+            };
+            foreach (var i in db.instruments)
+            {
+                bool camera = perDay.TryGetValue(i.componentId, out int n);
+                if (i.isCamera == camera && i.photosPerDay == n) continue;
+                i.isCamera = camera;
+                i.photosPerDay = n;
+                Save(i);
+            }
         }
 
         private static InstrumentSO Instrument(string id, string name, InstrumentType type, string desc, string heritage,

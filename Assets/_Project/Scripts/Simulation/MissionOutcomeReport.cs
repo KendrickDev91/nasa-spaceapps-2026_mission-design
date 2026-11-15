@@ -105,6 +105,20 @@ namespace MissionDesign.Simulation
         public bool returnsToEarth;
         public bool crewed;
 
+        [Header("Exploración fotográfica")]
+        public bool reachedMoon;
+        [Tooltip("Qué fotografiaron las cámaras: \"Luna\" (destino lunar) o \"Tierra\" (órbita terrestre).")]
+        public string photoTarget;
+        public string[] cameras = Array.Empty<string>();
+        [Tooltip("Fotografías tomadas (estimación a escala real).")]
+        public int photosTaken;
+        public int photosTransmitted;
+        public int photosRecovered;
+        [Tooltip("Imágenes que el juego renderiza para el informe de exploración.")]
+        public int photoShots;
+        [Tooltip("De esas imágenes, las que llegaron a tierra (enlace o tarjetas SD).")]
+        public int photoShotsAvailable;
+
         [Header("Ciencia y programa")]
         public float scienceAchieved;
         public float scienceTarget;

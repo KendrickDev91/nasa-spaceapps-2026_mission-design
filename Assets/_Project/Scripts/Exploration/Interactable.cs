@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace MissionDesign.Exploration
 {
-    public enum InteractionKind { Info, OpenMissionDesign, PlansViewer }
+    public enum InteractionKind { Info, OpenMissionDesign, PlansViewer, Elevator }
 
     /// <summary>Punto de interacción (tecla E): muestra información, abre los planos o entra al diseño de misión.</summary>
     public sealed class Interactable : MonoBehaviour
@@ -13,6 +13,8 @@ namespace MissionDesign.Exploration
         public float radius = 2.6f;
         /// <summary>Si es true, el panel de información ofrece "Diseñar la misión".</summary>
         public bool offerMissionDesign;
+        /// <summary>Solo para InteractionKind.Elevator.</summary>
+        public ElevatorController elevator;
 
         /// <summary>Páginas {título, cuerpo} (se completan desde <see cref="SpaceCenterContent"/> al iniciar).</summary>
         public string[][] Pages { get; set; }
@@ -27,6 +29,7 @@ namespace MissionDesign.Exploration
                 "StackInfo" => SpaceCenterContent.Stacking,
                 "LaunchPanel" => SpaceCenterContent.LaunchPad,
                 "DesignConsole" => SpaceCenterContent.DesignConsole,
+                "CrewArm" => SpaceCenterContent.CrewArm,
                 _ => null
             };
         }

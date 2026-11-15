@@ -22,9 +22,22 @@ namespace MissionDesign.Exploration
         private float currentDistance;
 
         public bool InputLocked { get; set; }
+        public bool FirstPerson { get; private set; }
+        private Renderer[] bodyRenderers;
         public float Yaw => yaw;
 
         private void Start() => currentDistance = distance;
+
+        /// <summary>Alterna cámara en primera / tercera persona. En primera persona el cuerpo solo proyecta sombra.</summary>
+        public void SetFirstPerson(bool on)
+        {
+            FirstPerson = on;
+            if (target == null) return;
+            bodyRenderers = target.GetComponentsInChildren<Renderer>(true);
+            foreach (var r in bodyRenderers)
+                r.shadowCastingMode = on ? UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly : UnityEngine.Rendering.ShadowCastingMode.On;
+            if (on) pitch = Mathf.Clamp(pitch, -10f, 20f);
+        }
 
         public void SnapBehind(float newYaw)
         {
@@ -57,7 +70,17 @@ namespace MissionDesign.Exploration
                 {
                     if (kb.qKey.isPressed) yaw -= 90f * dt;
                     if (kb.zKey.isPressed) yaw += 90f * dt;
+                    if (kb.vKey.wasPressedThisFrame) SetFirstPerson(!FirstPerson);
                 }
+            }
+
+            if (FirstPerson)
+            {
+                // Ojos a la altura de la cabeza, un poco por delante para no ver el interior del modelo.
+                Quaternion look = Quaternion.Euler(Mathf.Clamp(pitch, -70f, 80f), yaw, 0f);
+                Vector3 eye = target.position + Vector3.up * 1.66f + Quaternion.Euler(0f, yaw, 0f) * Vector3.forward * 0.14f;
+                transform.SetPositionAndRotation(eye, look);
+                return;
             }
 
             Vector3 pivot = target.position + Vector3.up * pivotHeight;

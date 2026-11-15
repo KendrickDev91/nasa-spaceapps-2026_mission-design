@@ -18,12 +18,22 @@ namespace MissionDesign.UI.Visual3D
         [SerializeField] private LunarFlyover lunarFlyover;
         [SerializeField] private Transform controlRoomPose;
         [SerializeField] private float followSharpness = 6f;
+        [Tooltip("Pose frente a los operadores para ver su reacción cuando el lanzamiento es exitoso.")]
+        [SerializeField] private Transform reactionPose;
+        [SerializeField] private float reactionSeconds = 1.8f;
+        private float reactionUntil;
+        [Tooltip("Plano general alto: la sala con los operadores y la pantalla grande al fondo.")]
+        [SerializeField] private Transform wideRoomPose;
+        [SerializeField] private float wideSeconds = 2.6f;
+        private float phaseStart;
+        private bool inReaction;
 
         private MissionStateManager manager;
         private Pose designPose;
         private bool cut = true;
 
         public Shot Current { get; private set; } = Shot.Design;
+        public bool ShowingReaction => Time.time < reactionUntil;
 
         private void Start()
         {
@@ -52,14 +62,23 @@ namespace MissionDesign.UI.Visual3D
                 case MissionPhase.PostMission: next = Shot.ControlRoom; break;
                 default: next = Shot.Design; break;
             }
-            if (next != Current) cut = true;
+            if (next != Current && !(Current == Shot.ControlRoom && next == Shot.ControlRoom)) cut = true;
             Current = next;
+            phaseStart = Time.time;
+            if (phase == MissionPhase.OrbitInsertion && reactionPose != null)
+            {
+                reactionUntil = Time.time + reactionSeconds;
+                cut = true;
+            }
+            else reactionUntil = 0f;   // la reacción no tapa la trayectoria de la fase siguiente
         }
 
         private void LateUpdate()
         {
             if (mainCamera == null) return;
-            Pose target = TargetPose();
+            bool reacting = ShowingReaction;
+            if (reacting != inReaction) { cut = true; inReaction = reacting; }
+            Pose target = reacting ? new Pose(reactionPose.position, reactionPose.rotation) : TargetPose();
             if (cut)
             {
                 mainCamera.transform.SetPositionAndRotation(target.position, target.rotation);
@@ -79,7 +98,14 @@ namespace MissionDesign.UI.Visual3D
                 case Shot.Launch when launchSite != null: return launchSite.GetCameraPose();
                 case Shot.Orbit when orbitView != null: return orbitView.GetCameraPose();
                 case Shot.Lunar when lunarFlyover != null: return lunarFlyover.GetCameraPose();
-                case Shot.ControlRoom when controlRoomPose != null: return new Pose(controlRoomPose.position, controlRoomPose.rotation);
+                case Shot.ControlRoom when controlRoomPose != null:
+                {
+                    // Primero el plano general (sala + pantalla); luego la cámara se desliza al costado, con los operadores.
+                    bool wide = wideRoomPose != null && (manager.Phase == MissionPhase.PostMission || Time.time - phaseStart < wideSeconds);
+                    if (wide) return new Pose(wideRoomPose.position, wideRoomPose.rotation);
+                    float drift = Mathf.Sin((Time.time - phaseStart) * 0.35f) * 0.8f;
+                    return new Pose(controlRoomPose.position + controlRoomPose.right * drift, controlRoomPose.rotation);
+                }
                 default: return designPose;
             }
         }

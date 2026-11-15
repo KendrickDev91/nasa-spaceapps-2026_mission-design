@@ -285,6 +285,18 @@ def dslr(id_):
     return done(r)
 
 
+def explorer_cams(id_):
+    """Kit de 4 cámaras compactas (gran angular, 35 mm, teleobjetivo e ingeniería) sobre una placa."""
+    r = mt.empty(id_)
+    mt.box("Plate", (0.32, 0.32, 0.03), (0, 0, 0.015), M["alu"], r)
+    for k, (x, y, lens_len) in enumerate(((-0.08, -0.08, 0.03), (0.08, -0.08, 0.06), (-0.08, 0.08, 0.12), (0.08, 0.08, 0.04))):
+        mt.box(f"Cam{k}", (0.09, 0.09, 0.08), (x, y, 0.07), M["black"], r)
+        lens = mt.cylinder(f"Lens{k}", 0.028, lens_len, 0.0, M["lens"], r, verts=16)
+        lens.rotation_euler = (1.5708, 0, 0)
+        lens.location = (x, y + 0.045 + lens_len / 2, 0.07)
+    return done(r)
+
+
 def main():
     mt.reset_scene()
     mats()
@@ -299,7 +311,7 @@ def main():
         modis("INS_MODIS"), abi("INS_ABI"), oco2("INS_OCO2"), nisar("INS_NISAR"), lroc("INS_LROC"), gedi("INS_GEDI"),
         small_cam("INS_CUBECAM"), minxss("INS_MINXSS"),
         orion("BUS_ORION"), wing("SOL_ESM", 3, 0.5, 0.75, M["cells"], yoke=0.3), o2o_terminal("ANT_O2O"), patch("ANT_ORION_S", 0.22),
-        camera_cluster("INS_ORION_CAMERAS"), dslr("INS_CREW_CAMERAS"), cubesat("INS_ATENEA", 0.24, 0.34, 0.24),
+        camera_cluster("INS_ORION_CAMERAS"), dslr("INS_CREW_CAMERAS"), explorer_cams("INS_EXPLORER_CAMS"), cubesat("INS_ATENEA", 0.24, 0.34, 0.24),
     ]
     for root in built:               # separados en el .blend para editarlos
         root.location = (x, 0, 0)

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using MissionDesign.Characters;
 using MissionDesign.Exploration;
 using MissionDesign.UI;
 using MissionDesign.UI.Visual3D;
@@ -57,6 +58,8 @@ namespace MissionDesign.Editor
         public static void BuildEverything()
         {
             NasaDatabaseGenerator.Generate();
+            DemoDesigns.Generate();
+            GmatValidation.Export();
             Build();
             BuildSpaceCenter();
         }
@@ -102,10 +105,12 @@ namespace MissionDesign.Editor
             EditorUtility.SetDirty(marker);
 
             var props = new GameObject("Gameplay").transform;
+            BuildControlRoomCrew(room, props, controller, all);
             foreach (var t in all.Where(t => t.name.StartsWith("Door_X_") || t.name.StartsWith("Door_Y_"))) BuildDoor(t, props, glass);
             foreach (var t in all.Where(t => t.name.StartsWith("Sign_"))) BuildSign(t, props, board);
             foreach (var t in all.Where(t => t.name.StartsWith("Interact_"))) BuildInteractable(t, props, marker);
             BuildZones(props);
+            BuildElevator(props, marker);
             BuildInteriorLights(props);
 
             var spawn = all.FirstOrDefault(t => t.name == "SpawnPoint");
@@ -113,6 +118,19 @@ namespace MissionDesign.Editor
             var travel = BuildTravelPoints(props, spawnPos);
             var (player, camera) = BuildPlayer(controller, spawnPos + Vector3.up * 0.1f, 180f);
             BuildExplorationHud(camera, player, travel);
+            var hudComp = Object.FindAnyObjectByType<ExplorationHud>();
+            BuildMinimap((RectTransform)hudComp.transform, hudComp);
+            hudComp.gameObject.AddComponent<AudioSource>();
+            hudComp.gameObject.AddComponent<ExplorationSfx>();
+            var playerAnimator = player.GetComponentInChildren<Animator>();
+            if (playerAnimator != null)
+            {
+                player.gameObject.AddComponent<CrewPoser>().Configure(playerAnimator, null, false, 0);
+                player.gameObject.AddComponent<FootPlanter>().Configure(playerAnimator);
+                var outfit = player.gameObject.AddComponent<OutfitController>();
+                outfit.Configure(playerAnimator, new Color(0.62f, 0.78f, 1f), Color.white, Color.white, withHeadset: false, Outfit.Engineer);
+                Wire(hudComp, "playerOutfit", outfit);
+            }
 
             Directory.CreateDirectory(Path.GetDirectoryName(SpaceCenterScenePath) ?? "Assets");
             EditorSceneManager.SaveScene(scene, SpaceCenterScenePath);
@@ -178,10 +196,13 @@ namespace MissionDesign.Editor
                     c.name = name;
                     c.loopTime = loop;
                     c.lockRootRotation = c.keepOriginalOrientation = true;
-                    c.lockRootHeightY = c.keepOriginalPositionY = true;
+                    // Altura de la raíz "basada en los pies": el personaje apoya las suelas en el suelo (no flota).
+                    c.lockRootHeightY = true;
+                    c.keepOriginalPositionY = false;
+                    c.heightFromFeet = true;
                     c.lockRootPositionXZ = c.keepOriginalPositionXZ = true;
                     var existing = ai.clipAnimations;
-                    bool same = existing.Length == 1 && existing[0].name == name && existing[0].loopTime == loop && existing[0].lockRootPositionXZ;
+                    bool same = existing.Length == 1 && existing[0].name == name && existing[0].loopTime == loop && existing[0].lockRootPositionXZ && existing[0].heightFromFeet;
                     if (!same) { ai.clipAnimations = new[] { c }; ai.SaveAndReimport(); }
                 }
                 var clip = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AnimationClip>().FirstOrDefault(x => !x.name.StartsWith("__preview"));
@@ -228,7 +249,7 @@ namespace MissionDesign.Editor
             var cc = go.AddComponent<CharacterController>();
             cc.height = 1.8f;
             cc.radius = 0.32f;
-            cc.center = new Vector3(0f, 0.92f, 0f);
+            cc.center = new Vector3(0f, 0.9f + 0.04f, 0f);   // base de la cápsula = suelo + skinWidth
             cc.stepOffset = 0.45f;
             cc.slopeLimit = 50f;
             cc.skinWidth = 0.04f;
@@ -471,7 +492,8 @@ namespace MissionDesign.Editor
             Zone("Edificio de Ensamblaje", AssemblyOffset + new Vector3(0f, 30f, 0f), new Vector3(64f, 62f, 56f));
             Zone("Edificio de Ensamblaje · Sala limpia", AssemblyOffset + new Vector3(20f, 5f, -16f), new Vector3(15f, 12f, 15f));
             Zone("Camino de orugas", new Vector3(0f, 5f, 260f), new Vector3(44f, 20f, 140f));
-            Zone("Plataforma de lanzamiento", PadOffset + new Vector3(0f, 20f, -10f), new Vector3(96f, 60f, 140f));
+            Zone("Plataforma de lanzamiento", PadOffset + new Vector3(0f, 40f, -10f), new Vector3(96f, 100f, 140f));
+            Zone("Plataforma · Brazo de acceso de la tripulación", PadOffset + new Vector3(6f, 76f, 1f), new Vector3(14f, 6f, 8f));
         }
 
         private static void BuildInteriorLights(Transform parent)
@@ -514,6 +536,116 @@ namespace MissionDesign.Editor
             };
         }
 
+        /// <summary>
+        /// Ascensor de la torre de servicio hasta el brazo de acceso de la tripulación (75 m), con pasarela y barandas.
+        /// Coordenadas de la plataforma (Blender → Unity): x_U = −x_B, z_U = 420 − y_B, y_U = z_B + 2.
+        /// </summary>
+        private static void BuildElevator(Transform parent, Material markerMat)
+        {
+            var steel = CreateLitMaterial("MAT_ElevatorSteel", new Color(0.55f, 0.57f, 0.6f));
+            var yellow = CreateLitMaterial("MAT_ElevatorYellow", new Color(0.95f, 0.75f, 0.1f));
+            var root = new GameObject("ServiceTowerElevator").transform;
+            root.SetParent(parent, false);
+            Vector3 shaft = PadOffset + new Vector3(9f, 0f, 5f);          // Blender (−9, −5) junto a la torre
+            const float half = 1.6f, top = 77.3f, bottom = 2f;
+
+            GameObject Box(string name, Vector3 center, Vector3 size, Material mat, Transform p = null, bool collider = true)
+            {
+                var b = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                b.name = name;
+                if (!collider) Object.DestroyImmediate(b.GetComponent<Collider>());
+                b.transform.SetParent(p != null ? p : root, true);
+                b.transform.position = center;
+                b.transform.localScale = size;
+                b.GetComponent<Renderer>().sharedMaterial = mat;
+                return b;
+            }
+
+            // Hueco: cuatro columnas y travesaños cada 8 m.
+            foreach (var (sx, sz) in new[] { (-1f, -1f), (1f, -1f), (1f, 1f), (-1f, 1f) })
+                Box("ShaftColumn", shaft + new Vector3(sx * (half + 0.25f), (top + 2.5f) * 0.5f, sz * (half + 0.25f)), new Vector3(0.25f, top + 2.5f - bottom + 2f, 0.25f), steel);
+            for (float y = bottom + 8f; y < top; y += 8f)
+            {
+                Box("ShaftRing", shaft + new Vector3(0f, y, half + 0.25f), new Vector3(2f * half + 0.5f, 0.18f, 0.18f), steel, null, false);
+                Box("ShaftRing", shaft + new Vector3(half + 0.25f, y, 0f), new Vector3(0.18f, 0.18f, 2f * half + 0.5f), steel, null, false);
+                Box("ShaftRing", shaft + new Vector3(-half - 0.25f, y, 0f), new Vector3(0.18f, 0.18f, 2f * half + 0.5f), steel, null, false);
+            }
+
+            // Cabina: piso, barandas en tres lados (abierta hacia la pasarela, −Z) y luz.
+            var platform = Box("ElevatorPlatform", shaft + new Vector3(0f, bottom - 0.15f, 0f), new Vector3(2f * half, 0.3f, 2f * half), yellow);
+            Box("RailBack", shaft + new Vector3(0f, bottom + 0.55f, half - 0.05f), new Vector3(2f * half, 1.1f, 0.08f), steel, platform.transform);
+            Box("RailLeft", shaft + new Vector3(-half + 0.05f, bottom + 0.55f, 0f), new Vector3(0.08f, 1.1f, 2f * half), steel, platform.transform);
+            Box("RailRight", shaft + new Vector3(half - 0.05f, bottom + 0.55f, 0f), new Vector3(0.08f, 1.1f, 2f * half), steel, platform.transform);
+            var lamp = new GameObject("CabLight").AddComponent<Light>();
+            lamp.transform.SetParent(platform.transform, false);
+            lamp.transform.position = shaft + new Vector3(0f, bottom + 2.4f, 0f);
+            lamp.type = LightType.Point; lamp.range = 6f; lamp.intensity = 1.5f; lamp.color = new Color(1f, 0.9f, 0.7f);
+
+            // Pasarela desde el ascensor hasta el brazo (x_U 1,35…11,85, z_U 418,8…421,2, superficie 77,3 m) y barandas.
+            Box("Walkway", new Vector3(shaft.x, top - 0.15f, (421.2f + shaft.z - half) * 0.5f), new Vector3(2.4f, 0.3f, shaft.z - half - 421.2f + 0.4f), steel);
+            Box("WalkwayRailL", new Vector3(shaft.x - 1.2f, top + 0.55f, (421.2f + shaft.z - half) * 0.5f), new Vector3(0.08f, 1.1f, shaft.z - half - 421.2f), steel);
+            Box("WalkwayRailR", new Vector3(shaft.x + 1.2f, top + 0.55f, (421.2f + shaft.z - half) * 0.5f), new Vector3(0.08f, 1.1f, shaft.z - half - 421.2f), steel);
+            Box("ArmRailNorth", new Vector3(6.6f, top + 0.55f, 418.8f), new Vector3(10.5f, 1.1f, 0.08f), steel);
+            Box("ArmRailSouthA", new Vector3((1.35f + shaft.x - 1.2f) * 0.5f, top + 0.55f, 421.2f), new Vector3(shaft.x - 1.2f - 1.35f, 1.1f, 0.08f), steel);
+            Box("ArmRailSouthB", new Vector3((shaft.x + 1.2f + 11.85f) * 0.5f, top + 0.55f, 421.2f), new Vector3(11.85f - shaft.x - 1.2f, 1.1f, 0.08f), steel);
+
+            var elevator = root.gameObject.AddComponent<ElevatorController>();
+            Wire(elevator, "platform", platform.transform);
+            var so = new SerializedObject(elevator);
+            so.FindProperty("bottomSurfaceY").floatValue = bottom;
+            so.FindProperty("topSurfaceY").floatValue = top;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            Interactable Point(string id, Vector3 pos, Transform p, InteractionKind kind, string prompt, float radius)
+            {
+                var go = new GameObject("Interact_" + id);
+                go.transform.SetParent(p, true);
+                go.transform.position = pos;
+                var it = go.AddComponent<Interactable>();
+                it.interactionId = id;
+                it.kind = kind;
+                it.prompt = prompt;
+                it.radius = radius;
+                if (kind == InteractionKind.Elevator) it.elevator = elevator;
+                var m = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Object.DestroyImmediate(m.GetComponent<Collider>());
+                m.name = "Marker";
+                m.transform.SetParent(go.transform, false);
+                m.transform.localPosition = new Vector3(0f, 2.3f, 0f);
+                m.transform.localRotation = Quaternion.Euler(45f, 0f, 45f);
+                m.transform.localScale = Vector3.one * 0.22f;
+                m.GetComponent<Renderer>().sharedMaterial = markerMat;
+                return it;
+            }
+            Point("ElevatorCab", shaft + new Vector3(0f, bottom, 0f), platform.transform, InteractionKind.Elevator, "Ascensor", 1.5f);
+            Point("ElevatorCallBottom", shaft + new Vector3(0f, bottom, -half - 1.6f), root, InteractionKind.Elevator, "Llamar al ascensor", 1.6f);
+            Point("ElevatorCallTop", new Vector3(shaft.x, top, 422.4f), root, InteractionKind.Elevator, "Llamar al ascensor", 1.3f);
+            Point("CrewArm", new Vector3(5f, top, 420f), root, InteractionKind.Info, "Brazo de acceso de la tripulación: cómo entran los astronautas", 2.4f);
+        }
+
+        /// <summary>Operadores tecleando en la sala de control del centro espacial y el círculo de entrada al diseño.</summary>
+        private static void BuildControlRoomCrew(GameObject room, Transform parent, RuntimeAnimatorController controller, List<Transform> all)
+        {
+            if (room == null) return;
+            var seats = Seats(room.transform);
+            var console = all.FirstOrDefault(t => t.name == "Interact_DesignConsole");
+            var screen = Find(room, "Screen_Main");
+            var back = Find(room, "CameraSpot_Back");
+            Vector3 facing = screen != null && back != null ? screen.position - back.position : Vector3.back;
+            Transform designSeat = console != null && seats.Count > 0
+                ? seats.OrderBy(s => (s.position - console.position).sqrMagnitude).First()
+                : seats.FirstOrDefault();
+            if (designSeat != null) BuildDesignRing(parent, designSeat.position, facing);
+            DecorateControlRoom(room.transform, room.transform, facing);
+            int k = 0;
+            for (int i = 0; i < seats.Count; i++)
+            {
+                if (seats[i] == designSeat || i % 3 != 0) continue;
+                SpawnCrew($"Operator_{k}", parent, seats[i].position, facing, k, controller, ambient: true);
+                k++;
+            }
+        }
+
         // ───────────────────────────── HUD ─────────────────────────────
 
         private static void BuildExplorationHud(Camera camera, PlayerController player, Transform[] travelPoints)
@@ -544,7 +676,7 @@ namespace MissionDesign.Editor
             Place(zone.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(20f, -36f), new Vector2(-40f, 40f));
 
             // Controles (abajo a la izquierda).
-            var hint = Text("Controls", root, "WASD caminar · Shift correr · Espacio saltar · Clic derecho + ratón cámara · Rueda zoom · E interactuar · M planos · Esc menú",
+            var hint = Text("Controls", root, "WASD caminar · Shift correr · Espacio saltar · Clic derecho + ratón cámara · Rueda zoom · V 1.ª/3.ª persona · E interactuar · M planos · N mapa · Esc menú",
                 16, UiTheme.TextDim, TextAlignmentOptions.BottomLeft);
             Place(hint.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(24f, 18f), new Vector2(-48f, 26f));
 
@@ -630,6 +762,21 @@ namespace MissionDesign.Editor
             WireArray(hud, "travelButtons", travelButtons);
             WireArray(hud, "travelPoints", travelPoints.Cast<Object>().ToArray());
             WireArray(hud, "planTextures", LoadPlanTextures());
+
+            // Avisos (cambio de equipo, entrada a la consola) y fundido a negro.
+            var toast = Panel("Toast", root, new Color(0.02f, 0.05f, 0.11f, 0.9f));
+            Place(toast, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -120f), new Vector2(900f, 54f));
+            var toastGroup = toast.gameObject.AddComponent<CanvasGroup>();
+            var toastText = Text("Text", toast, "", 21, new Color(1f, 0.88f, 0.5f), TextAlignmentOptions.Center);
+            Stretch(toastText.rectTransform);
+            var fadeRt = NewRect("Fade", root);
+            Stretch(fadeRt);
+            var fade = fadeRt.gameObject.AddComponent<Image>();
+            fade.color = new Color(0f, 0f, 0f, 0f);
+            fade.raycastTarget = false;
+            Wire(hud, "toastGroup", toastGroup);
+            Wire(hud, "toastText", toastText);
+            Wire(hud, "fade", fade);
         }
 
         private static void SetFloat(Object target, string field, float value)

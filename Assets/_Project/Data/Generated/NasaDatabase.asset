@@ -36,6 +36,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7825205956e840243a01461055269b56, type: 2}
   - {fileID: 11400000, guid: a930643ee99f1cd458118a4d2adddb4a, type: 2}
   - {fileID: 11400000, guid: 50fef9845540ae94ba33b36f3e58f6ad, type: 2}
+  - {fileID: 11400000, guid: d4729415dacbe004aa1de3c87d9d90d0, type: 2}
   buses:
   - {fileID: 11400000, guid: 7c6bcb732a1678048b3e36b45150d4d7, type: 2}
   - {fileID: 11400000, guid: fc87a5075788fb34dbf6d27fdc0b5125, type: 2}

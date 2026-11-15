@@ -1,0 +1,104 @@
+%  MISSION TRADE-OFF - validacion de la trayectoria de retorno libre (tipo Artemis II) con NASA GMAT
+%  Estado inicial = salida del modelo CR3BP del juego justo despues de la TLI:
+%    parking 185 km - angulo 228.000 deg - 10.9702 km/s
+%    CR3BP: sobrevuelo 7283 km (dia 2.82) - perigeo de regreso 50 km (dia 9.31)
+%  Generado automaticamente por Unity (NASA SpaceApps -> Export GMAT Validation Script).
+
+Create CoordinateSystem EarthMoonRot;
+EarthMoonRot.Origin = Earth;
+EarthMoonRot.Axes = ObjectReferenced;
+EarthMoonRot.XAxis = R;
+EarthMoonRot.ZAxis = N;
+EarthMoonRot.Primary = Earth;
+EarthMoonRot.Secondary = Luna;
+
+Create Spacecraft Orion;
+Orion.DateFormat = UTCGregorian;
+Orion.Epoch = '02 Apr 2026 23:30:00.000';
+Orion.CoordinateSystem = EarthMoonRot;
+Orion.DisplayStateType = Cartesian;
+Orion.X = -4391.5958404262592;
+Orion.Y = -4877.3613004492272;
+Orion.Z = 0;
+Orion.VX = 8.1394394718977114;
+Orion.VY = -7.3287842188141781;
+Orion.VZ = 0;
+Orion.DryMass = 26500;
+
+Create Spacecraft OrionTCM;
+OrionTCM.DateFormat = UTCGregorian;
+OrionTCM.Epoch = '02 Apr 2026 23:30:00.000';
+OrionTCM.CoordinateSystem = EarthMoonRot;
+OrionTCM.DisplayStateType = Cartesian;
+OrionTCM.X = -4391.5958404262592;
+OrionTCM.Y = -4877.3613004492272;
+OrionTCM.Z = 0;
+OrionTCM.VX = 8.1394394718977114;
+OrionTCM.VY = -7.3287842188141781;
+OrionTCM.VZ = 0;
+OrionTCM.DryMass = 26500;
+
+Create ForceModel CislunarFM;
+CislunarFM.CentralBody = Earth;
+CislunarFM.PrimaryBodies = {Earth};
+CislunarFM.PointMasses = {Sun, Luna};
+CislunarFM.Drag = None;
+CislunarFM.SRP = Off;
+CislunarFM.GravityField.Earth.Degree = 4;
+CislunarFM.GravityField.Earth.Order = 4;
+
+Create Propagator CislunarProp;
+CislunarProp.FM = CislunarFM;
+CislunarProp.Type = RungeKutta89;
+CislunarProp.InitialStepSize = 30;
+CislunarProp.Accuracy = 1e-11;
+CislunarProp.MinStep = 0.001;
+CislunarProp.MaxStep = 3600;
+CislunarProp.MaxStepAttempts = 50;
+
+Create ImpulsiveBurn TCM;
+TCM.CoordinateSystem = Local;
+TCM.Origin = Earth;
+TCM.Axes = VNB;
+TCM.Element1 = 0;
+TCM.Element2 = 0;
+TCM.Element3 = 0;
+
+Create DifferentialCorrector DC;
+DC.MaximumIterations = 60;
+
+Create Variable t0 nomFlybyAlt nomFlybyDay nomPerigeeAlt nomReturnDay corrFlybyAlt corrFlybyDay corrPerigeeAlt corrReturnDay tcmMag;
+
+Create ReportFile Results;
+Results.Filename = 'C:/DEV/unity/nasa-spaceapps-2026_mission-design/docs/validacion/gmat/resultados_gmat.txt';
+Results.WriteHeaders = false;
+Results.Precision = 10;
+
+BeginMissionSequence;
+t0 = Orion.A1ModJulian;
+
+% 1) Estado nominal del juego propagado con efemerides reales (sin correcciones)
+Propagate 'Nominal a periselenio' CislunarProp(Orion) {Orion.Luna.Periapsis, Orion.ElapsedDays = 7};
+nomFlybyAlt = Orion.Luna.Altitude;
+nomFlybyDay = Orion.A1ModJulian - t0;
+Propagate 'Nominal a perigeo' CislunarProp(Orion) {Orion.Earth.Periapsis, Orion.ElapsedDays = 9};
+nomPerigeeAlt = Orion.Earth.Altitude;
+nomReturnDay = Orion.A1ModJulian - t0;
+Report Results nomFlybyAlt nomFlybyDay nomPerigeeAlt nomReturnDay;
+
+% 2) Correccion de rumbo (TCM) justo despues de la TLI: sobrevuelo de 7 400 km y perigeo de 50 km
+Target 'Corregir retorno libre' DC {SolveMode = Solve, ExitMode = SaveAndContinue};
+   Vary 'TCM velocidad' DC(TCM.Element1 = 0, {Perturbation = 1e-6, Lower = -0.3, Upper = 0.3, MaxStep = 0.004});
+   Vary 'TCM radial' DC(TCM.Element3 = 0, {Perturbation = 1e-6, Lower = -0.3, Upper = 0.3, MaxStep = 0.004});
+   Maneuver TCM(OrionTCM);
+   Propagate 'A periselenio' CislunarProp(OrionTCM) {OrionTCM.Luna.Periapsis, OrionTCM.ElapsedDays = 7};
+   corrFlybyAlt = OrionTCM.Luna.Altitude;
+   corrFlybyDay = OrionTCM.A1ModJulian - t0;
+   Achieve 'Sobrevuelo 7400 km' DC(OrionTCM.Luna.Altitude = 7283, {Tolerance = 25});
+   Propagate 'A perigeo' CislunarProp(OrionTCM) {OrionTCM.Earth.Periapsis, OrionTCM.ElapsedDays = 9};
+   Achieve 'Perigeo 50 km' DC(OrionTCM.Earth.Altitude = 50, {Tolerance = 10});
+EndTarget;
+corrPerigeeAlt = OrionTCM.Earth.Altitude;
+corrReturnDay = OrionTCM.A1ModJulian - t0;
+tcmMag = sqrt(TCM.Element1^2 + TCM.Element3^2) * 1000;
+Report Results corrFlybyAlt corrFlybyDay corrPerigeeAlt corrReturnDay tcmMag;

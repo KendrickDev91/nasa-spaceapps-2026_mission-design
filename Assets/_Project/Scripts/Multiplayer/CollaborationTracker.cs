@@ -18,6 +18,7 @@ namespace MissionDesign.Multiplayer
             if (manager == null) return;
             manager.Design.Changed += OnDesignChanged;
             manager.DesignEvaluated += OnDesignEvaluated;
+            if (roles != null) roles.ApprovalsChanged += OnApprovalsChanged;
         }
 
         private void OnDestroy()
@@ -25,6 +26,15 @@ namespace MissionDesign.Multiplayer
             if (manager == null) return;
             if (manager.Design != null) manager.Design.Changed -= OnDesignChanged;
             manager.DesignEvaluated -= OnDesignEvaluated;
+            if (roles != null) roles.ApprovalsChanged -= OnApprovalsChanged;
+        }
+
+        private void OnApprovalsChanged()
+        {
+            if (manager == null || manager.Phase != MissionPhase.Design) return;
+            // Solo cuenta el rol que pulsó "Aprobar" (el rol activo). Con 1 jugador, un clic aprueba los 4 roles
+            // a la vez, pero eso es una sola persona revisando, no cuatro.
+            if (roles.IsApproved(roles.ActiveRole)) Log.RecordApproval(roles.ActiveRole);
         }
 
         private void OnDesignChanged()

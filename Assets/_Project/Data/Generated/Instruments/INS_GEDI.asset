@@ -41,3 +41,5 @@ MonoBehaviour:
   - tierra
   - bosques
   - carbono
+  isCamera: 0
+  photosPerDay: 0

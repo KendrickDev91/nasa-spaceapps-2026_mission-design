@@ -40,3 +40,5 @@ MonoBehaviour:
   - luna
   - radiacion
   - cubesat
+  isCamera: 0
+  photosPerDay: 0

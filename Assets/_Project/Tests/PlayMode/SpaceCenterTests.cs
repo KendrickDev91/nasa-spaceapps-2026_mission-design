@@ -1,11 +1,13 @@
 using System.Collections;
 using System.IO;
 using System.Linq;
+using MissionDesign.Characters;
 using MissionDesign.Core;
 using MissionDesign.Exploration;
 using MissionDesign.Multiplayer;
 using MissionDesign.Simulation;
 using MissionDesign.UI;
+using MissionDesign.UI.Visual3D;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -34,6 +36,11 @@ namespace MissionDesign.Tests
             Assert.GreaterOrEqual(Object.FindObjectsByType<Interactable>().Length, 6);
             var doors = Object.FindObjectsByType<AutoDoor>();
             Assert.GreaterOrEqual(doors.Length, 3);
+            Assert.IsTrue(hud.MapRendered, "El mapa geolocalizador debe renderizarse al iniciar.");
+            StringAssert.Contains("° N", hud.GeoText);
+            Assert.AreEqual(7.5f, player.RunSpeed, 0.01f, "+25 % de velocidad");
+            Assert.GreaterOrEqual(Object.FindObjectsByType<CrewPoser>().Length, 5, "Operadores sentados en la sala de control + jugador.");
+            Assert.IsNotNull(Object.FindAnyObjectByType<DesignEntryRing>(), "Falta el círculo de entrada al diseño.");
             yield return Capture("Logs/spacecenter_01_entrance.png");
 
             // Caminar hacia el Centro de Control: avanza, se anima y abre la puerta de entrada.
@@ -82,7 +89,13 @@ namespace MissionDesign.Tests
             player.SimulatedMove = Vector2.zero;
             yield return new WaitForSeconds(0.3f);
             StringAssert.Contains("Ensamblaje", hud.CurrentZone, "El jugador debe entrar al edificio por la puerta de personal.");
+            Assert.AreEqual(Outfit.AssemblyEngineer, hud.CurrentOutfit, "En la nave de ensamblaje lleva casco.");
             yield return Capture("Logs/spacecenter_06_assembly.png");
+            var cleanRoom = Object.FindObjectsByType<ZoneVolume>().First(z => z.zoneName.Contains("Sala limpia"));
+            player.Teleport(cleanRoom.transform.position + new Vector3(3.5f, -4.9f, 3.5f), 225f);   // dentro de las cortinas, junto a la cápsula
+            yield return new WaitForSeconds(0.5f);
+            Assert.AreEqual(Outfit.CleanRoom, hud.CurrentOutfit, "En la sala limpia, mono, capucha y mascarilla.");
+            yield return Capture("Logs/spacecenter_06b_cleanroom_suit.png");
             hud.TravelTo(3);
             yield return new WaitForSeconds(0.6f);
             player.SimulatedMove = new Vector2(0f, 1f);
@@ -91,12 +104,114 @@ namespace MissionDesign.Tests
             player.SimulatedMove = Vector2.zero;
             yield return new WaitForSeconds(0.5f);
             Assert.Greater(player.transform.position.y, 1.5f, "El jugador debe subir la rampa hasta la losa.");
+            Assert.AreEqual(Outfit.Astronaut, hud.CurrentOutfit, "En la plataforma, traje espacial con casco.");
             yield return Capture("Logs/spacecenter_07_launch_pad.png");
 
             var panel = Object.FindObjectsByType<Interactable>().First(i => i.interactionId == "LaunchPanel");
             hud.Interact(panel);
             Assert.AreEqual(3, hud.PageCount, "Plataforma, retorno libre y fotos de Artemis II.");
             hud.CloseInfo();
+        }
+
+        [UnityTest]
+        public IEnumerator DesignRing_SeatsThePlayer_AndOpensMissionDesign()
+        {
+            SceneManager.LoadScene(SceneFlow.SpaceCenterScene);
+            yield return null;
+            yield return new WaitForSeconds(0.8f);
+            var player = Object.FindAnyObjectByType<PlayerController>();
+            var ring = Object.FindAnyObjectByType<DesignEntryRing>();
+            Assert.IsNotNull(ring);
+            player.Teleport(ring.transform.position + Vector3.up * 0.05f + ring.transform.forward * 1.6f, 180f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Capture("Logs/spacecenter_08_design_ring.png");
+            player.Teleport(ring.transform.position + Vector3.up * 0.05f, 180f);
+            float t0 = Time.realtimeSinceStartup;
+            while (!ring.IsEntering && Time.realtimeSinceStartup - t0 < 3f) yield return null;
+            Assert.IsTrue(ring.IsEntering, "Pisar el círculo debe iniciar la entrada al diseño.");
+            yield return new WaitForSeconds(1.0f);
+            Assert.Greater(player.GetComponent<CrewPoser>().SitAmount, 0.5f, "El personaje se sienta en la silla.");
+            yield return Capture("Logs/spacecenter_09_seated.png");
+            t0 = Time.realtimeSinceStartup;
+            while (SceneManager.GetActiveScene().name != SceneFlow.MissionDesignScene && Time.realtimeSinceStartup - t0 < 6f) yield return null;
+            yield return null;
+            yield return null;
+            Assert.AreEqual(SceneFlow.MissionDesignScene, SceneManager.GetActiveScene().name);
+            Assert.IsFalse(Object.FindAnyObjectByType<GameMenus>().IsBlocking, "Desde la consola se entra directo al diseño (sin menú principal).");
+        }
+
+        [UnityTest]
+        public IEnumerator Feet_Elevator_AndFirstPerson()
+        {
+            SceneManager.LoadScene(SceneFlow.SpaceCenterScene);
+            yield return null;
+            yield return new WaitForSeconds(1.2f);
+            var player = Object.FindAnyObjectByType<PlayerController>();
+            var hud = Object.FindAnyObjectByType<ExplorationHud>();
+
+            // Pies apoyados: la suela más baja queda a menos de 4 cm del suelo, quieto y caminando.
+            var planter = player.GetComponent<FootPlanter>();
+            Assert.IsNotNull(planter);
+            Assert.Less(Mathf.Abs(planter.LastGap), 0.04f, $"De pie: hueco {planter.LastGap:F3} m");
+            player.SimulatedMove = new Vector2(0f, 1f);
+            yield return new WaitForSeconds(1.5f);
+            Assert.Less(Mathf.Abs(planter.LastGap), 0.06f, $"Caminando: hueco {planter.LastGap:F3} m");
+            player.SimulatedMove = Vector2.zero;
+            yield return Capture("Logs/spacecenter_10_feet.png");
+
+            // Ascensor de la torre: subir al brazo de acceso de la tripulación.
+            var elevator = Object.FindAnyObjectByType<ElevatorController>();
+            Assert.IsNotNull(elevator, "Falta el ascensor de la torre de servicio.");
+            var cab = Object.FindObjectsByType<Interactable>().First(i => i.interactionId == "ElevatorCab");
+            player.Teleport(cab.transform.position + Vector3.up * 0.1f, 0f);
+            yield return new WaitForSeconds(0.4f);
+            Assert.IsTrue(elevator.IsOnPlatform(player.transform.position), "El jugador debe estar en la cabina.");
+            hud.Interact(cab);
+            float t0 = Time.realtimeSinceStartup;
+            while (!elevator.AtTop && Time.realtimeSinceStartup - t0 < 20f) yield return null;
+            yield return new WaitForSeconds(0.3f);
+            Assert.IsTrue(elevator.AtTop);
+            Assert.Greater(player.transform.position.y, 76f, "El jugador sube con la plataforma.");
+            player.SimulatedMove = new Vector2(0f, 1f);    // cámara mirando a +Z: sale por la pasarela hacia el brazo
+            var cam = Object.FindAnyObjectByType<ThirdPersonCamera>();
+            cam.SnapBehind(180f);
+            yield return new WaitForSeconds(1.6f);
+            player.SimulatedMove = Vector2.zero;
+            Assert.Greater(player.transform.position.y, 76f, "No se cae de la pasarela.");
+            StringAssert.Contains("Brazo de acceso", hud.CurrentZone);
+            yield return Capture("Logs/spacecenter_11_crew_arm.png");
+
+            // Primera persona.
+            cam.SetFirstPerson(true);
+            cam.SnapBehind(270f);
+            yield return new WaitForSeconds(0.2f);
+            Assert.IsTrue(cam.FirstPerson);
+            Assert.Less(Vector3.Distance(cam.transform.position, player.transform.position + Vector3.up * 1.66f), 0.3f);
+            yield return Capture("Logs/spacecenter_12_first_person.png");
+            cam.SetFirstPerson(false);
+        }
+
+        [UnityTest]
+        public IEnumerator DemoDesigns_AreListed_AndLoadWithTheirFixedSeed()
+        {
+            SceneManager.LoadScene(SceneFlow.MissionDesignScene);
+            yield return null;
+            yield return null;
+            Object.FindAnyObjectByType<GameMenus>().CloseAll();
+            var demos = DesignLibrary.Demos();
+            Assert.AreEqual(3, demos.Count, "Tres diseños de demostración en StreamingAssets/Demos.");
+            var library = Object.FindAnyObjectByType<DesignLibraryPanel>();
+            var runner = Object.FindAnyObjectByType<MissionSimulationRunner>();
+            foreach (var (_, demo) in demos)
+            {
+                Assert.IsTrue(demo.IsDemo);
+                library.Load(demo);
+                yield return null;
+                Assert.AreEqual(demo.demoSeed, runner.FixedSeed);
+                Assert.IsTrue(MissionStateManager.Instance.CurrentValidation.canLaunch, $"{demo.designName}: {MissionStateManager.Instance.CurrentValidation.ToConsoleString()}");
+            }
+            library.Open();
+            yield return Capture("Logs/screenshot_10_demo_designs.png");
         }
 
         [UnityTest]
@@ -130,18 +245,61 @@ namespace MissionDesign.Tests
             runner.SecondsPerPhase = 2.5f;
             Assert.IsTrue(roles.TryRequestLaunch(out string msg), msg);
 
+            var director = Object.FindAnyObjectByType<MissionCameraDirector>();
+            var orbit = Object.FindAnyObjectByType<OrbitViewController>();
+            var studio = Object.FindAnyObjectByType<MoonPhotoStudio>();
             float t0 = Time.realtimeSinceStartup;
-            while (mgr.Phase < MissionPhase.ScienceOperations && Time.realtimeSinceStartup - t0 < 20f) yield return null;
-            yield return new WaitForSeconds(1.6f);
+            yield return new WaitForSeconds(1.2f);
+            yield return Capture("Logs/screenshot_05b_earth_orbits.png");
+            while (mgr.Phase < MissionPhase.OrbitInsertion && Time.realtimeSinceStartup - t0 < 20f) yield return null;
+            yield return new WaitForSeconds(1.0f);
+            Assert.IsTrue(director.ShowingReaction, "Tras un despegue exitoso la cámara muestra la sala de control.");
+            Assert.That(Object.FindObjectsByType<CrewPoser>().Select(p => p.Current), Has.Some.EqualTo(CrewReaction.Celebrate));
+            yield return Capture("Logs/screenshot_08_control_room_reaction.png");
+
+            while (mgr.Phase < MissionPhase.ScienceOperations && Time.realtimeSinceStartup - t0 < 30f) yield return null;
+            yield return new WaitForSeconds(0.3f);
             yield return Capture("Logs/screenshot_06_free_return.png");
+            while (Mathf.Abs(orbit.CurrentDay - orbit.Solution.flybyTimeDays) > 0.25f && mgr.Phase == MissionPhase.ScienceOperations
+                   && Time.realtimeSinceStartup - t0 < 40f) yield return null;
+            yield return new WaitForSeconds(0.4f);
+            Assert.Greater(studio.Photos.Count, 0, "Las cámaras deben tomar fotos durante el sobrevuelo.");
+            yield return Capture("Logs/screenshot_06c_flyby_zoom.png");
 
             runner.SkipToEnd();
             t0 = Time.realtimeSinceStartup;
             while (mgr.Phase != MissionPhase.PostMission && Time.realtimeSinceStartup - t0 < 15f) yield return null;
             Assert.AreEqual(MissionPhase.PostMission, mgr.Phase);
-            Assert.IsTrue(mgr.LastOutcome.crewed);
-            Assert.IsTrue(mgr.LastOutcome.returnsToEarth);
+            var o = mgr.LastOutcome;
+            Assert.IsTrue(o.crewed);
+            Assert.IsTrue(o.returnsToEarth);
+            Assert.AreEqual(8, o.photoShots, "Dos cámaras: 8 fotografías para el informe.");
+            // Las fotos que faltan se completan una por fotograma y los PNG se guardan en segundo plano.
+            t0 = Time.realtimeSinceStartup;
+            while ((studio.Photos.Count < o.photoShotsAvailable || studio.SavedFolder == null || studio.Saving) && Time.realtimeSinceStartup - t0 < 15f)
+                yield return null;
+            Assert.AreEqual("Fanfare", Object.FindAnyObjectByType<SfxPlayer>().LastPlayed, "Sonido de éxito al terminar.");
+            Assert.AreEqual(o.photoShotsAvailable, studio.Photos.Count);
+            Assert.IsTrue(System.IO.Directory.Exists(studio.SavedFolder), "Las fotos se guardan junto al reporte.");
+            Assert.AreEqual(8, System.IO.Directory.GetFiles(studio.SavedFolder, "foto_*.png").Length);
+            var post = Object.FindAnyObjectByType<PostMissionPanel>();
+            t0 = Time.realtimeSinceStartup;
+            while (post.Revealing && Time.realtimeSinceStartup - t0 < 10f) yield return null;   // presentación animada
+            yield return new WaitForSeconds(1.5f);                                                // que caiga el confeti
             yield return Capture("Logs/screenshot_07_crewed_post_mission.png");
+
+            var report = Object.FindAnyObjectByType<ExplorationReportPanel>();
+            report.Open();
+            Assert.IsTrue(report.IsOpen);
+            Assert.AreEqual(8, report.PhotoCount);
+            StringAssert.Contains("cara oculta", report.Body);
+            yield return new WaitForSeconds(1.8f);   // la bitácora se "escribe"
+            yield return Capture("Logs/screenshot_09_exploration_report.png");
+            for (int i = 0; i < 8; i++)
+            {
+                report.Select(i);
+                yield return Capture($"Logs/moon_photo_{i + 1:00}.png");
+            }
         }
 
         private static IEnumerator Capture(string path)

@@ -41,3 +41,5 @@ MonoBehaviour:
   - luna
   - artemis
   - tripulada
+  isCamera: 1
+  photosPerDay: 6500

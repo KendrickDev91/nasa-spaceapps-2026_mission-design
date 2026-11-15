@@ -29,15 +29,96 @@ El sitio lunar es solo de visualización (no caminable).
 
 | Tecla | Acción |
 |---|---|
-| WASD / flechas · Shift · Espacio | caminar · correr · saltar |
+| WASD / flechas · Shift · Espacio | caminar · correr · saltar (2,75 / 7,5 m/s) |
 | Clic derecho + ratón · rueda · Q/Z | girar cámara · zoom · girar con teclado |
 | **E** | interactuar (aparece el aviso al acercarse a un rombo azul) |
 | **M** | planos 2D (5 láminas) |
+| **N** | amplía el mapa geolocalizador (latitud/longitud y rumbo; ubicación ilustrativa en Florida) |
 | **Esc** | menú: viaje rápido entre edificios, controles, diseñar la misión, menú principal |
 
 Interacciones: recepción (bienvenida y controles), mesa de planos, consola de diseño (entra a la sala de diseño sin pasar por el menú),
 kiosco de la sala limpia (ISO 14644, Orion y su tripulación), apilado del SLS (con la cronología real del ascenso) y panel de la
 plataforma (trayectoria de retorno libre y las fotos de Artemis II). Las puertas se abren solas al acercarse.
+
+- **Círculo de entrada al diseño** (anillo con llamas en el puesto de la consola): al pisarlo el personaje se sienta en la silla,
+  la pantalla se funde y se abre la sala de diseño.
+- **Vestuario según el ambiente**: ropa de ingeniero aeroespacial (Centro de Control), casco de seguridad (nave de ensamblaje),
+  mono, capucha y mascarilla (sala limpia) y traje naranja de lanzamiento con casco (plataforma).
+- **Personal de la sala de control**: operadores sentados tecleando con auriculares; en la sala de diseño celebran (brazos arriba
+  o aplausos, se ponen de pie) cuando el lanzamiento es exitoso y se llevan las manos a la cabeza si falla. Las poses son
+  procedurales sobre el esqueleto Humanoid (`CrewPoser`), sin depender de animaciones extra de Mixamo.
+
+## Fotografías de la Luna e informe de exploración
+
+Las **cámaras** son piezas de la nave (rol Científico): *Kit de cámaras de exploración* (cualquier nave), *32 cámaras de Orion*,
+*cámaras de la tripulación (Nikon D5/Z9)*, *LROC* y la cámara CubeSat. Si la misión llega a la Luna, durante el sobrevuelo u
+operación lunar el juego **renderiza fotografías reales de la escena** (`MoonPhotoStudio`: Luna con cráteres y relieve, puesta de
+Tierra tras el limbo, ala solar de Orion, superficie a baja altura…), con destello de cámara y miniaturas en el HUD. Al terminar:
+
+- El análisis post-misión tiene el botón **Informe de la exploración**: bitácora escrita por la tripulación (o el equipo de
+  operaciones si es robótica) con despegue y amerizaje geolocalizados, más la galería de fotos con pie de foto (cámara y lente).
+- Las fotos y el informe se guardan junto al reporte: `MissionReports/<reporte>_exploracion/foto_NN.png` + `informe_exploracion.txt`.
+- Fotos a escala real (p. ej. ~10 000 en el sobrevuelo tripulado): parte por el enlace y el resto en tarjetas SD; si la cápsula no
+  vuelve, solo quedan las transmitidas.
+
+## Demostración rápida (ventana «Diseños»)
+
+Tres diseños de demostración vienen con el juego (`StreamingAssets/Demos`, etiqueta **DEMO**). Cada uno guarda una semilla fija,
+así el resultado se repite en la presentación. Se generan con el catálogo y el simulador reales (`DemoDesigns`):
+
+| Demo | Resultado | Fotos |
+|---|---|---|
+| 1 · Artemis II con fotos | Éxito (ciencia 125 %, 98/100) | 8 de 8 |
+| 2 · Sobrevuelo económico | Éxito parcial (ciencia 75 %, 83/100) | 8 de 8 |
+| 3 · Batería insuficiente | Falla: la cápsula no vuelve (58/100) | 6 de 8, solo las transmitidas |
+
+**Dónde está la cámara:** rol *Científico Principal* (tecla 3) → catálogo de instrumentos → «Kit de cámaras de exploración»
+(o las cámaras de Orion / de la tripulación). En órbita terrestre fotografía la Tierra; con destino lunar, la Luna.
+
+## Validación con NASA GMAT
+
+La trayectoria de retorno libre se validó con **NASA GMAT R2026a**, usando efemérides reales DE405. Detalle en
+[`docs/validacion/gmat/`](docs/validacion/gmat/README.md). El estado de la TLI del juego, propagado sin corregir, pasa a
+12 523 km de la Luna y no regresa. Con una corrección de rumbo de ≈142 m/s, GMAT reproduce el sobrevuelo de 7 283 km y el
+perigeo de 50 km (regreso en 10,9 días).
+
+## Sonido
+
+Todo el sonido es sintetizado por código (`Synth`), sin archivos de terceros:
+- **Misión:** cuenta regresiva y rugido del cohete, aplausos de la sala al despegar, campanita en cada hito, obturador por
+  cada foto, módem durante la bajada de datos, alarma en eventos críticos, y fanfarria o tono de falla al terminar.
+- **Centro espacial:** pasos, puertas, crepitar del círculo de entrada y aviso al cambiar de equipo.
+
+## Simulación más dinámica
+
+Trayectoria con el estilo del diagrama de Artemis II de la ESA (Tierra arriba, Luna abajo, ida a la izquierda y vuelta a la
+derecha) y sus **8 hitos**: despegue, órbita alta, separación del lanzador, motor a la Luna (TLI), sobrevuelo, regreso, separación
+del módulo de tripulación y amerizaje. Orion recorre el "8" con estela; la cámara se acerca a la cara oculta durante el sobrevuelo;
+telemetría en vivo (día, distancias a la Tierra y a la Luna, velocidad inercial) y un cartel por cada hito. Tras el despegue la
+cámara corta a la sala de control celebrando. El resultado aparece animado: sello del veredicto, tarjetas que entran, puntuación
+que cuenta y confeti en los éxitos.
+
+## Pulido de experiencia (última ronda)
+
+- **Personaje bien apoyado:** las animaciones usan la altura "basada en los pies" y `FootPlanter` ajusta el modelo en cada
+  fotograma para que las suelas toquen el suelo en rampas, losas y escalones.
+- **Cámara en 1.ª persona (V)** y **ascensor de la torre de servicio**: sube 75 m hasta el brazo de acceso de la tripulación
+  (pasarela con barandas), por donde los astronautas entran en Orion.
+- **Infraestructura más rica:** transportador de orugas, autos, palmeras, farolas, edificios de apoyo y antena parabólica en el
+  Centro de Control. En el edificio de ensamblaje, franjas en las fachadas. En la plataforma, tanques esféricos de LOX y LH2,
+  deflector de llamas y cables de pararrayos.
+- **Resultados legibles:** letra grande, viñetas cortas (una idea por línea), 5 barras de métricas y animaciones (sello del
+  veredicto, viñetas que se escriben, barras que se llenan, puntuación que cuenta y confeti).
+- **Informe de exploración:** párrafos cortos con etiquetas de color y la bitácora "escribiéndose".
+- **Sala de control:** plano general (sala y pantalla grande) que se desliza hacia el plano lateral de los operadores.
+- **Sala de control viva:**
+  - Cada monitor de operador tiene un panel animado: telemetría, traza terrestre, estado de subsistemas o trayectoria.
+  - Una fila de relojes LED en vivo: UTC, Florida, tiempo de misión (MET), cuenta, distancia a la Luna y la estación DSN activa.
+  - Teclados, ratones, tazas, carpetas y teléfonos en los puestos; paneles acústicos y pantallas en las paredes laterales.
+- **Movimientos naturales:** IK de dos huesos (manos sobre el teclado con pulsaciones alternas, aplauso frente al pecho, puños
+  arriba, manos a la cabeza, señalar), cabeza que mira la pantalla y respiración.
+- **Órbita fluida:** la nave avanza con el progreso real de cada fase y las fotos se copian desde la GPU de forma asíncrona,
+  sin tirones.
 
 ## Planos 2D (`docs/planos/`)
 
@@ -85,7 +166,8 @@ Assets/_Project/
 │   ├── Data/          ScriptableObjects del catálogo (cohetes, órbitas, piezas, redes terrenas, eventos, escenarios, misiones reales)
 │   ├── Simulation/    telemetría, validador, simulador, runner, reportes, diseños guardados, comparación, ranking
 │   ├── Multiplayer/   roles hot-seat, consenso, colaboración
-│   ├── Exploration/   personaje, cámara en 3.ª persona, puertas, interacciones, zonas, HUD y textos del centro espacial
+│   ├── Exploration/   personaje, cámara en 3.ª persona, puertas, interacciones, zonas, HUD, mapa y círculo de entrada
+│   ├── Characters/    poses procedurales (sentado, celebrar, aplaudir, tensión, señalar) y vestuario por ambiente
 │   └── UI/            HUD, catálogo, tooltips, post-misión, menús, sonidos; Visual3D/ (ensamblador, lanzamiento, órbita, cámaras)
 ├── Editor/            generador de la base, vinculador de modelos, texturas procedurales, constructor de escena, build
 ├── Data/Generated/    catálogo generado (menú NASA SpaceApps)

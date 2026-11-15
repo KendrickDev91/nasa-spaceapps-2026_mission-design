@@ -1,13 +1,15 @@
 using MissionDesign.Core;
 using MissionDesign.Simulation;
+using MissionDesign.UI.Visual3D;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace MissionDesign.UI
 {
     /// <summary>
-    /// Sonidos sintetizados por código (sin archivos de audio): clic al elegir, zumbido de error si el
-    /// lanzamiento se bloquea, campanita de éxito, alarma en eventos críticos y rugido del cohete.
+    /// Sonidos sintetizados por código (sin archivos de audio): clic al elegir, zumbido de error si el lanzamiento se bloquea,
+    /// cuenta regresiva y rugido del cohete, aplausos de la sala de control al despegar, campanita en cada hito de la trayectoria,
+    /// obturador en cada fotografía, módem durante la bajada de datos, alarma en eventos críticos y fanfarria / tono de falla al final.
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
     public sealed class SfxPlayer : MonoBehaviour
@@ -15,12 +17,16 @@ namespace MissionDesign.UI
         [SerializeField] private MissionSimulationRunner runner;
         [Range(0f, 1f)] [SerializeField] private float volume = 0.5f;
 
-        private const int Rate = 44100;
         private AudioSource source;
         private AudioSource rumbleSource;
-        private AudioClip click, error, success, alarm, rumble;
+        private AudioClip click, error, alarm, rumble, countdown, applause, chime, shutter, modem, fanfare, failure;
         private MissionStateManager manager;
+        private OrbitViewController orbit;
+        private MoonPhotoStudio studio;
         private int lastFrameClick = -1;
+
+        /// <summary>Último sonido reproducido (para pruebas).</summary>
+        public string LastPlayed { get; private set; }
 
         private void Awake()
         {
@@ -30,17 +36,23 @@ namespace MissionDesign.UI
             rumbleSource.playOnAwake = false;
             rumbleSource.loop = true;
 
-            click = Tone("Click", 0.05f, t => Mathf.Sin(2f * Mathf.PI * 1250f * t) * Env(t, 0.05f));
-            error = Tone("Error", 0.32f, t => Mathf.Sign(Mathf.Sin(2f * Mathf.PI * 150f * t)) * 0.5f * Env(t, 0.32f));
-            success = Tone("Success", 0.45f, t => (Mathf.Sin(2f * Mathf.PI * (t < 0.18f ? 880f : 1320f) * t)) * Env(t, 0.45f));
-            alarm = Tone("Alarm", 0.6f, t => Mathf.Sin(2f * Mathf.PI * (Mathf.Repeat(t, 0.3f) < 0.15f ? 960f : 720f) * t) * 0.6f * Env(t, 0.6f));
+            click = Synth.Make("Click", 0.05f, t => Mathf.Sin(2f * Mathf.PI * 1250f * t) * Synth.Env(t, 0.05f));
+            error = Synth.Make("Error", 0.32f, t => Mathf.Sign(Mathf.Sin(2f * Mathf.PI * 150f * t)) * 0.5f * Synth.Env(t, 0.32f));
+            alarm = Synth.Make("Alarm", 0.6f, t => Mathf.Sin(2f * Mathf.PI * (Mathf.Repeat(t, 0.3f) < 0.15f ? 960f : 720f) * t) * 0.6f * Synth.Env(t, 0.6f));
             var rng = new System.Random(7);
             float lp = 0f;
-            rumble = Tone("Rumble", 2f, t =>
+            rumble = Synth.Make("Rumble", 2f, t =>
             {
                 lp += 0.04f * ((float)rng.NextDouble() * 2f - 1f - lp);   // ruido marrón (filtrado)
                 return Mathf.Clamp(lp * 9f, -1f, 1f);
             });
+            countdown = Synth.Countdown();
+            applause = Synth.Applause();
+            chime = Synth.Chime();
+            shutter = Synth.Shutter();
+            modem = Synth.Modem();
+            fanfare = Synth.Fanfare();
+            failure = Synth.Failure();
         }
 
         private void Start()
@@ -52,10 +64,14 @@ namespace MissionDesign.UI
                 manager.LaunchRejected += _ => Play(error);
                 manager.LaunchApproved += OnLaunch;
                 manager.PhaseChanged += OnPhase;
-                manager.MissionCompleted += o => Play(o != null && o.verdict == MissionVerdict.Failure ? error : success);
+                manager.MissionCompleted += o => Play(o != null && o.verdict == MissionVerdict.Failure ? failure : fanfare);
             }
             if (runner != null) runner.EntryEmitted += e => { if (e.tone == LogTone.Critical) Play(alarm); };
-            foreach (var b in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            orbit = FindAnyObjectByType<OrbitViewController>();
+            if (orbit != null) orbit.MilestoneReached += _ => Play(chime, 0.7f);
+            studio = FindAnyObjectByType<MoonPhotoStudio>();
+            if (studio != null) studio.PhotoTaken += (_, __, ___) => Play(shutter);
+            foreach (var b in FindObjectsByType<Button>(FindObjectsInactive.Include))
                 b.onClick.AddListener(PlayClick);
         }
 
@@ -66,15 +82,17 @@ namespace MissionDesign.UI
 
         private void OnLaunch()
         {
-            Play(success);
+            Play(countdown, 0.8f);
             rumbleSource.clip = rumble;
             rumbleSource.volume = volume * 0.8f;
-            rumbleSource.Play();
+            rumbleSource.PlayDelayed(1.6f);
         }
 
         private void OnPhase(MissionPhase phase)
         {
             if (phase != MissionPhase.Launch && rumbleSource.isPlaying) rumbleSource.Stop();
+            if (phase == MissionPhase.OrbitInsertion) Play(applause, 0.9f);     // el cohete llegó al espacio: la sala aplaude
+            if (phase == MissionPhase.DataTransmission) Play(modem, 0.5f);
         }
 
         private void PlayClick()
@@ -84,21 +102,11 @@ namespace MissionDesign.UI
             Play(click);
         }
 
-        private void Play(AudioClip clip)
+        private void Play(AudioClip clip, float gain = 1f)
         {
-            if (clip != null && source != null) source.PlayOneShot(clip, volume);
-        }
-
-        private static float Env(float t, float length) => Mathf.Clamp01(t / 0.01f) * Mathf.Clamp01((length - t) / (length * 0.6f));
-
-        private static AudioClip Tone(string name, float seconds, System.Func<float, float> wave)
-        {
-            int n = Mathf.CeilToInt(seconds * Rate);
-            var data = new float[n];
-            for (int i = 0; i < n; i++) data[i] = wave(i / (float)Rate) * 0.5f;
-            var clip = AudioClip.Create(name, n, 1, Rate, false);
-            clip.SetData(data, 0);
-            return clip;
+            if (clip == null || source == null) return;
+            source.PlayOneShot(clip, volume * gain);
+            LastPlayed = clip.name;
         }
     }
 }

@@ -41,3 +41,5 @@ MonoBehaviour:
   - clima
   - meteorologia
   - tormentas
+  isCamera: 0
+  photosPerDay: 0

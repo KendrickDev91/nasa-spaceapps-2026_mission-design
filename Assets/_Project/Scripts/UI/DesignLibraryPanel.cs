@@ -82,9 +82,13 @@ namespace MissionDesign.UI
         {
             if (manager == null || snapshot == null) return;
             var missing = manager.LoadSnapshot(snapshot);
-            SetStatus(missing.Count == 0
+            // Las demos usan una semilla fija para que la presentación salga igual cada vez; los demás diseños, aleatoria.
+            var runner = FindAnyObjectByType<MissionSimulationRunner>();
+            if (runner != null) runner.FixedSeed = snapshot.demoSeed;
+            string note = snapshot.IsDemo && !string.IsNullOrEmpty(snapshot.demoNote) ? $"\n<size=85%>{snapshot.demoNote}</size>" : string.Empty;
+            SetStatus((missing.Count == 0
                 ? $"Cargado: {snapshot.designName}"
-                : $"Cargado con {missing.Count} pieza(s) que ya no existen en el catálogo: {string.Join(", ", missing)}");
+                : $"Cargado con {missing.Count} pieza(s) que ya no existen en el catálogo: {string.Join(", ", missing)}") + note);
         }
 
         public void CompareWithCurrent(DesignSnapshot snapshot)
@@ -117,7 +121,7 @@ namespace MissionDesign.UI
             rows.Clear();
             if (itemTemplate == null || listContent == null) return;
 
-            var saved = DesignLibrary.List().Take(maxItems).ToList();
+            var saved = DesignLibrary.Demos().Concat(DesignLibrary.List()).Take(maxItems).ToList();
             if (saved.Count == 0 && comparisonText != null)
                 comparisonText.text = $"<color={UiTheme.Hex(UiTheme.TextDim)}>Aún no hay diseños guardados. Guarda el actual y prueba alternativas: después compáralos aquí.</color>";
 
@@ -126,8 +130,14 @@ namespace MissionDesign.UI
                 var row = Instantiate(itemTemplate, listContent);
                 row.gameObject.SetActive(true);
                 var texts = row.GetComponentsInChildren<TMP_Text>(true).Where(t => t.GetComponentInParent<Button>() == null).ToArray();
-                if (texts.Length > 0) texts[0].text = $"<b>{snapshot.designName}</b> <size=80%><color={UiTheme.Hex(UiTheme.TextDim)}>· {snapshot.teamName}</color></size>";
-                if (texts.Length > 1) texts[1].text = $"{snapshot.scenarioId} · {snapshot.orbitId} · {snapshot.instrumentIds.Count} instr. · {snapshot.savedAtUtc}";
+                if (texts.Length > 0)
+                    texts[0].text = snapshot.IsDemo
+                        ? $"<color={UiTheme.Hex(UiTheme.Warning)}><b>DEMO</b></color> · <b>{snapshot.designName}</b>"
+                        : $"<b>{snapshot.designName}</b> <size=80%><color={UiTheme.Hex(UiTheme.TextDim)}>· {snapshot.teamName}</color></size>";
+                if (texts.Length > 1)
+                    texts[1].text = snapshot.IsDemo && !string.IsNullOrEmpty(snapshot.demoNote)
+                        ? snapshot.demoNote
+                        : $"{snapshot.scenarioId} · {snapshot.orbitId} · {snapshot.instrumentIds.Count} instr. · {snapshot.savedAtUtc}";
                 var s = snapshot;
                 foreach (var b in row.GetComponentsInChildren<Button>(true))
                 {

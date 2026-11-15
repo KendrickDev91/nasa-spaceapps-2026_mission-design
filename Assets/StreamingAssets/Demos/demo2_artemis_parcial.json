@@ -1,0 +1,23 @@
+{
+    "designName": "2 · Sobrevuelo económico (parcial ~80 %)",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_ARTEMIS_FLYBY",
+    "orbitId": "ORB_FREE_RETURN",
+    "launchVehicleId": "LV_SLS_B1",
+    "groundNetworkId": "GND_OPTICAL",
+    "componentIds": [
+        "BUS_ORION",
+        "SOL_ESM",
+        "BAT_2000",
+        "ANT_O2O",
+        "CDH_ORION"
+    ],
+    "instrumentIds": [
+        "INS_CREW_CAMERAS",
+        "INS_EXPLORER_CAMS"
+    ],
+    "demoSeed": 0,
+    "demoNote": "Menos cámaras y menos ciencia: se cumple solo una parte del objetivo. Compáralo con la demo 1."
+}

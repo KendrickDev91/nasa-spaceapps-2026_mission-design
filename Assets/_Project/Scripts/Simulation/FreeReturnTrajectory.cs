@@ -11,7 +11,7 @@ namespace MissionDesign.Simulation
         /// <summary>Posición en el marco rotatorio Tierra-Luna (km), origen en el baricentro, Luna en +X.</summary>
         public float xKm;
         public float yKm;
-        /// <summary>0 = ida (hasta el sobrevuelo), 1 = vuelta.</summary>
+        /// <summary>-1 = órbitas terrestres previas a la TLI, 0 = ida (hasta el sobrevuelo), 1 = vuelta.</summary>
         public int leg;
     }
 
@@ -40,6 +40,10 @@ namespace MissionDesign.Simulation
         public float totalDays;
         public bool passesFarSide;
         public List<TrajectorySample> samples = new List<TrajectorySample>();
+        /// <summary>Despegue, órbita de estacionamiento y órbita terrestre alta (~1 día) hasta la TLI; tDays negativos.</summary>
+        public List<TrajectorySample> preTliSamples = new List<TrajectorySample>();
+        public float launchDays;
+        public float highOrbitApogeeKm;
         public List<TrajectoryMilestone> milestones = new List<TrajectoryMilestone>();
     }
 
@@ -130,6 +134,7 @@ namespace MissionDesign.Simulation
             sol.converged = final.returned && final.farSide
                             && Math.Abs(final.flybyAltKm - targetFlybyAltKm) < 0.05 * targetFlybyAltKm
                             && final.returnPerigeeAltKm < EntryInterfaceKm;
+            BuildPreTli(sol);
             BuildMilestones(sol);
             return sol;
         }
@@ -241,29 +246,75 @@ namespace MissionDesign.Simulation
         }
 
         /// <summary>Hitos numerados como en el diagrama de Artemis II (ida 1-5, vuelta 6-8).</summary>
+        public const double HighOrbitApogeeKm = 70000.0;     // Artemis II: órbita alta de ~24 h para verificar Orion
+
+        /// <summary>
+        /// Fase previa a la TLI, como en el diagrama de la ESA: despegue → media vuelta en la órbita de estacionamiento →
+        /// una revolución en órbita terrestre alta (Kepler) que termina en el perigeo donde se enciende el motor (TLI).
+        /// </summary>
+        private static void BuildPreTli(FreeReturnSolution s)
+        {
+            double th = s.injectionAngleDeg * Math.PI / 180.0;
+            double ex = -Mu * LengthKm;
+            double rp = EarthRadiusKm + s.parkingAltitudeKm, ra = EarthRadiusKm + HighOrbitApogeeKm;
+            double a = (rp + ra) / 2, e = (ra - rp) / (ra + rp);
+            double leoPeriod = 2 * Math.PI * Math.Sqrt(rp * rp * rp / EarthMuKm3S2) / 86400.0;
+            double heoPeriod = 2 * Math.PI * Math.Sqrt(a * a * a / EarthMuKm3S2) / 86400.0;
+            double leoDays = leoPeriod * 0.5;
+            s.launchDays = (float)-(leoDays + heoPeriod);
+            s.highOrbitApogeeKm = (float)HighOrbitApogeeKm;
+            s.preTliSamples.Clear();
+
+            // Ascenso + media órbita baja: del lado opuesto al perigeo (θ+π) hasta θ, prograda.
+            const int leoSteps = 40;
+            for (int k = 0; k <= leoSteps; k++)
+            {
+                double f = (double)k / leoSteps;
+                double ang = th + Math.PI + Math.PI * f;
+                double r = EarthRadiusKm + s.parkingAltitudeKm * Math.Min(1.0, f * 4.0);   // el ascenso dura ~1/4 del tramo
+                s.preTliSamples.Add(new TrajectorySample { tDays = (float)(s.launchDays + leoDays * f), xKm = (float)(ex + r * Math.Cos(ang)), yKm = (float)(r * Math.Sin(ang)), leg = -1 });
+            }
+            // Órbita alta: una revolución completa desde el perigeo θ (ecuación de Kepler).
+            const int heoSteps = 160;
+            for (int k = 1; k <= heoSteps; k++)
+            {
+                double M = 2 * Math.PI * k / heoSteps, E = M;
+                for (int it = 0; it < 12; it++) E -= (E - e * Math.Sin(E) - M) / (1 - e * Math.Cos(E));
+                double nu = 2 * Math.Atan2(Math.Sqrt(1 + e) * Math.Sin(E / 2), Math.Sqrt(1 - e) * Math.Cos(E / 2));
+                double r = a * (1 - e * Math.Cos(E));
+                s.preTliSamples.Add(new TrajectorySample
+                {
+                    tDays = (float)(s.launchDays + leoDays + heoPeriod * k / heoSteps),
+                    xKm = (float)(ex + r * Math.Cos(th + nu)), yKm = (float)(r * Math.Sin(th + nu)), leg = -1
+                });
+            }
+        }
+
+        /// <summary>Los 8 hitos del diagrama de Artemis II publicado por la ESA (ida 1-5, vuelta 6-8).</summary>
         private static void BuildMilestones(FreeReturnSolution s)
         {
             if (s.samples.Count == 0) return;
-            TrajectorySample At(float days)
+            TrajectorySample At(List<TrajectorySample> list, float days)
             {
-                TrajectorySample best = s.samples[0];
-                foreach (var p in s.samples) if (Math.Abs(p.tDays - days) < Math.Abs(best.tDays - days)) best = p;
+                TrajectorySample best = list[0];
+                foreach (var p in list) if (Math.Abs(p.tDays - days) < Math.Abs(best.tDays - days)) best = p;
                 return best;
             }
 
             void Add(int n, string title, string detail, TrajectorySample p) =>
                 s.milestones.Add(new TrajectoryMilestone { number = n, title = title, detail = detail, tDays = p.tDays, xKm = p.xKm, yKm = p.yKm });
 
-            var first = s.samples[0];
+            var pre = s.preTliSamples.Count > 0 ? s.preTliSamples : s.samples;
             var last = s.samples[s.samples.Count - 1];
-            Add(1, "Órbita de estacionamiento", $"{s.parkingAltitudeKm:N0} km de altitud; en Artemis II, órbita terrestre alta para verificar sistemas", first);
-            Add(2, "Inyección translunar (TLI)", $"Δv ≈ {s.tliDeltaVKmS:F2} km/s → {s.injectionSpeedKmS:F2} km/s", At(0.02f));
-            Add(3, "Corrección de rumbo 1", "Encendido pequeño (pocos m/s) para afinar la ruta", At(1.0f));
-            Add(4, "Corrección de rumbo 2", "Ajuste final antes de llegar a la Luna", At(Math.Max(1.2f, s.flybyTimeDays - 1.0f)));
-            Add(5, "Sobrevuelo lunar", $"{s.flybyAltitudeKm:N0} km sobre la cara oculta, día {s.flybyTimeDays:F1}", At(s.flybyTimeDays));
-            Add(6, "Retorno libre", "La gravedad lunar devuelve la nave hacia la Tierra sin motor", At((s.flybyTimeDays + s.totalDays) * 0.5f));
-            Add(7, "Corrección de rumbo 3 y separación", "Ajuste del pasillo de reentrada; el módulo de servicio se separa", At(s.totalDays - 0.3f));
-            Add(8, "Reentrada y amerizaje", $"Interfaz de reentrada a {EntryInterfaceKm:N0} km, día {s.totalDays:F1}", last);
+            float heoStart = pre.Count > 41 ? pre[40].tDays : s.launchDays;
+            Add(1, "Despegue: Florida", "El cohete SLS despega y deja la nave en una órbita baja de estacionamiento", pre[0]);
+            Add(2, "Hacia la órbita alta", $"La etapa superior eleva el apogeo a ~{s.highOrbitApogeeKm:N0} km (~1 día de pruebas)", At(pre, heoStart));
+            Add(3, "Se separa del lanzador", "Orion se separa de la etapa superior y practica maniobras de proximidad", At(pre, heoStart + 0.14f));
+            Add(4, "Motor rumbo a la Luna (TLI)", $"El motor principal se enciende e impulsa la cápsula a la Luna: Δv ≈ {s.tliDeltaVKmS:F2} km/s", s.samples[0]);
+            Add(5, "Sobrevuelo lunar", $"{s.flybyAltitudeKm:N0} km sobre la cara oculta, día {s.flybyTimeDays:F1}", At(s.samples, s.flybyTimeDays));
+            Add(6, "Regreso a la Tierra", "Retorno libre: la gravedad lunar devuelve la nave sin encender el motor", At(s.samples, (s.flybyTimeDays + s.totalDays) * 0.55f));
+            Add(7, "El módulo de tripulación se separa", "Se suelta el módulo de servicio; solo la cápsula entra en la atmósfera", At(s.samples, s.totalDays - 0.15f));
+            Add(8, "Amerizaje: océano Pacífico", $"Reentrada a {EntryInterfaceKm:N0} km y paracaídas; día {s.totalDays:F1}", last);
         }
     }
 }

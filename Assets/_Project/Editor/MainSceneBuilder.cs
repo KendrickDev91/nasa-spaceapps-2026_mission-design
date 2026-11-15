@@ -47,6 +47,7 @@ namespace MissionDesign.Editor
             if (TMP_Settings.defaultFontAsset == null)
                 Debug.LogError("[SceneBuilder] Falta TMP Essential Resources: Window → TextMeshPro → Import TMP Essential Resources.");
 
+            CrewController();   // avatar Humanoid + Animator del personal de la sala de control
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             // Cargar DESPUÉS de NewScene: el modo Single descarga los assets no referenciados.
             var db = AssetDatabase.LoadAssetAtPath<NasaDatabaseSO>(DatabasePath);
@@ -368,6 +369,8 @@ namespace MissionDesign.Editor
             var skip = MakeButton("SkipButton", panel, "Saltar al resultado »", UiTheme.AccentDim, 17, 0);
             Place((RectTransform)skip.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-16, 12), new Vector2(240, 46));
 
+            BuildFlightHud(root);
+
             var view = panel.gameObject.AddComponent<SimulationPanel>();
             Wire(view, "runner", runner);
             Wire(view, "phaseText", phase);
@@ -378,71 +381,106 @@ namespace MissionDesign.Editor
 
         private static void BuildPostMission(Transform root)
         {
-            var overlay = Panel("PostMissionOverlay", root, new Color(0f, 0f, 0f, 0.78f));
+            var overlay = Panel("PostMissionOverlay", root, new Color(0f, 0f, 0f, 0.8f));
             Stretch(overlay);
             SetPhases(overlay.gameObject, MissionPhase.PostMission);
 
-            var card = Panel("Card", overlay, new Color(0.04f, 0.06f, 0.11f, 1f));
-            Place(card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1500, 900));
+            var card = Panel("Card", overlay, new Color(0.035f, 0.05f, 0.1f, 0.98f));
+            Place(card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1640, 960));
 
-            var header = Text("Header", card, "ANÁLISIS POST-MISIÓN", 18, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
-            Place(header.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -24), new Vector2(-64, 26));
-            var verdict = Text("VerdictText", card, "VEREDICTO", 60, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
-            Place(verdict.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -54), new Vector2(-64, 90));
+            var header = Text("Header", card, "ANÁLISIS POST-MISIÓN", 20, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
+            Place(header.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -24), new Vector2(-72, 28));
+            var verdict = Text("VerdictText", card, "ÉXITO", 72, UiTheme.Text, TextAlignmentOptions.MidlineLeft, bold: true);
+            Place(verdict.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(36, -100), new Vector2(560, 90));
+            // "ÉXITO PARCIAL" debe caber en una línea: sin salto y con tamaño automático.
+            verdict.textWrappingMode = TextWrappingModes.NoWrap;
+            verdict.enableAutoSizing = true;
+            verdict.fontSizeMin = 36;
+            verdict.fontSizeMax = 72;
+            var title = Text("TitleText", card, "", 30, UiTheme.Text, TextAlignmentOptions.MidlineLeft);
+            Place(title.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, 0.5f), new Vector2(560, -102), new Vector2(-600, 60));
 
-            // Tres tarjetas: bien · falló · puntuación (card 1500 × 900; columnas de 32 + 455 + 20 + 455 + 20 + 486 + 32).
-            var wentWell = MakeCard(card, "WentWellCard", "LO QUE SALIÓ BIEN", UiTheme.Ok, new Color(0.06f, 0.16f, 0.11f, 1f), 32f, 455f);
-            var wentWrong = MakeCard(card, "WentWrongCard", "LO QUE FALLÓ", UiTheme.Critical, new Color(0.18f, 0.07f, 0.07f, 1f), 507f, 455f);
+            // Dos tarjetas de viñetas cortas (texto grande) y la tarjeta de puntuación con barras.
+            TextMeshProUGUI BulletCard(string name, string head, Color accent, Color bg, float x)
+            {
+                var c = Panel(name, card, bg);
+                Place(c, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -168), new Vector2(520, -278));
+                var stripe = NewRect("Stripe", c);
+                stripe.gameObject.AddComponent<Image>().color = accent;
+                Place(stripe, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), Vector2.zero, new Vector2(0, 6));
+                var h = Text("Title", c, head, 22, accent, TextAlignmentOptions.TopLeft, bold: true);
+                Place(h.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -20), new Vector2(-48, 30));
+                var body = Text("Body", c, "", 21, UiTheme.Text, TextAlignmentOptions.TopLeft);
+                body.paragraphSpacing = 16;
+                body.lineSpacing = 4;
+                body.overflowMode = TextOverflowModes.Ellipsis;
+                Place(body.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -66), new Vector2(-48, -86));
+                return body;
+            }
+            var wentWell = BulletCard("WentWellCard", "LO QUE SALIÓ BIEN", UiTheme.Ok, new Color(0.05f, 0.14f, 0.1f, 1f), 36f);
+            var wentWrong = BulletCard("WentWrongCard", "LO QUE FALLÓ", UiTheme.Critical, new Color(0.16f, 0.06f, 0.07f, 1f), 572f);
 
-            var scoreCard = Panel("ScoreCard", card, new Color(0.08f, 0.11f, 0.19f, 1f));
-            Place(scoreCard, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(982, -160), new Vector2(486, -270));
-            var scoreTitle = Text("Title", scoreCard, "PUNTUACIÓN", 18, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
-            Place(scoreTitle.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -16), new Vector2(-40, 26));
-            var rank = Text("RankText", scoreCard, "A", 96, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
-            Place(rank.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -40), new Vector2(-40, 100));
-            var similar = Text("SimilarText", scoreCard, "", 15, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            Place(similar.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -145), new Vector2(-40, 95));
-            var metrics = Text("MetricsText", scoreCard, "", 15, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            metrics.lineSpacing = 4;
-            Place(metrics.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -245), new Vector2(-40, 175));
-            var leaderboard = Text("LeaderboardText", scoreCard, "", 14, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            Place(leaderboard.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -428), new Vector2(-40, -440));
+            var scoreCard = Panel("ScoreCard", card, new Color(0.07f, 0.1f, 0.18f, 1f));
+            Place(scoreCard, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(1108, -168), new Vector2(496, -278));
+            var scoreTitle = Text("Title", scoreCard, "PUNTUACIÓN", 22, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
+            Place(scoreTitle.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -20), new Vector2(-48, 30));
+            var rank = Text("RankText", scoreCard, "A", 120, UiTheme.Text, TextAlignmentOptions.MidlineLeft, bold: true);
+            Place(rank.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(28, -118), new Vector2(150, 130));
+            var score = Text("ScoreText", scoreCard, "0/100", 64, UiTheme.Text, TextAlignmentOptions.MidlineLeft, bold: true);
+            Place(score.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(190, -118), new Vector2(290, 90));
 
-            var export = Text("ExportText", card, "", 13, UiTheme.TextDim, TextAlignmentOptions.BottomLeft);
-            Place(export.rectTransform, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(-250, 34), new Vector2(-564, 44));
-            var open = MakeButton("OpenReportsButton", card, "Abrir reportes", UiTheme.AccentDim, 18, 0);
-            Place((RectTransform)open.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-292, 28), new Vector2(220, 54));
-            var back = MakeButton("BackButton", card, "<b>Volver al diseño</b>", UiTheme.Accent, 19, 0);
-            Place((RectTransform)back.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-32, 28), new Vector2(240, 54));
+            string[] barNames = { "Ciencia", "Datos recibidos", "Energía disponible", "Presupuesto usado", "Trabajo en equipo" };
+            var fills = new Object[barNames.Length];
+            var values = new Object[barNames.Length];
+            for (int b = 0; b < barNames.Length; b++)
+            {
+                float y = -200 - b * 58;
+                var label = Text("BarLabel" + b, scoreCard, barNames[b], 18, UiTheme.TextDim, TextAlignmentOptions.BottomLeft);
+                Place(label.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, y), new Vector2(-48, 24));
+                var value = Text("BarValue" + b, scoreCard, "", 18, UiTheme.Text, TextAlignmentOptions.BottomRight, bold: true);
+                Place(value.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, y), new Vector2(-48, 24));
+                var track = Panel("BarTrack" + b, scoreCard, new Color(0.14f, 0.18f, 0.28f, 1f));
+                Place(track, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, y - 28), new Vector2(-48, 12));
+                var fill = Panel("Fill", track, UiTheme.Accent);
+                fill.anchorMin = Vector2.zero; fill.anchorMax = new Vector2(0.5f, 1f);
+                fill.offsetMin = fill.offsetMax = Vector2.zero;
+                fills[b] = fill;
+                values[b] = value;
+            }
+            var similar = Text("SimilarText", scoreCard, "", 17, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            Place(similar.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -500), new Vector2(-48, 70));
+            var leaderboard = Text("LeaderboardText", scoreCard, "", 16, UiTheme.Text, TextAlignmentOptions.TopLeft);
+            Place(leaderboard.rectTransform, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(0, 16), new Vector2(-48, 100));
+
+            var export = Text("ExportText", card, "", 15, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft);
+            Place(export.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(36, 34), new Vector2(560, 50));
+            var exploration = MakeButton("ExplorationButton", card, "Informe de la exploración", UiTheme.Launch, 20, 0);
+            Place((RectTransform)exploration.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-568, 30), new Vector2(380, 60));
+            var open = MakeButton("OpenReportsButton", card, "Abrir reportes", UiTheme.AccentDim, 19, 0);
+            Place((RectTransform)open.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-312, 30), new Vector2(240, 60));
+            var back = MakeButton("BackButton", card, "<b>Volver al diseño</b>", UiTheme.Accent, 20, 0);
+            Place((RectTransform)back.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-36, 30), new Vector2(260, 60));
 
             var view = overlay.gameObject.AddComponent<PostMissionPanel>();
             Wire(view, "verdictText", verdict);
+            Wire(view, "titleText", title);
             Wire(view, "wentWellText", wentWell);
             Wire(view, "wentWrongText", wentWrong);
             Wire(view, "rankText", rank);
+            Wire(view, "scoreText", score);
             Wire(view, "similarText", similar);
-            Wire(view, "metricsText", metrics);
             Wire(view, "leaderboardText", leaderboard);
             Wire(view, "exportText", export);
+            WireArray(view, "barFills", fills);
+            WireArray(view, "barValues", values);
             Wire(view, "openReportsButton", open);
             Wire(view, "backButton", back);
-        }
+            Wire(view, "explorationButton", exploration);
 
-        /// <summary>Tarjeta con encabezado coloreado; devuelve el texto del cuerpo.</summary>
-        private static TextMeshProUGUI MakeCard(RectTransform parent, string name, string title, Color accent, Color background, float x, float width)
-        {
-            var cardRt = Panel(name, parent, background);
-            Place(cardRt, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -160), new Vector2(width, -270));
-            var stripe = NewRect("Stripe", cardRt);
-            stripe.gameObject.AddComponent<Image>().color = accent;
-            Place(stripe, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), Vector2.zero, new Vector2(0, 5));
-            var head = Text("Title", cardRt, title, 18, accent, TextAlignmentOptions.TopLeft, bold: true);
-            Place(head.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(-40, 26));
-            var body = Text("Body", cardRt, "", 16, UiTheme.Text, TextAlignmentOptions.TopLeft);
-            body.paragraphSpacing = 10;
-            body.overflowMode = TextOverflowModes.Ellipsis;
-            Place(body.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -56), new Vector2(-40, -72));
-            return body;
+            var confetti = NewRect("Confetti", overlay);
+            Stretch(confetti);
+            Wire(view, "confettiLayer", confetti);
+            Wire(view, "explorationPanel", BuildExplorationReport(root));
         }
 
         /// <summary>Tooltip único, último hijo del canvas para quedar por encima de todo.</summary>
@@ -648,14 +686,37 @@ namespace MissionDesign.Editor
 
             var issues = Text("IssuesText", panel, "", 14, UiTheme.Text, TextAlignmentOptions.TopLeft);
             issues.overflowMode = TextOverflowModes.Ellipsis;
-            Place(issues.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -52), new Vector2(-32, -150));
+            Place(issues.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -52), new Vector2(-32, -192));
 
-            var message = Text("MessageText", panel, "", 16, UiTheme.Warning, TextAlignmentOptions.BottomLeft);
-            Place(message.rectTransform, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(0, 66), new Vector2(-32, 26));
-
-            var consensus = Text("ConsensusText", panel, "CONSENSO DEL EQUIPO", 15, UiTheme.Text, TextAlignmentOptions.MidlineLeft);
+            // Fila inferior: botones. Encima, una fila propia de consenso que ocupa todo el ancho del panel
+            // (las píldoras se reparten en cuartos), así nunca se montan sobre los botones aunque la ventana sea angosta.
+            // Más arriba: título del consenso a la izquierda y mensaje a la derecha.
+            var consensus = Text("ConsensusText", panel, "CONSENSO DEL EQUIPO", 14, UiTheme.TextDim, TextAlignmentOptions.BottomLeft, bold: true);
             consensus.textWrappingMode = TextWrappingModes.NoWrap;
-            Place(consensus.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(16, 10), new Vector2(310, 52));
+            Place(consensus.rectTransform, new Vector2(0, 0), new Vector2(0.4f, 0), new Vector2(0, 0), new Vector2(16, 106), new Vector2(-16, 20));
+
+            var message = Text("MessageText", panel, "", 15, UiTheme.Warning, TextAlignmentOptions.BottomRight);
+            message.enableAutoSizing = true; message.fontSizeMin = 11; message.fontSizeMax = 15;
+            Place(message.rectTransform, new Vector2(0.4f, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-16, 104), new Vector2(-24, 34));
+
+            var chipRow = Panel("ConsensusRow", panel, new Color(0, 0, 0, 0));
+            Place(chipRow, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(0, 68), new Vector2(-32, 30));
+            var chips = new Object[RoleTurnManager.AllRoles.Length];
+            var chipLabels = new Object[RoleTurnManager.AllRoles.Length];
+            for (int i = 0; i < chips.Length; i++)
+            {
+                var role = RoleTurnManager.AllRoles[i];
+                var chip = Panel("Chip_" + role, chipRow, UiTheme.PanelLight);
+                float a = (float)i / chips.Length, b = (float)(i + 1) / chips.Length;
+                chip.anchorMin = new Vector2(a, 0); chip.anchorMax = new Vector2(b, 1); chip.pivot = new Vector2(0.5f, 0.5f);
+                chip.offsetMin = new Vector2(i == 0 ? 0 : 4, 0); chip.offsetMax = new Vector2(i == chips.Length - 1 ? 0 : -4, 0);
+                chip.gameObject.AddComponent<TooltipTrigger>().staticText = $"{RoleTurnManager.RoleDisplayName(role)}: en verde cuando aprueba el diseño.";
+                var label = Text("Label", chip, UiTheme.RoleShort(role), 14, UiTheme.Text, TextAlignmentOptions.Center, bold: true);
+                Stretch(label.rectTransform);
+                label.textWrappingMode = TextWrappingModes.NoWrap;
+                chips[i] = chip.GetComponent<Image>();
+                chipLabels[i] = label;
+            }
 
             var approve = MakeButton("ApproveButton", panel, "Aprobar diseño", UiTheme.AccentDim, 18, 0);
             Place((RectTransform)approve.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-236, 12), new Vector2(170, 48));
@@ -667,6 +728,8 @@ namespace MissionDesign.Editor
             Wire(view, "statusText", status);
             Wire(view, "issuesText", issues);
             Wire(view, "consensusText", consensus);
+            WireArray(view, "consensusChips", chips);
+            WireArray(view, "consensusLabels", chipLabels);
             Wire(view, "approveButton", approve);
             Wire(view, "launchButton", launch);
             Wire(view, "messageText", message);

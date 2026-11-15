@@ -146,6 +146,20 @@ namespace MissionDesign.Tests
         }
 
         [Test]
+        public void CollaborationLog_ApprovingCountsAsParticipation()
+        {
+            // Caso reportado: un rol arma el diseño y los cuatro lo aprueban → 4 de 4, no 1 de 4.
+            var log = new CollaborationLog();
+            log.RecordChange(MissionRole.PrincipalScientist);
+            foreach (var role in RoleTurnManager.AllRoles) log.RecordApproval(role);
+
+            Assert.AreEqual(4, log.RolesParticipated);
+            Assert.AreEqual(1, log.RolesContributed);
+            Assert.AreEqual(5, log.Score);                       // 1.5 + 3 × 1.25 = 5.25 → 5 (sin conflictos)
+            StringAssert.Contains("4 de 4 roles participaron", log.Notes);
+        }
+
+        [Test]
         public void Collaboration_IsAddedToTheReportCards()
         {
             var o = MissionSimulator.Run(fx.ValidLeoDesign(out _), null,

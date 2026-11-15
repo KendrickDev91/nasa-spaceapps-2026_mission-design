@@ -1,0 +1,23 @@
+{
+    "designName": "3 · Batería insuficiente (falla)",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_ARTEMIS_FLYBY",
+    "orbitId": "ORB_FREE_RETURN",
+    "launchVehicleId": "LV_SLS_B1",
+    "groundNetworkId": "GND_OPTICAL",
+    "componentIds": [
+        "BUS_ORION",
+        "SOL_ESM",
+        "BAT_CUBESAT",
+        "ANT_O2O",
+        "CDH_ORION"
+    ],
+    "instrumentIds": [
+        "INS_ORION_CAMERAS",
+        "INS_CREW_CAMERAS"
+    ],
+    "demoSeed": 1,
+    "demoNote": "La batería no aguanta un evento: la cápsula no vuelve y solo quedan las fotos transmitidas. Lección: margen de energía."
+}

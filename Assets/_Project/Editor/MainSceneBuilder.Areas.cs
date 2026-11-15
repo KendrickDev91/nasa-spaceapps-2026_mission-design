@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using MissionDesign.UI;
 using MissionDesign.Simulation;
 using MissionDesign.UI.Visual3D;
 using TMPro;
@@ -44,6 +46,14 @@ namespace MissionDesign.Editor
             var orbit = BuildOrbitArea(earthMat, moonMat, screenRt);
             var roomPose = PlaceControlRoom(room, screenRt);
             var lunar = BuildLunarArea(assembler, earthMat);
+            var studio = BuildPhotoStudio(runner, earthMat, lunar != null ? lunar.transform : null);
+            var flightHud = Object.FindAnyObjectByType<FlightHudView>();
+            if (flightHud != null) { Wire(flightHud, "orbit", orbit); Wire(flightHud, "studio", studio); }
+            var report = Object.FindAnyObjectByType<ExplorationReportPanel>();
+            if (report != null) Wire(report, "studio", studio);
+            Wire(orbit, "runner", runner);
+            var screens = Object.FindAnyObjectByType<ControlRoomScreens>();
+            if (screens != null) { Wire(screens, "runner", runner); Wire(screens, "orbit", orbit); Wire(screens, "studio", studio); }
 
             var director = systems.AddComponent<MissionCameraDirector>();
             Wire(director, "mainCamera", camera);
@@ -51,6 +61,8 @@ namespace MissionDesign.Editor
             Wire(director, "orbitView", orbit);
             Wire(director, "lunarFlyover", lunar);
             Wire(director, "controlRoomPose", roomPose);
+            Wire(director, "reactionPose", room.transform.Find("ControlRoomReactionPose"));
+            Wire(director, "wideRoomPose", room.transform.Find("ControlRoomWidePose"));
 
             var so = new SerializedObject(runner);
             so.FindProperty("secondsPerPhase").floatValue = 4f;
@@ -126,6 +138,8 @@ namespace MissionDesign.Editor
 
             Wire(view, "earth", earth);
             Wire(view, "moon", moon);
+            Wire(view, "spacecraftPrefab", ModelLinker.Load("Spacecraft", "BUS_ORION"));
+            Wire(view, "trailMaterial", ParticleMaterial("MAT_FX_Trail", additive: true));
             Wire(view, "parkingLine", Line("ParkingOrbit", area.transform, new Color(0.3f, 0.75f, 1f), 0.12f));
             Wire(view, "transferLine", Line("TransferOrbit", area.transform, new Color(1f, 0.55f, 0.15f), 0.25f));
             Wire(view, "targetLine", Line("TargetOrbit", area.transform, new Color(0.35f, 1f, 0.5f), 0.22f));
@@ -171,28 +185,77 @@ namespace MissionDesign.Editor
                 quad.transform.localScale = new Vector3(Mathf.Max(b.size.x, b.size.z), b.size.y, 1f);
                 quad.GetComponent<Renderer>().sharedMaterial = UnlitMaterial("MAT_ControlRoom_MainScreen", Color.white, screenRt);
             }
-            var sideMat = UnlitMaterial("MAT_ControlRoom_SideScreen", new Color(0.08f, 0.28f, 0.55f));
+            // Pantallas laterales: fondo oscuro con texto en vivo (telemetría · despliegue y bitácora).
+            var sideMat = UnlitMaterial("MAT_ControlRoom_SideScreen", new Color(0.02f, 0.05f, 0.11f));
+            var screensView = room.AddComponent<ControlRoomScreens>();
+            Vector3 screenNormal = screen != null && spotForScreen != null ? screen.position - spotForScreen.position : Vector3.forward;
+            screenNormal.y = 0f;
+            screenNormal.Normalize();
             foreach (var side in new[] { "Screen_Left", "Screen_Right" })
             {
                 var t = FindDeep(model.transform, side);
-                if (t != null) t.GetComponent<Renderer>().sharedMaterial = sideMat;
+                if (t == null) continue;
+                var r = t.GetComponent<Renderer>();
+                r.sharedMaterial = sideMat;
+                var bounds = r.bounds;
+                var textGo = new GameObject(side + "_Live", typeof(RectTransform));
+                textGo.transform.SetParent(room.transform, true);
+                textGo.transform.SetPositionAndRotation(bounds.center - screenNormal * 0.08f, Quaternion.LookRotation(screenNormal, Vector3.up));
+                var tmp = textGo.AddComponent<TextMeshPro>();
+                tmp.rectTransform.sizeDelta = new Vector2(Mathf.Max(bounds.size.x, bounds.size.z) * 0.9f, bounds.size.y * 0.88f);
+                tmp.alignment = TextAlignmentOptions.TopLeft;
+                tmp.enableAutoSizing = true;
+                tmp.fontSizeMin = 0.05f;
+                tmp.fontSizeMax = bounds.size.y * 1.1f;
+                tmp.color = new Color(0.86f, 0.92f, 1f);
+                tmp.richText = true;
+                tmp.text = "";
+                Wire(screensView, side == "Screen_Left" ? "leftScreen" : "rightScreen", tmp);
             }
 
-            // Operadores (anclas de Mixamo) sentados en la primera grada.
+            // Personal de la sala: los 4 roles en la primera grada y más operadores en las otras (avatar con poses procedurales).
+            var bridge = room.GetComponent<MissionControlAnimatorBridge>();
+            var controller = CrewController();
+            Vector3 facing = screen != null && spotForScreen != null ? screen.position - spotForScreen.position : Vector3.forward;
+            var bso = new SerializedObject(bridge);
+            var opsProp = bso.FindProperty("operators");
             int i = 0;
-            foreach (Transform op in room.transform)
+            var anchors = new List<Transform>();
+            foreach (Transform op in room.transform) if (op.name.StartsWith("Operator_")) anchors.Add(op);
+            foreach (var op in anchors)
             {
-                if (!op.name.StartsWith("Operator_")) continue;
                 var seat = FindDeep(model.transform, $"Seat_0_{1 + i * 2}");
                 if (seat != null) op.position = seat.position;
                 var body = op.Find("Placeholder_Body");
-                if (body != null)
-                {
-                    body.localPosition = new Vector3(0f, 0.55f, 0f);
-                    body.localScale = new Vector3(0.55f, 0.6f, 0.55f);
-                }
+                if (body != null) Object.DestroyImmediate(body.gameObject);
+                var oldAnimator = op.GetComponent<Animator>();
+                if (oldAnimator != null) Object.DestroyImmediate(oldAnimator);
+                var crewAnimator = seat != null ? SpawnCrew($"Crew_{op.name}", op, seat.position, facing, i, controller, ambient: false) : null;
+                if (i < opsProp.arraySize) opsProp.GetArrayElementAtIndex(i).FindPropertyRelative("animator").objectReferenceValue = crewAnimator;
                 i++;
             }
+            var crowd = new List<Object>();
+            int crewIndex = 4;
+            foreach (var name in new[] { "Seat_1_0", "Seat_1_3", "Seat_1_5", "Seat_1_6", "Seat_2_1", "Seat_2_6" })
+            {
+                var seat = FindDeep(model.transform, name);
+                if (seat == null) continue;
+                var a = SpawnCrew($"Crew_{name}", room.transform, seat.position, facing, crewIndex++, controller, ambient: false);
+                if (a != null) crowd.Add(a);
+            }
+            bso.ApplyModifiedPropertiesWithoutUndo();
+            WireArray(bridge, "crowd", crowd.ToArray());
+
+            DecorateControlRoom(room.transform, model.transform, facing);
+
+            // Cámara de reacción: frente a las pantallas, mirando a la primera grada.
+            var firstRow = FindDeep(model.transform, "Seat_0_3");
+            var reaction = new GameObject("ControlRoomReactionPose").transform;
+            reaction.SetParent(room.transform, false);
+            Vector3 dir = facing; dir.y = 0f; dir.Normalize();
+            Vector3 look = (firstRow != null ? firstRow.position : room.transform.position) + Vector3.up * 0.7f + Vector3.Cross(Vector3.up, dir) * 1.2f;
+            reaction.position = look + dir * 5.2f + Vector3.up * 1.4f;
+            reaction.LookAt(look + Vector3.up * 0.2f);
 
             for (int k = 0; k < 3; k++)
             {
@@ -202,11 +265,21 @@ namespace MissionDesign.Editor
                 l.type = LightType.Point; l.range = 22f; l.intensity = 6f; l.color = new Color(0.85f, 0.9f, 1f);
             }
 
-            var spot = FindDeep(model.transform, "CameraSpot_Back");
+            // Plano general alto desde el fondo: operadores de espaldas y la pantalla grande con la trayectoria en vivo.
+            var wide = new GameObject("ControlRoomWidePose").transform;
+            wide.SetParent(room.transform, false);
+            Vector3 back = spotForScreen != null ? spotForScreen.position : room.transform.position - dir * 9f + Vector3.up * 3f;
+            wide.position = back + Vector3.up * 3.2f - dir * 0.6f;
+            wide.LookAt((screen != null ? screen.position : room.transform.position + dir * 10f) + Vector3.down * 2.2f);
+
+            // Toma de la sala (transmisión y análisis): desde el costado, para ver a los operadores trabajando
+            // y, al fondo, las pantallas con la trayectoria y los datos en vivo.
             var pose = new GameObject("ControlRoomCameraPose").transform;
             pose.SetParent(room.transform, false);
-            pose.position = spot != null ? spot.position : room.transform.position + new Vector3(0f, 3.4f, -8.5f);
-            if (screen != null) pose.LookAt(screen.position + Vector3.down * 0.6f);
+            Vector3 row = firstRow != null ? firstRow.position : room.transform.position;
+            Vector3 sideDir = Vector3.Cross(Vector3.up, dir);
+            pose.position = row + sideDir * 6.5f + dir * 1.6f + Vector3.up * 2.2f;
+            pose.LookAt(row - sideDir * 1.2f + dir * 0.2f + Vector3.up * 1.2f);
             return pose;
         }
 

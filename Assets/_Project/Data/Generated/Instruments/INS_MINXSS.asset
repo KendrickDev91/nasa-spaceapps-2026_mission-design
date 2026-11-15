@@ -39,3 +39,5 @@ MonoBehaviour:
   scienceObjectives:
   - sol
   - clima_espacial
+  isCamera: 0
+  photosPerDay: 0

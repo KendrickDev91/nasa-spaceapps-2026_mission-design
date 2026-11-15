@@ -234,6 +234,8 @@ namespace MissionDesign.Simulation
                 $"{Name(d.Antenna)} vía {NetworkName(d)} entregó {o.downlinkGBPerDay:N1} GB/día frente a {o.dataGeneratedGBPerDay:N1} GB/día generados: " +
                 $"{o.dataReturnedTotalTB:N1} TB recibidos en tierra ({o.dataReturnFraction:P0}).");
 
+            float linkFraction = o.dataReturnFraction;   // lo que bajó por enlace antes de recuperar memorias
+
             // ───── 5. REGRESO Y RECUPERACIÓN (misiones con retorno libre) ─────
             if (flyby)
             {
@@ -257,6 +259,8 @@ namespace MissionDesign.Simulation
                     Log(o, MissionPhase.ReturnAndRecovery, opsDays, LogTone.Critical, "La cápsula no regresa: los datos guardados a bordo se pierden.");
                 }
             }
+
+            ComputePhotos(d, o, flyby, opsDays, linkFraction, powerFrac);
 
             // ───── Veredicto y explicación ─────
             float target = o.scienceTarget > 0f ? o.scienceTarget : Mathf.Max(1f, potential);
@@ -373,6 +377,8 @@ namespace MissionDesign.Simulation
                 o.explanations.Add($"Bien: tras el amerizaje se recuperaron {o.dataRecoveredTB:N2} TB guardados a bordo que el enlace no alcanzó a enviar. " +
                                    "Así ocurrió en Artemis II: la tripulación tomó ~10 000 fotos con las 32 cámaras de Orion y cámaras Nikon D5/Z9; " +
                                    "parte se envió por enlace láser y el resto volvió en tarjetas SD.");
+
+            ExplainPhotos(o);
 
             if (powerFrac < 0.98f)
                 o.explanations.Add($"{prefix}: los paneles dieron {genW:N0} W de media (eclipse y degradación incluidos) frente a {t.peakLoadW:N0} W de consumo pico; " +
@@ -514,5 +520,53 @@ namespace MissionDesign.Simulation
         private static string NetworkName(SpacecraftDesign d) => d.GroundNetwork != null ? d.GroundNetwork.displayName : "(sin red terrena)";
 
         private static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s.Substring(1);
+
+        // ───── Fotografía de exploración ─────
+
+        /// <summary>
+        /// Cámaras + destino lunar → fotografías. Con retorno libre, lo que el enlace no envió vuelve en las tarjetas SD
+        /// (como en Artemis II); si la cápsula se pierde, solo queda lo transmitido.
+        /// </summary>
+        public static void ComputePhotos(SpacecraftDesign d, MissionOutcomeReport o, bool flyby, float opsDays, float linkFraction, float powerFrac)
+        {
+            var cams = d.Instruments.Where(i => i != null && i.isCamera).ToList();
+            o.cameras = cams.Select(c => c.displayName).ToArray();
+            var orbit = d.Orbit;
+            bool lunarTarget = orbit != null && (orbit.regime == OrbitRegime.Lunar || flyby);
+            bool inSpace = o.launchSucceeded && o.orbitInsertionSucceeded;
+            o.reachedMoon = lunarTarget && inSpace;
+            o.photoTarget = lunarTarget ? "Luna" : "Tierra";
+            o.photosTaken = o.photosTransmitted = o.photosRecovered = o.photoShots = o.photoShotsAvailable = 0;
+            // En órbita terrestre las cámaras fotografían la Tierra; en destino lunar, la Luna.
+            if (cams.Count == 0 || !inSpace) return;
+
+            float window = flyby ? 1.2f : Mathf.Clamp(opsDays, 0f, lunarTarget ? 30f : 10f);
+            if (!o.survivedOperations && !flyby) window *= o.plannedOperationsDays > 0f ? Mathf.Clamp01(o.achievedOperationsDays / o.plannedOperationsDays) : 0f;
+            o.photosTaken = Mathf.RoundToInt(cams.Sum(c => c.photosPerDay) * window * Mathf.Clamp01(powerFrac));
+            o.photoShots = Mathf.Clamp(4 + 2 * cams.Count, 4, 8);
+            float sent = Mathf.Clamp01(linkFraction);
+            o.photosTransmitted = Mathf.RoundToInt(o.photosTaken * sent);
+            bool capsuleBack = flyby && o.survivedOperations;
+            o.photosRecovered = capsuleBack ? o.photosTaken - o.photosTransmitted : 0;
+            o.photoShotsAvailable = capsuleBack ? o.photoShots : Mathf.Clamp(Mathf.RoundToInt(o.photoShots * sent), o.photosTransmitted > 0 ? 1 : 0, o.photoShots);
+        }
+
+        private static void ExplainPhotos(MissionOutcomeReport o)
+        {
+            if (o.cameras == null || o.cameras.Length == 0) return;
+            string cams = string.Join(", ", o.cameras);
+            if (o.photosTaken <= 0)
+            {
+                o.explanations.Add($"Falló: las cámaras ({cams}) no tomaron fotografías porque la nave no llegó a su órbita.");
+                return;
+            }
+            string recovered = o.photosRecovered > 0 ? $" y {o.photosRecovered:N0} en tarjetas SD" : string.Empty;
+            string target = o.reachedMoon ? "de la Luna" : "de la Tierra desde órbita";
+            o.explanations.Add($"Bien: las cámaras tomaron ~{o.photosTaken:N0} fotos {target} ({o.photosTransmitted:N0} por el enlace{recovered}). " +
+                               $"Cámaras: {cams}. Revísalas en el «Informe de la exploración»." +
+                               (o.reachedMoon ? string.Empty : " Para fotografiar la Luna elige un destino lunar."));
+            if (o.photoShotsAvailable < o.photoShots)
+                o.explanations.Add($"Falló: se perdieron fotografías guardadas a bordo; solo llegaron a tierra las transmitidas ({o.photosTransmitted:N0}).");
+        }
     }
 }

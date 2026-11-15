@@ -38,6 +38,9 @@ namespace MissionDesign.Simulation
         public event Action<float> ProgressChanged;
 
         public bool IsRunning => playback != null;
+        /// <summary>Avance 0-1 dentro de la fase que se está reproduciendo (para animaciones sincronizadas).</summary>
+        public float PhaseProgress { get; private set; }
+        private int phaseIndex;
         public MissionOutcomeReport Current { get; private set; }
 
         public float SecondsPerPhase
@@ -104,6 +107,8 @@ namespace MissionDesign.Simulation
                 var entries = outcome.timeline.Where(e => e.phase == phase).ToList();
                 if (phase == MissionPhase.ReturnAndRecovery && entries.Count == 0) continue;   // solo misiones con retorno
 
+                phaseIndex = p;
+                PhaseProgress = 0f;
                 manager.SetPhase(phase);
                 float slot = entries.Count > 0 ? secondsPerPhase / entries.Count : secondsPerPhase;
                 if (entries.Count == 0) yield return Wait(secondsPerPhase, p / total, (p + 1) / total);
@@ -157,9 +162,12 @@ namespace MissionDesign.Simulation
             while (time < seconds && !skipRequested)
             {
                 time += Time.deltaTime;
-                ProgressChanged?.Invoke(Mathf.Lerp(fromProgress, toProgress, time / seconds));
+                float value = Mathf.Lerp(fromProgress, toProgress, time / seconds);
+                PhaseProgress = Mathf.Clamp01(value * PlaybackPhases.Length - phaseIndex);
+                ProgressChanged?.Invoke(value);
                 yield return null;
             }
+            PhaseProgress = Mathf.Clamp01(toProgress * PlaybackPhases.Length - phaseIndex);
             ProgressChanged?.Invoke(toProgress);
         }
     }

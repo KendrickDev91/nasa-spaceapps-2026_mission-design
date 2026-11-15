@@ -23,6 +23,12 @@ def main():
     chair = mt.material("CR_Chair", (0.12, 0.12, 0.14), roughness=0.7)
     clock = mt.material("CR_ClockLED", (0.55, 0.15, 0.05), emission=(1.0, 0.35, 0.1), emission_strength=1.5)
     carpet = mt.material("CR_Step", (0.2, 0.2, 0.24), roughness=0.95)
+    keyboard = mt.material("CR_Keyboard", (0.07, 0.07, 0.08), roughness=0.6)
+    keys = mt.material("CR_Keys", (0.55, 0.57, 0.6), roughness=0.5)
+    panel = mt.material("CR_AcousticPanel", (0.2, 0.23, 0.3), roughness=0.95)
+    glass = mt.material("CR_ViewGlass", (0.05, 0.08, 0.12), metallic=0.6, roughness=0.08)
+    mugs = [mt.material(f"CR_Mug{k}", c, roughness=0.4) for k, c in enumerate(((0.85, 0.85, 0.85), (0.1, 0.3, 0.7), (0.75, 0.2, 0.1)))]
+    binder = mt.material("CR_Binder", (0.15, 0.35, 0.55), roughness=0.6)
 
     root = mt.empty("ControlRoom")
     W, D, H = 26.0, 20.0, 7.0
@@ -49,6 +55,14 @@ def main():
     for side, x in (("Left", -8.6), ("Right", 8.6)):
         mt.box(f"Screen_{side}_Frame", (5.4, 0.25, 3.4), (x, D / 2 - 0.2, 4.2), bezel, root)
         mt.box(f"Screen_{side}", (5.0, 0.05, 3.0), (x, D / 2 - 0.35, 4.2), screen, root)
+    # Paneles acústicos y pantallas de monitoreo en las paredes laterales; ventana de la sala de visitas al fondo.
+    for side_x in (-W / 2 + 0.2, W / 2 - 0.2):
+        for k in range(5):
+            mt.box(f"AcousticPanel_{int(side_x)}_{k}", (0.08, 1.4, 3.2), (side_x, -7.5 + k * 3.6, 2.6), panel, root)
+        mt.box(f"Screen_Wall_{'L' if side_x < 0 else 'R'}_Frame", (0.12, 3.6, 2.2), (side_x * 0.995, 1.0, 4.9), bezel, root)
+        mt.box(f"Screen_Wall_{'L' if side_x < 0 else 'R'}", (0.06, 3.3, 1.9), (side_x * 0.99, 1.0, 4.9), screen, root)
+    mt.box("ViewingWindow", (12.0, 0.08, 1.6), (0, -D / 2 + 0.2, 5.3), glass, root)
+    mt.box("ViewingWindowSill", (12.2, 0.3, 0.12), (0, -D / 2 + 0.3, 4.45), bezel, root)
     for k in range(6):
         mt.box(f"MissionClock{k}", (1.6, 0.1, 0.4), (-8.75 + k * 3.5, D / 2 - 0.3, 6.6), clock, root)
 
@@ -71,6 +85,16 @@ def main():
                 mt.box(f"ChairBack_{r_i}_{c_i}_{s_i}", (0.55, 0.08, 0.6), (sx, sy - 0.28, base_z + 0.85), chair, root)
                 mt.cylinder(f"ChairStem_{r_i}_{c_i}_{s_i}", 0.05, 0.45, base_z, chair, root, verts=8, x=sx, y=sy)
                 mt.empty(f"Seat_{r_i}_{c_i * 2 + s_i}", root, location=(sx, sy, base_z + 0.5))
+                # Puesto de trabajo: teclado, ratón y una taza o carpeta.
+                top = base_z + 0.795
+                mt.box(f"Keyboard_{r_i}_{c_i}_{s_i}", (0.46, 0.16, 0.025), (sx, y - 0.42, top + 0.0125), keyboard, root)
+                mt.box(f"Keys_{r_i}_{c_i}_{s_i}", (0.42, 0.12, 0.006), (sx, y - 0.42, top + 0.028), keys, root)
+                mt.box(f"Mouse_{r_i}_{c_i}_{s_i}", (0.06, 0.1, 0.03), (sx + 0.34, y - 0.41, top + 0.015), keyboard, root)
+                if (r_i + c_i + s_i) % 2 == 0:
+                    mt.cylinder(f"Mug_{r_i}_{c_i}_{s_i}", 0.045, 0.1, top, mugs[(r_i + c_i) % 3], root, verts=12, x=sx - 0.42, y=y - 0.12)
+                else:
+                    mt.box(f"Binder_{r_i}_{c_i}_{s_i}", (0.24, 0.3, 0.04), (sx - 0.45, y - 0.1, top + 0.02), binder, root)
+            mt.box(f"Phone_{r_i}_{c_i}", (0.18, 0.2, 0.06), (x + 1.85, y - 0.05, base_z + 0.825), keyboard, root)
 
     mt.empty("CameraSpot_Back", root, location=(0, -D / 2 + 1.5, 3.4))
     mt.export(root, "ControlRoom", "ControlRoom")

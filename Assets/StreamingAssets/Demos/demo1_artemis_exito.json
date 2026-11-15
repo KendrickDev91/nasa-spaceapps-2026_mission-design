@@ -1,0 +1,23 @@
+{
+    "designName": "1 · Artemis II con fotos (éxito 100 %)",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_ARTEMIS_FLYBY",
+    "orbitId": "ORB_FREE_RETURN",
+    "launchVehicleId": "LV_SLS_B1",
+    "groundNetworkId": "GND_OPTICAL",
+    "componentIds": [
+        "BUS_ORION",
+        "SOL_ESM",
+        "BAT_2000",
+        "ANT_O2O",
+        "CDH_ORION"
+    ],
+    "instrumentIds": [
+        "INS_ORION_CAMERAS",
+        "INS_CREW_CAMERAS"
+    ],
+    "demoSeed": 0,
+    "demoNote": "Éxito total: 32 cámaras de Orion + cámaras de la tripulación, enlace láser y fotos de la Luna en el informe."
+}

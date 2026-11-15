@@ -32,7 +32,18 @@ namespace MissionDesign.Exploration
         public const string Controls =
             "<b>WASD</b> / flechas: caminar · <b>Shift</b>: correr · <b>Espacio</b>: saltar\n" +
             "<b>Clic derecho + ratón</b>: girar la cámara · <b>Rueda</b>: acercar/alejar\n" +
-            "<b>E</b>: interactuar · <b>M</b>: planos · <b>Esc</b>: menú (viaje rápido entre edificios)";
+            "<b>E</b>: interactuar · <b>M</b>: planos · <b>N</b>: mapa · <b>V</b>: cámara en 1.ª / 3.ª persona\n" +
+            "<b>Esc</b>: menú (viaje rápido entre edificios)";
+
+        public static readonly string[][] CrewArm =
+        {
+            new[] { "BRAZO DE ACCESO DE LA TRIPULACIÓN",
+                "Desde este brazo, a la altura de la cápsula, los astronautas cruzan a la <b>sala blanca</b> y entran en Orion " +
+                "unas horas antes del despegue. Técnicos con trajes limpios los ayudan a sentarse y cierran la escotilla.\n\n" +
+                "Antes del lanzamiento el brazo se retrae. Si hay una emergencia en la plataforma, la tripulación evacúa por un " +
+                "sistema de cestas que bajan deslizándose por cables hasta un búnker.\n\n" +
+                "<size=85%>En el juego el brazo está a 75 m; en la plataforma real de Artemis está aún más alto.</size>" },
+        };
 
         public static readonly string[][] Reception =
         {
@@ -94,7 +105,9 @@ namespace MissionDesign.Exploration
                 "4. <b>Sobrevuelo</b> por la cara oculta a ~7 400 km de altura.\n" +
                 "5. La gravedad lunar curva la trayectoria y la devuelve a la Tierra <b>sin encender el motor principal</b>.\n" +
                 "6. Reentrada y amerizaje tras ~10 días.\n\n" +
-                "En el juego la trayectoria se calcula con un modelo de 3 cuerpos Tierra-Luna (órbita “Sobrevuelo lunar con retorno libre”)." },
+                "En el juego la trayectoria se calcula con un modelo de 3 cuerpos Tierra-Luna (órbita “Sobrevuelo lunar con retorno libre”) " +
+                "y se validó con <b>NASA GMAT</b>: con efemérides reales, una corrección de rumbo de ~140 m/s tras la TLI reproduce el mismo " +
+                "sobrevuelo (7 283 km) y el perigeo de regreso de 50 km." },
             new[] { "LAS FOTOS DE ARTEMIS II",
                 "Durante el sobrevuelo se tomaron unas <b>10 000 fotos</b>. Orion lleva <b>32 cámaras</b> (muchas externas) y la tripulación usó " +
                 "cámaras Nikon D5 y Z9 con objetivos de 80–400 mm y 35 mm.\n\n" +

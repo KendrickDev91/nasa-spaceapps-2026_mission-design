@@ -21,6 +21,11 @@ namespace MissionDesign.Data
         public OrbitRegime[] preferredOrbits;
         [Tooltip("Etiquetas de objetivo científico (clima, océano, superficie lunar...).")]
         public string[] scienceObjectives;
+        [Header("Cámaras (fotografía de exploración)")]
+        [Tooltip("Es una cámara: si la misión llega a la Luna, toma fotografías que aparecen en el informe de exploración.")]
+        public bool isCamera;
+        [Tooltip("Fotografías por día de sobrevuelo/operación cerca de la Luna (estimación).")]
+        [Min(0)] public int photosPerDay;
 
         public override ComponentCategory Category => ComponentCategory.Instrument;
         public override MissionRole OwnerRole => MissionRole.PrincipalScientist;

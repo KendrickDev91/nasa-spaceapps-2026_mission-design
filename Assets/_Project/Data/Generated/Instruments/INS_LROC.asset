@@ -41,3 +41,5 @@ MonoBehaviour:
   - luna
   - superficie
   - artemis
+  isCamera: 1
+  photosPerDay: 450

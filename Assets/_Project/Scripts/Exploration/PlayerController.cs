@@ -12,8 +12,8 @@ namespace MissionDesign.Exploration
     {
         [SerializeField] private Animator animator;
         [SerializeField] private Transform cameraTransform;
-        [SerializeField] private float walkSpeed = 2.2f;
-        [SerializeField] private float runSpeed = 6f;
+        [SerializeField] private float walkSpeed = 2.75f;   // +25 %
+        [SerializeField] private float runSpeed = 7.5f;     // +25 %
         [SerializeField] private float jumpHeight = 1.0f;
         [SerializeField] private float gravity = -19.6f;
         [SerializeField] private float turnSpeed = 12f;
@@ -37,6 +37,31 @@ namespace MissionDesign.Exploration
         public bool SimulatedRun { get; set; }
         public bool IsGrounded => grounded;
         public float AnimatorSpeed => animSpeed;
+        public float WalkSpeed => walkSpeed;
+        public float RunSpeed => runSpeed;
+        /// <summary>Congelado (sentado en una silla): sin física ni movimiento; el CrewPoser coloca el cuerpo.</summary>
+        public bool Frozen { get; private set; }
+
+        /// <summary>Desplaza al personaje junto con una plataforma móvil (ascensor).</summary>
+        public void Carry(Vector3 delta)
+        {
+            if (controller == null) controller = GetComponent<CharacterController>();
+            bool was = controller.enabled;
+            controller.enabled = false;
+            transform.position += delta;
+            controller.enabled = was;
+            if (velocity.y < 0f) velocity.y = -2f;
+        }
+
+        public void SetFrozen(bool frozen)
+        {
+            Frozen = frozen;
+            if (controller == null) controller = GetComponent<CharacterController>();
+            controller.enabled = !frozen;
+            velocity = Vector3.zero;
+            animSpeed = 0f;
+            if (animator != null) animator.SetFloat(SpeedId, 0f);
+        }
 
         private void Awake()
         {
@@ -50,7 +75,7 @@ namespace MissionDesign.Exploration
         private void Update()
         {
             float dt = Time.deltaTime;
-            if (dt <= 0f) return;
+            if (dt <= 0f || Frozen) return;
             Vector2 input = SimulatedMove;
             bool run = SimulatedRun, jump = false;
             var kb = Keyboard.current;

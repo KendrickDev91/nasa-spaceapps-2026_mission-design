@@ -20,6 +20,8 @@ namespace MissionDesign.UI
 
         private readonly List<string> lines = new List<string>();
         private MissionStateManager manager;
+        private Vector2 homeAnchorMin, homeAnchorMax, homePivot, homeOffsetMin, homeOffsetMax;
+        private bool homeSaved;
 
         private static readonly (MissionPhase phase, string label)[] Steps =
         {
@@ -60,9 +62,10 @@ namespace MissionDesign.UI
                 SetProgress(0f);
             }
 
+            bool returns = manager.Design.Orbit != null && manager.Design.Orbit.regime == OrbitRegime.LunarFlyby;
+            if (phase == MissionPhase.Launch) Dock(returns);
             if (phaseText == null) return;
             var parts = new List<string>();
-            bool returns = manager.Design.Orbit != null && manager.Design.Orbit.regime == OrbitRegime.LunarFlyby;
             foreach (var (p, label) in Steps)
             {
                 if (p == MissionPhase.ReturnAndRecovery && !returns) continue;
@@ -78,6 +81,30 @@ namespace MissionDesign.UI
                 phaseText.enableAutoSizing = true;
             }
             phaseText.text = string.Join(parts.Count > 4 ? " » " : "  »  ", parts);
+        }
+
+        /// <summary>En el sobrevuelo lunar el panel pasa a la columna derecha para no tapar la Luna del diagrama.</summary>
+        private void Dock(bool rightColumn)
+        {
+            var rt = (RectTransform)transform;
+            if (!homeSaved)
+            {
+                homeAnchorMin = rt.anchorMin; homeAnchorMax = rt.anchorMax; homePivot = rt.pivot;
+                homeOffsetMin = rt.offsetMin; homeOffsetMax = rt.offsetMax;
+                homeSaved = true;
+            }
+            if (rightColumn)
+            {
+                rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
+                rt.pivot = new Vector2(1f, 0f);
+                rt.sizeDelta = new Vector2(560f, 372f);
+                rt.anchoredPosition = new Vector2(-20f, 16f);
+            }
+            else
+            {
+                rt.anchorMin = homeAnchorMin; rt.anchorMax = homeAnchorMax; rt.pivot = homePivot;
+                rt.offsetMin = homeOffsetMin; rt.offsetMax = homeOffsetMax;
+            }
         }
 
         private void AddLine(SimulationLogEntry entry)

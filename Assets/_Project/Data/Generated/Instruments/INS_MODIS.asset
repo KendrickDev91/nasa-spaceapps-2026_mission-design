@@ -42,3 +42,5 @@ MonoBehaviour:
   - tierra
   - oceano
   - incendios
+  isCamera: 0
+  photosPerDay: 0

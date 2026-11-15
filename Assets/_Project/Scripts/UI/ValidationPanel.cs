@@ -19,12 +19,26 @@ namespace MissionDesign.UI
         [SerializeField] private TMP_Text statusText;
         [SerializeField] private TMP_Text issuesText;
         [SerializeField] private TMP_Text consensusText;
+        [Tooltip("Una píldora por rol (DIR, SIS, CIE, TEL): se ilumina en verde cuando ese rol aprueba.")]
+        [SerializeField] private Image[] consensusChips;
+        [SerializeField] private TMP_Text[] consensusLabels;
+        private bool[] chipWasApproved = new bool[0];
         [SerializeField] private Button approveButton;
         [SerializeField] private Button launchButton;
         [SerializeField] private TMP_Text messageText;
         [SerializeField] private int maxIssues = 7;
 
         private MissionStateManager manager;
+
+        private static System.Collections.IEnumerator Pop(RectTransform rt)
+        {
+            for (float t = 0f; t < 0.3f && rt != null; t += Time.unscaledDeltaTime)
+            {
+                rt.localScale = Vector3.one * (1f + 0.25f * Mathf.Sin(t / 0.3f * Mathf.PI));
+                yield return null;
+            }
+            if (rt != null) rt.localScale = Vector3.one;
+        }
 
         private void Start()
         {
@@ -110,7 +124,31 @@ namespace MissionDesign.UI
 
         private void RefreshConsensus()
         {
-            if (consensusText != null)
+            var all = RoleTurnManager.AllRoles;
+            int approvedCount = all.Count(r => roles.IsApproved(r));
+            if (consensusChips != null && consensusChips.Length > 0)
+            {
+                if (consensusText != null)
+                    consensusText.text = $"CONSENSO DEL EQUIPO  <color={UiTheme.Hex(approvedCount == all.Length ? UiTheme.Ok : UiTheme.TextDim)}>{approvedCount}/{all.Length}</color>";
+                if (chipWasApproved.Length != consensusChips.Length) chipWasApproved = new bool[consensusChips.Length];
+                for (int i = 0; i < consensusChips.Length && i < all.Length; i++)
+                {
+                    bool ok = roles.IsApproved(all[i]);
+                    bool active = roles.ActiveRole == all[i];
+                    if (consensusChips[i] != null)
+                    {
+                        consensusChips[i].color = ok ? UiTheme.Ok : active ? UiTheme.AccentDim : UiTheme.PanelLight;
+                        if (ok && !chipWasApproved[i] && isActiveAndEnabled) StartCoroutine(Pop(consensusChips[i].rectTransform));
+                    }
+                    if (consensusLabels != null && i < consensusLabels.Length && consensusLabels[i] != null)
+                    {
+                        consensusLabels[i].text = ok ? $"{UiTheme.RoleShort(all[i])} OK" : UiTheme.RoleShort(all[i]);
+                        consensusLabels[i].color = ok ? new Color(0.02f, 0.1f, 0.05f) : UiTheme.Text;
+                    }
+                    chipWasApproved[i] = ok;
+                }
+            }
+            else if (consensusText != null)
             {
                 var parts = RoleTurnManager.AllRoles.Select(r =>
                     roles.IsApproved(r)

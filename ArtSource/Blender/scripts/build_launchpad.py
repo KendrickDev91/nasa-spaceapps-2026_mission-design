@@ -77,6 +77,29 @@ def main():
         mt.cylinder(f"LampPole{k}", 0.3, 18, 0.0, grey, root, x=x, y=y, verts=8)
         mt.box(f"LampHead{k}", (2.2, 2.2, 0.6), (x, y, 18.3), lamp, root)
     _ = tower
+    # Tanques esféricos de oxígeno (LOX) e hidrógeno líquido (LH2), como en las plataformas reales, fuera de la losa.
+    for name, x, y, r in (("LOX", 66, -30, 7.5), ("LH2", -66, -24, 9.0)):
+        for k in range(6):
+            a = k * math.pi / 3
+            mt.cylinder(f"{name}_Leg{k}", 0.35, r + 1.5, -2.0, grey, root, verts=8, x=x + math.cos(a) * r * 0.7, y=y + math.sin(a) * r * 0.7)
+        mt.sphere(f"{name}_Tank", r, (x, y, r - 0.5), white, root)
+        sgn = 1 if x > 0 else -1
+        x0, x1 = sgn * 45.0, x - sgn * r
+        mt.box(f"{name}_Pipe", (abs(x1 - x0), 0.8, 0.8), ((x0 + x1) / 2, y, -1.2), grey, root)
+    # Deflector de llamas en el foso, bajo el cohete.
+    deflector = mt.box("FlameDeflector", (12, 9, 0.8), (0, 9, -0.6), grey, root)
+    deflector.rotation_euler = (math.radians(-25), 0, 0)
+    # Cables de los pararrayos (catenaria) entre los mástiles y hacia anclajes en el suelo.
+    import mathutils
+    def wire(p0, p1, name):
+        a, b = mathutils.Vector(p0), mathutils.Vector(p1)
+        w = mt.box(name, (0.12, 0.12, (b - a).length), tuple((a + b) / 2), grey, root)
+        w.rotation_mode = "QUATERNION"
+        w.rotation_quaternion = mathutils.Vector((0, 0, 1)).rotation_difference((b - a).normalized())
+    masts = [(42, 42), (-42, -42), (42, -42)]
+    for k, (x, y) in enumerate(masts):
+        wire((x, y, 119.5), (0, 0, 126), f"Catenary{k}")
+        wire((x, y, 119.5), (x * 1.5, y * 1.5, -2), f"Guy{k}")
     # Rampa de acceso (pendiente ~2,3°) desde el camino de orugas hasta la losa elevada.
     ramp = mt.box("AccessRamp", (30, 50.2, 1.0), (0, 70, -1.5), concrete, root)
     ramp.rotation_euler = (-math.atan2(2.0, 50.0), 0, 0)

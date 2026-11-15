@@ -25,6 +25,11 @@ namespace MissionDesign.Simulation
         public string groundNetworkId;
         public List<string> componentIds = new List<string>();   // bus, paneles, batería, antena, computadora, ADCS
         public List<string> instrumentIds = new List<string>();
+        [Tooltip("Diseños de demostración: semilla fija para que el resultado se repita en la presentación (-1 = aleatoria).")]
+        public int demoSeed = -1;
+        public string demoNote;
+
+        public bool IsDemo => demoSeed >= 0;
 
         public static DesignSnapshot Capture(SpacecraftDesign d, string name, string team = null) => new DesignSnapshot
         {
@@ -92,6 +97,13 @@ namespace MissionDesign.Simulation
             File.WriteAllText(path, snapshot.ToJson());
             return path;
         }
+
+        /// <summary>Carpeta de solo lectura con los diseños de demostración que acompañan al juego.</summary>
+        public static string DemoFolder => Path.Combine(Application.streamingAssetsPath, "Demos");
+
+        /// <summary>Diseños de demostración (StreamingAssets/Demos), ordenados por nombre.</summary>
+        public static List<(string path, DesignSnapshot snapshot)> Demos() =>
+            List(DemoFolder).OrderBy(d => d.snapshot.designName).ToList();
 
         /// <summary>Diseños guardados, del más reciente al más antiguo.</summary>
         public static List<(string path, DesignSnapshot snapshot)> List(string folder = null)

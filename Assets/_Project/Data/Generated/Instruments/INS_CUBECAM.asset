@@ -39,3 +39,5 @@ MonoBehaviour:
   scienceObjectives:
   - tierra
   - agricultura
+  isCamera: 1
+  photosPerDay: 300

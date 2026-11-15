@@ -41,3 +41,5 @@ MonoBehaviour:
   - clima
   - carbono
   - atmosfera
+  isCamera: 0
+  photosPerDay: 0

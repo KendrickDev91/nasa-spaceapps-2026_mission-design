@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MissionDesign.Characters;
 using MissionDesign.Core;
 using MissionDesign.Simulation;
 using UnityEngine;
@@ -57,6 +58,8 @@ namespace MissionDesign.UI.Visual3D
 
         private void OnPhaseChanged(MissionPhase phase)
         {
+            // El cohete llegó al espacio: la sala estalla en aplausos (como en un lanzamiento real).
+            if (phase == MissionPhase.OrbitInsertion) TriggerAll(Celebrate);
             // Durante operaciones el equipo trabaja en sus consolas.
             if (phase == MissionPhase.ScienceOperations || phase == MissionPhase.DataTransmission) TriggerAll(Type);
         }
@@ -109,6 +112,14 @@ namespace MissionDesign.UI.Visual3D
 
         private void Fire(Animator animator, int trigger)
         {
+            // Personajes con poses procedurales (avatar Humanoid sentado en la sala).
+            var poser = animator != null ? animator.GetComponentInParent<CrewPoser>() : null;
+            if (poser != null)
+            {
+                var reaction = trigger == Celebrate ? CrewReaction.Celebrate : trigger == Stress ? CrewReaction.Stress
+                             : trigger == PointScreen ? CrewReaction.PointScreen : CrewReaction.Type;
+                poser.React(reaction, UnityEngine.Random.Range(0f, 0.6f));
+            }
             if (animator == null || animator.runtimeAnimatorController == null || !animator.isActiveAndEnabled) return;
             foreach (var p in animator.parameters)
             {
