@@ -2,15 +2,15 @@
 
 **Team ASTROBYTE:** Alejandro Marco Toranzo Cazorla · Keni Breython Ramos Ramirez · Jhamil Obando Requis · Tony Cahuaya
 
-## 🎬 Demo video (30 s, English)
+## 🎬 Demo video (30 s · Spanish narration, English subtitles)
 
-[![AstroByte — 30-second demo (click to watch)](docs/video/thumbnail_en_1280x720.jpg)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_EN.mp4)
+[![AstroByte — 30-second demo (click to watch)](docs/video/thumbnail_en_1280x720.jpg)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_ES_subs_EN.mp4)
 
 | Video | Language | Length |
 |---|---|---|
-| [**30-second demo**](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_EN.mp4) | English narration + English captions | 0:29 |
-| [30-second demo (Spanish)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 0:29 |
-| [Full walkthrough](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 1:13 |
+| [**30-second demo**](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 0:29 |
+| [**Full walkthrough**](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 1:13 |
+| [30-second demo (English)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_EN.mp4) | English narration + English captions | 0:29 |
 
 Subtitles (SRT): [`docs/video/`](docs/video/) · **Play the game (Windows):** [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest)
 
