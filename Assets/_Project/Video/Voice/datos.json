@@ -1,0 +1,65 @@
+{
+ "text": "Cada pieza sale de datos reales: instrumentos, cohetes, antenas y estaciones terrenas.",
+ "words": [
+  {
+   "w": "Cada",
+   "t0": 0.096,
+   "t1": 0.339
+  },
+  {
+   "w": "pieza",
+   "t0": 0.351,
+   "t1": 0.663
+  },
+  {
+   "w": "sale",
+   "t0": 0.675,
+   "t1": 0.953
+  },
+  {
+   "w": "de",
+   "t0": 0.964,
+   "t1": 1.068
+  },
+  {
+   "w": "datos",
+   "t0": 1.08,
+   "t1": 1.416
+  },
+  {
+   "w": "reales",
+   "t0": 1.427,
+   "t1": 1.856
+  },
+  {
+   "w": "instrumentos",
+   "t0": 2.041,
+   "t1": 2.747
+  },
+  {
+   "w": "cohetes",
+   "t0": 2.967,
+   "t1": 3.511
+  },
+  {
+   "w": "antenas",
+   "t0": 3.707,
+   "t1": 4.251
+  },
+  {
+   "w": "y",
+   "t0": 4.263,
+   "t1": 4.309
+  },
+  {
+   "w": "estaciones",
+   "t0": 4.321,
+   "t1": 4.888
+  },
+  {
+   "w": "terrenas",
+   "t0": 4.9,
+   "t1": 5.501
+  }
+ ]
+}

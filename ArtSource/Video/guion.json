@@ -1,0 +1,21 @@
+{
+  "voice": "es-MX-JorgeNeural",
+  "rate": "+8%",
+  "lines": {
+    "hook":     "¿Podrías llevar a cuatro astronautas a la Luna... y traerlos de vuelta con vida?",
+    "intro":    "Creamos AstroByte: un juego donde tu equipo diseña una misión espacial, pieza por pieza.",
+    "roles":    "Cuatro roles. Masa, energía, presupuesto y datos, en tensión. Si uno falla, no hay despegue.",
+    "datos":    "Cada pieza sale de datos reales: instrumentos, cohetes, antenas y estaciones terrenas.",
+    "launch":   "Cuando todo el equipo aprueba... ¡despegamos!",
+    "room":     "Y la sala de control explota de emoción.",
+    "eight":    "La trayectoria no es un dibujo: es física real. Un ocho alrededor de la Luna, validado con GMAT, el software de la NASA.",
+    "moon":     "Las cámaras fotografían la cara oculta, con datos reales de la Luna.",
+    "splash":   "Y el regreso: tres paracaídas... y amerizaje en el Pacífico.",
+    "analysis": "Al final, un análisis te explica qué salió bien, qué falló y por qué, con una nota de la A a la F.",
+    "center":   "Y puedes recorrer el centro espacial, subir a la torre y ver el cohete en la plataforma.",
+    "cta_v":    "Somos el equipo AstroByte, para NASA Space Apps 2026. ¿Qué misión diseñarías tú? Te leo en los comentarios.",
+    "cta_h":    "Somos el equipo AstroByte, para NASA Space Apps 2026. Suscríbete, y cuéntame en los comentarios: ¿qué misión diseñarías tú?"
+  },
+  "vertical":   ["hook", "intro", "roles", "launch", "room", "eight", "moon", "splash", "cta_v"],
+  "horizontal": ["hook", "intro", "roles", "datos", "launch", "room", "eight", "moon", "splash", "analysis", "center", "cta_h"]
+}
