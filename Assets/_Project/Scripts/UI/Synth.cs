@@ -35,31 +35,76 @@ namespace MissionDesign.UI
             }, 0.6f);
         }
 
-        /// <summary>Aplausos y vítores: muchas palmadas al azar sobre un murmullo que crece y se apaga.</summary>
-        public static AudioClip Applause(float seconds = 3.2f)
+        /// <summary>
+        /// Aplausos y vítores de la sala de control: 28 personas que aplauden cada una a su ritmo (palmadas con timbre propio),
+        /// voces de festejo ("¡uuuh!") que suben y bajan y un par de silbidos. Crece rápido y se apaga al final.
+        /// </summary>
+        public static AudioClip Applause(float seconds = 4.5f)
         {
             int n = Mathf.CeilToInt(seconds * Rate);
             var data = new float[n];
             var rng = new System.Random(11);
-            float lp = 0f;
-            for (int i = 0; i < n; i++)
+            float R() => (float)rng.NextDouble();
+            float Envelope(float t) => Mathf.Clamp01(t / 0.35f) * Mathf.Clamp01((seconds - t) / 1.4f);
+
+            // 1) Palmadas: cada persona con su ritmo (2,4-3,8 Hz), su tono (filtro) y pequeñas irregularidades.
+            for (int person = 0; person < 28; person++)
             {
-                float t = i / (float)Rate;
-                float swell = Mathf.Clamp01(t / 0.4f) * Mathf.Clamp01((seconds - t) / 1.2f);
-                lp += 0.08f * ((float)rng.NextDouble() * 2f - 1f - lp);
-                data[i] = lp * 2.2f * swell;
+                float rate = 2.4f + R() * 1.4f;
+                float gain = 0.35f + R() * 0.45f;
+                float bright = 0.25f + R() * 0.55f;            // palmas "huecas" (graves) o "planas" (agudas)
+                float t = R() * 0.6f;                           // empiezan escalonados, como en la sala
+                while (t < seconds)
+                {
+                    int start = (int)(t * Rate);
+                    int len = (int)((0.008f + R() * 0.01f) * Rate);
+                    float amp = gain * Envelope(t) * (0.7f + R() * 0.3f);
+                    float lp = 0f;
+                    for (int k = 0; k < len && start + k < n; k++)
+                    {
+                        float noise = R() * 2f - 1f;
+                        lp += bright * (noise - lp);
+                        float decay = Mathf.Exp(-k / (len * 0.35f));
+                        data[start + k] += (lp * 1.6f + noise * 0.25f) * amp * decay;
+                    }
+                    t += 1f / rate * (0.85f + R() * 0.3f);
+                }
             }
-            int claps = Mathf.RoundToInt(seconds * 70f);
-            for (int c = 0; c < claps; c++)
+
+            // 2) Voces de festejo: vocales "uuu/ooo" con vibrato que suben de tono (varias a la vez).
+            for (int v = 0; v < 6; v++)
             {
-                int start = rng.Next(n);
-                float t0 = start / (float)Rate;
-                float amp = (0.25f + 0.35f * (float)rng.NextDouble()) * Mathf.Clamp01(t0 / 0.3f) * Mathf.Clamp01((seconds - t0) / 1.0f);
-                int len = (int)(0.012f * Rate);
-                for (int k = 0; k < len && start + k < n; k++)
-                    data[start + k] += ((float)rng.NextDouble() * 2f - 1f) * amp * (1f - k / (float)len);
+                float t0 = 0.2f + R() * (seconds - 1.6f), dur = 0.7f + R() * 0.8f;
+                float f0 = 180f + R() * 160f, rise = 1.25f + R() * 0.35f, gain = 0.05f + R() * 0.05f;
+                float ph = 0f;
+                for (int i = (int)(t0 * Rate); i < Mathf.Min(n, (int)((t0 + dur) * Rate)); i++)
+                {
+                    float u = (i / (float)Rate - t0) / dur;
+                    float f = f0 * Mathf.Lerp(1f, rise, Mathf.Sin(u * Mathf.PI * 0.5f)) * (1f + 0.02f * Mathf.Sin(u * 40f));
+                    ph += 2f * Mathf.PI * f / Rate;
+                    float voice = Mathf.Sin(ph) + 0.5f * Mathf.Sin(2f * ph) + 0.25f * Mathf.Sin(3f * ph);
+                    data[i] += voice * gain * Mathf.Sin(u * Mathf.PI) * Envelope(i / (float)Rate);
+                }
             }
-            for (int i = 0; i < n; i++) data[i] = Mathf.Clamp(data[i] * 0.6f, -1f, 1f);
+
+            // 3) Dos silbidos de festejo (subida y bajada rápida).
+            for (int w = 0; w < 2; w++)
+            {
+                float t0 = 0.6f + w * 1.4f + R() * 0.4f, dur = 0.55f;
+                float ph = 0f;
+                for (int i = (int)(t0 * Rate); i < Mathf.Min(n, (int)((t0 + dur) * Rate)); i++)
+                {
+                    float u = (i / (float)Rate - t0) / dur;
+                    float f = 1900f + 900f * Mathf.Sin(u * Mathf.PI);
+                    ph += 2f * Mathf.PI * f / Rate;
+                    data[i] += Mathf.Sin(ph) * 0.07f * Mathf.Sin(u * Mathf.PI);
+                }
+            }
+
+            // Normalizar al 80 % para que no sature.
+            float peak = 1e-4f;
+            for (int i = 0; i < n; i++) peak = Mathf.Max(peak, Mathf.Abs(data[i]));
+            for (int i = 0; i < n; i++) data[i] = data[i] / peak * 0.8f;
             var clip = AudioClip.Create("Applause", n, 1, Rate, false);
             clip.SetData(data, 0);
             return clip;
@@ -144,6 +189,48 @@ namespace MissionDesign.UI
                 float pop = rng.NextDouble() < 0.0015 ? ((float)rng.NextDouble() * 2f - 1f) * 3f : 0f;
                 return lp * 2f + pop;
             }, 0.35f);
+        }
+
+        /// <summary>Rugido de la reentrada: ruido grave filtrado que crece y vibra (plasma alrededor de la cápsula).</summary>
+        public static AudioClip ReentryRoar(float seconds = 3.2f)
+        {
+            var rng = new System.Random(41);
+            float lp = 0f, lp2 = 0f;
+            return Make("ReentryRoar", seconds, t =>
+            {
+                lp += 0.025f * ((float)rng.NextDouble() * 2f - 1f - lp);
+                lp2 += 0.2f * (lp - lp2);
+                float swell = Mathf.Clamp01(t / 0.8f) * Mathf.Clamp01((seconds - t) / 0.6f);
+                return lp2 * 9f * swell * (0.8f + 0.2f * Sine(7f, t));
+            }, 0.55f);
+        }
+
+        /// <summary>Apertura de un paracaídas: chasquido de tela seguido de un golpe sordo.</summary>
+        public static AudioClip ChuteSnap()
+        {
+            var rng = new System.Random(57);
+            float lp = 0f;
+            return Make("ChuteSnap", 0.9f, t =>
+            {
+                lp += 0.3f * ((float)rng.NextDouble() * 2f - 1f - lp);
+                float crack = t < 0.06f ? 1f - t / 0.06f : 0f;
+                float thump = Sine(55f, t) * Mathf.Exp(-t * 6f);
+                return lp * 2.2f * crack + thump * 0.9f + lp * 0.4f * Mathf.Exp(-t * 4f);
+            }, 0.6f);
+        }
+
+        /// <summary>Amerizaje: golpe en el agua y salpicadura que se apaga.</summary>
+        public static AudioClip Splash()
+        {
+            var rng = new System.Random(63);
+            float lp = 0f;
+            return Make("Splash", 2.2f, t =>
+            {
+                float n = (float)rng.NextDouble() * 2f - 1f;
+                lp += 0.12f * (n - lp);
+                float body = Sine(70f, t) * Mathf.Exp(-t * 5f);
+                return (n * 0.5f + lp * 2.5f) * Mathf.Exp(-t * 2.2f) * Mathf.Clamp01(t / 0.01f) + body;
+            }, 0.55f);
         }
 
         /// <summary>Barrido ascendente (entrar a la consola).</summary>

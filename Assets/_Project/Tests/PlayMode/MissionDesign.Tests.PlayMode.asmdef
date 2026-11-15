@@ -4,6 +4,7 @@
     "references": [
         "MissionDesign.Runtime",
         "UnityEngine.UI",
+        "Unity.TextMeshPro",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

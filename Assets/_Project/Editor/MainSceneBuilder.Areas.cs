@@ -33,7 +33,15 @@ namespace MissionDesign.Editor
             camera.farClipPlane = 3000f;
 
             var earthMat = TexturedLit("MAT_Earth", TextureFactory.Earth(), 0.3f);
-            var moonMat = TexturedLit("MAT_Moon", TextureFactory.Moon(), 0.05f);
+            var moonMat = TexturedLit("MAT_Moon", TextureFactory.Moon(), 0.02f);
+            if (TextureFactory.NasaMoonNormal() is Texture2D moonRelief)
+            {
+                // Relieve real de NASA (LOLA): los cráteres se sombrean con el Sol al acercarse en el sobrevuelo.
+                moonMat.SetTexture("_BumpMap", moonRelief);
+                moonMat.SetFloat("_BumpScale", 1f);
+                moonMat.EnableKeyword("_NORMALMAP");
+                EditorUtility.SetDirty(moonMat);
+            }
             var designEarth = GameObject.Find("Earth_Placeholder");
             if (designEarth != null)
             {
@@ -47,6 +55,7 @@ namespace MissionDesign.Editor
             var roomPose = PlaceControlRoom(room, screenRt);
             var lunar = BuildLunarArea(assembler, earthMat);
             var studio = BuildPhotoStudio(runner, earthMat, lunar != null ? lunar.transform : null);
+            BuildSplashdownCinematic(runner);
             var flightHud = Object.FindAnyObjectByType<FlightHudView>();
             if (flightHud != null) { Wire(flightHud, "orbit", orbit); Wire(flightHud, "studio", studio); }
             var report = Object.FindAnyObjectByType<ExplorationReportPanel>();
@@ -107,7 +116,7 @@ namespace MissionDesign.Editor
             var view = area.AddComponent<OrbitViewController>();
 
             var earth = Sphere("Earth", area.transform, Vector3.zero, OrbitViewController.EarthRadius * 2f, earthMat);
-            var moon = Sphere("Moon", area.transform, new Vector3(-OrbitViewController.MoonDisplayDistance, 0f, 0f), 1.737f * 2f, moonMat);
+            var moon = Sphere("Moon", area.transform, new Vector3(-OrbitViewController.MoonDisplayDistance, 0f, 0f), OrbitViewController.MoonDisplayRadius * 2f, moonMat);
             var marker = Sphere("SpacecraftMarker", area.transform, new Vector3(OrbitViewController.ParkingRadius, 0f, 0f), 0.7f,
                 UnlitMaterial("MAT_Orbit_Marker", new Color(1f, 0.95f, 0.6f)));
             var markerLight = marker.gameObject.AddComponent<Light>();

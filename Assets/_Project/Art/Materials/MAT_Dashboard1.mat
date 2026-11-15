@@ -41,11 +41,11 @@ Material:
     - _BaseMap:
         m_Texture: {fileID: 2800000, guid: a69d8c4f197134a47a6596212ecb89c4, type: 3}
         m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 4.873805, y: 0}
+        m_Offset: {x: 6.989364, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: a69d8c4f197134a47a6596212ecb89c4, type: 3}
         m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 4.88806, y: 0}
+        m_Offset: {x: 1.3680606, y: 0}
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0

@@ -391,14 +391,14 @@ namespace MissionDesign.Editor
             var header = Text("Header", card, "ANÁLISIS POST-MISIÓN", 20, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
             Place(header.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -24), new Vector2(-72, 28));
             var verdict = Text("VerdictText", card, "ÉXITO", 72, UiTheme.Text, TextAlignmentOptions.MidlineLeft, bold: true);
-            Place(verdict.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(36, -100), new Vector2(560, 90));
+            Place(verdict.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(36, -100), new Vector2(640, 90));
             // "ÉXITO PARCIAL" debe caber en una línea: sin salto y con tamaño automático.
             verdict.textWrappingMode = TextWrappingModes.NoWrap;
             verdict.enableAutoSizing = true;
             verdict.fontSizeMin = 36;
-            verdict.fontSizeMax = 72;
+            verdict.fontSizeMax = 64;
             var title = Text("TitleText", card, "", 30, UiTheme.Text, TextAlignmentOptions.MidlineLeft);
-            Place(title.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, 0.5f), new Vector2(560, -102), new Vector2(-600, 60));
+            Place(title.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, 0.5f), new Vector2(700, -102), new Vector2(-740, 60));
 
             // Dos tarjetas de viñetas cortas (texto grande) y la tarjeta de puntuación con barras.
             TextMeshProUGUI BulletCard(string name, string head, Color accent, Color bg, float x)

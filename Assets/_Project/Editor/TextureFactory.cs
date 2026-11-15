@@ -14,7 +14,7 @@ namespace MissionDesign.Editor
         public const string Folder = "Assets/_Project/Art/Textures";
 
         public static Texture2D Earth() => GetOrCreate("Earth_Albedo", 1024, 512, EarthPixel, TextureWrapMode.Repeat);
-        public static Texture2D Moon() => GetOrCreate("Moon_Albedo", 512, 256, MoonPixel, TextureWrapMode.Repeat);
+        public static Texture2D Moon() => NasaMoonAlbedo() ?? GetOrCreate("Moon_Albedo", 512, 256, MoonPixel, TextureWrapMode.Repeat);
         public static Texture2D Stars() => GetOrCreate("Stars_Panorama", 2048, 1024, null, TextureWrapMode.Clamp, StarsTexture);
         /// <summary>Tierra en alta resolución para las fotografías desde órbita.</summary>
         public static Texture2D EarthPhoto() => GetOrCreate("Earth_Photo_Albedo", 2048, 1024, EarthPixel, TextureWrapMode.Repeat);
@@ -106,17 +106,88 @@ namespace MissionDesign.Editor
             return tex;
         }
 
+        /// <summary>Gajos alternados de un paracaídas (u da la vuelta a la cúpula); con banda de ventilación cerca del ápice.</summary>
+        public static Texture2D ChuteStripes(string name, int gores, Color a, Color b) =>
+            GetOrCreate(name, gores * 8, 64, (u, v) =>
+            {
+                int gore = Mathf.FloorToInt(u * gores) % gores;
+                var c = gore % 2 == 0 ? a : b;
+                if (v < 0.08f) c *= 0.55f;                    // ventilación del ápice (sombra)
+                float seam = Mathf.Abs(u * gores - Mathf.Round(u * gores));
+                if (seam < 0.04f) c *= 0.82f;                 // costuras entre gajos
+                c.a = 1f;
+                return c;
+            }, TextureWrapMode.Repeat);
+
+        /// <summary>Degradado de cielo diurno sobre el mar (v = 0 abajo, 1 cénit).</summary>
+        public static Texture2D SkyGradient() => GetOrCreate("Sky_Gradient", 4, 256, (u, v) =>
+        {
+            Color horizon = new Color(0.78f, 0.86f, 0.93f), mid = new Color(0.45f, 0.65f, 0.88f), zenith = new Color(0.16f, 0.36f, 0.72f);
+            if (v < 0.5f) return Color.Lerp(new Color(0.55f, 0.66f, 0.76f), horizon, v / 0.5f);
+            float k = (v - 0.5f) / 0.5f;
+            return k < 0.25f ? Color.Lerp(horizon, mid, k / 0.25f) : Color.Lerp(mid, zenith, (k - 0.25f) / 0.75f);
+        }, TextureWrapMode.Clamp);
+
         public static Texture2D SoftDot() => GetOrCreate("FX_SoftDot", 64, 64, DotPixel, TextureWrapMode.Clamp);
 
         /// <summary>Luna detallada para las fotografías de exploración (cráteres con borde y fondo, mares) + mapa de normales.</summary>
-        public static Texture2D MoonPhoto() => GetOrCreate("Moon_Photo_Albedo", 2048, 1024, null, TextureWrapMode.Repeat, (w, h) => MoonPhotoTexture(w, h, false));
+        public static Texture2D MoonPhoto() => NasaMoonAlbedo() ?? GetOrCreate("Moon_Photo_Albedo", 2048, 1024, null, TextureWrapMode.Repeat, (w, h) => MoonPhotoTexture(w, h, false));
         public static Texture2D MoonPhotoNormal()
         {
+            var nasa = NasaMoonNormal();
+            if (nasa != null) return nasa;
             var tex = GetOrCreate("Moon_Photo_Normal", 2048, 1024, null, TextureWrapMode.Repeat, (w, h) => MoonPhotoTexture(w, h, true));
             string path = AssetDatabase.GetAssetPath(tex);
             if (AssetImporter.GetAtPath(path) is TextureImporter ti && ti.textureType != TextureImporterType.NormalMap)
             {
                 ti.textureType = TextureImporterType.NormalMap;
+                ti.SaveAndReimport();
+            }
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        }
+
+        // ───────────── Luna real de NASA (CGI Moon Kit, LRO) ─────────────
+
+        /// <summary>Carpeta con las texturas de NASA/GSFC (dominio público, ver README.md en la carpeta).</summary>
+        public const string NasaFolder = Folder + "/NASA";
+
+        /// <summary>
+        /// Color real de la Luna (LROC WAC, 4096×2048, proyección equirectangular con longitud 0 en el centro).
+        /// Si no está, se usa la Luna procedural (el proyecto compila igual sin descargas).
+        /// </summary>
+        public static Texture2D NasaMoonAlbedo()
+        {
+            string path = NasaFolder + "/Moon_LRO_Albedo_4k.jpg";
+            if (AssetImporter.GetAtPath(path) is not TextureImporter ti) return null;
+            if (ti.maxTextureSize != 4096 || ti.anisoLevel != 8 || ti.wrapModeV != TextureWrapMode.Clamp)
+            {
+                ti.maxTextureSize = 4096;
+                ti.anisoLevel = 8;
+                ti.mipmapEnabled = true;
+                ti.wrapModeU = TextureWrapMode.Repeat;     // la longitud da la vuelta; los polos no
+                ti.wrapModeV = TextureWrapMode.Clamp;
+                ti.textureCompression = TextureImporterCompression.CompressedHQ;
+                ti.SaveAndReimport();
+            }
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        }
+
+        /// <summary>
+        /// Mapa de normales calculado con el relieve real (LOLA, ldem_4, en coma flotante) por ArtSource/NASA/moon_normals.py:
+        /// pendiente correcta según la latitud y exageración ×5 para que los cráteres se lean con luz rasante.
+        /// </summary>
+        public static Texture2D NasaMoonNormal()
+        {
+            string path = NasaFolder + "/Moon_LRO_Normal_2k.png";
+            if (AssetImporter.GetAtPath(path) is not TextureImporter ti) return null;
+            if (ti.textureType != TextureImporterType.NormalMap || ti.convertToNormalmap || ti.wrapModeV != TextureWrapMode.Clamp)
+            {
+                ti.textureType = TextureImporterType.NormalMap;
+                ti.convertToNormalmap = false;
+                ti.wrapModeU = TextureWrapMode.Repeat;
+                ti.wrapModeV = TextureWrapMode.Clamp;
+                ti.maxTextureSize = 2048;
+                ti.anisoLevel = 4;
                 ti.SaveAndReimport();
             }
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);

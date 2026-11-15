@@ -79,8 +79,27 @@ así el resultado se repite en la presentación. Se generan con el catálogo y e
 
 La trayectoria de retorno libre se validó con **NASA GMAT R2026a**, usando efemérides reales DE405. Detalle en
 [`docs/validacion/gmat/`](docs/validacion/gmat/README.md). El estado de la TLI del juego, propagado sin corregir, pasa a
-12 523 km de la Luna y no regresa. Con una corrección de rumbo de ≈142 m/s, GMAT reproduce el sobrevuelo de 7 283 km y el
-perigeo de 50 km (regreso en 10,9 días).
+11 581 km de la Luna y vuelve demasiado empinado. Con una corrección de rumbo de solo **≈27 m/s**, GMAT reproduce el
+sobrevuelo de 7 672 km y el perigeo de 50 km (regreso 8,2 días después de la TLI, ~9,3 días desde el despegue; Artemis II: 9,1).
+
+## Equipo ASTROBYTE
+
+Proyecto del equipo **ASTROBYTE** para NASA Space Apps Challenge 2026: Alejandro Marco Toranzo Cazorla, Keni Breython Ramos
+Ramirez, Jhamil Obando Requis y Tony Cahuaya. Los nombres viven en `Core/GameInfo.cs` (créditos y menú principal).
+
+## Trayectoria en "8", Luna real y amerizaje (ronda 2026-11-15)
+
+- **Trayectoria como el diagrama de la ESA, con física real.** El solver CR3BP exige la familia de Artemis II: rodea la Luna
+  en sentido **horario** (marco rotatorio), llega en ~4 días y la vuelta **cruza** la ida antes de la Tierra. La vista dibuja
+  "no a escala" como la ESA (zona terrestre ampliada con `NearEarthWarp`, orientación vista desde el norte), con círculos
+  numerados en cada hito y leyenda 1-8 + Ida/Vuelta. Prueba: `FreeReturn_DrawsAFigureEight` (cruce real de los segmentos).
+- **Luna real de NASA.** Color LROC 4096×2048 y relieve LOLA del *CGI Moon Kit* (NASA/GSFC SVS, dominio público) en
+  `Art/Textures/NASA/`. El mapa de normales se calcula en coma flotante (`ArtSource/NASA/moon_normals.py`). Las fotos del
+  sobrevuelo muestran la cuenca Oriental, como las de Artemis II. Sin esos archivos, el juego vuelve a la Luna procedural.
+- **Cinemática del amerizaje** (`SplashdownCinematic`, ~17 s, se salta con Espacio/clic): reentrada con plasma → 2 drogues
+  (~7 600 m) → 3 principales naranja/blanco que se abren por etapas (~2 900 m) → amerizaje a ~27 km/h con salpicadura →
+  bolsas de enderezamiento y buque de recuperación. Se reproduce entre REGRESO y el análisis, solo si la cápsula vuelve
+  (interfaz `IMissionCinematic` en la simulación; el botón «Saltar» también la corta). Toda la geometría es procedural.
 
 ## Sonido
 

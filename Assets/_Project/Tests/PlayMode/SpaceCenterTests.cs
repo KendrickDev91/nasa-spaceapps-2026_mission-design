@@ -214,6 +214,42 @@ namespace MissionDesign.Tests
             yield return Capture("Logs/screenshot_10_demo_designs.png");
         }
 
+        /// <summary>Las demos parcial y fallida llegan al análisis y su veredicto y subtítulo caben sin desbordarse.</summary>
+        [UnityTest]
+        public IEnumerator DemoOutcomes_HeadlineFitsThePostMissionCard([Values(1, 2)] int demoIndex)
+        {
+            SceneManager.LoadScene(SceneFlow.MissionDesignScene);
+            yield return null;
+            yield return null;
+            Object.FindAnyObjectByType<GameMenus>().CloseAll();
+            var demo = DesignLibrary.Demos()[demoIndex].Item2;
+            Object.FindAnyObjectByType<DesignLibraryPanel>().Load(demo);
+            yield return new WaitForSeconds(0.3f);
+            var roles = Object.FindAnyObjectByType<RoleTurnManager>();
+            roles.SetPlayerCount(1);
+            roles.ApproveAsActivePlayer();
+            Assert.IsTrue(roles.TryRequestLaunch(out string msg), msg);
+            var mgr = MissionStateManager.Instance;
+            var runner = Object.FindAnyObjectByType<MissionSimulationRunner>();
+            yield return new WaitForSeconds(0.5f);
+            runner.SkipToEnd();
+            float t0 = Time.realtimeSinceStartup;
+            while (mgr.Phase != MissionPhase.PostMission && Time.realtimeSinceStartup - t0 < 20f) yield return null;
+            Assert.AreEqual(MissionPhase.PostMission, mgr.Phase);
+            var post = Object.FindAnyObjectByType<PostMissionPanel>();
+            t0 = Time.realtimeSinceStartup;
+            while (post.Revealing && Time.realtimeSinceStartup - t0 < 10f) yield return null;
+            yield return new WaitForSeconds(0.5f);
+            yield return Capture($"Logs/screenshot_11_demo{demoIndex + 1}_post_mission.png");
+            foreach (var name in new[] { "VerdictText", "TitleText" })
+            {
+                var text = post.GetComponentsInChildren<TMPro.TMP_Text>(true).First(t => t.name == name);
+                text.ForceMeshUpdate();
+                Assert.IsFalse(text.isTextOverflowing, $"{name} se desborda: «{text.text}»");
+                Assert.LessOrEqual(text.textBounds.size.x, text.rectTransform.rect.width + 1f, $"{name} es más ancho que su caja: «{text.text}»");
+            }
+        }
+
         [UnityTest]
         public IEnumerator CrewedFreeReturn_FliesFigureEight_AndRecoversPhotos()
         {
@@ -302,9 +338,54 @@ namespace MissionDesign.Tests
             }
         }
 
-        private static IEnumerator Capture(string path)
+        [UnityTest]
+        public IEnumerator Splashdown_Cinematic_PlaysChutesAndSplash_ThenRestoresTheScene()
         {
-            var cam = Camera.main;
+            SceneManager.LoadScene(SceneFlow.MissionDesignScene);
+            yield return null;
+            yield return null;
+            Object.FindAnyObjectByType<GameMenus>().CloseAll();
+            var cine = Object.FindAnyObjectByType<SplashdownCinematic>();
+            Assert.IsNotNull(cine, "La escena principal debe tener la cinemática del amerizaje.");
+            var runner = Object.FindAnyObjectByType<MissionSimulationRunner>();
+            var wired = (MonoBehaviour[])typeof(MissionSimulationRunner)
+                .GetField("cinematics", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(runner);
+            CollectionAssert.Contains(wired, cine, "El runner reproduce la cinemática antes del análisis.");
+
+            var ok = new MissionOutcomeReport { returnsToEarth = true, launchSucceeded = true, orbitInsertionSucceeded = true, survivedOperations = true };
+            Assert.IsTrue(cine.WantsToPlay(ok));
+            Assert.IsFalse(cine.WantsToPlay(new MissionOutcomeReport { returnsToEarth = true, launchSucceeded = true, orbitInsertionSucceeded = true }),
+                "Si la cápsula se pierde no hay amerizaje.");
+            Assert.IsFalse(cine.WantsToPlay(new MissionOutcomeReport { launchSucceeded = true, orbitInsertionSucceeded = true, survivedOperations = true }),
+                "Las misiones sin regreso no tienen amerizaje.");
+
+            var mainCam = Camera.main;
+            var hud = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None).First(c => c.isRootCanvas && c.enabled && c.renderMode != RenderMode.WorldSpace);
+            cine.StartCoroutine(cine.Play(ok, () => false));
+            yield return null;
+            Assert.IsTrue(cine.Playing);
+            Assert.IsFalse(hud.enabled, "La interfaz se oculta durante la cinemática.");
+            Assert.IsFalse(mainCam.enabled, "La cámara principal se pausa para no renderizar dos veces.");
+
+            foreach (var (shot, wait, file) in new[] { ("reentrada", 1.6f, "10a_reentry"), ("frenado", 1.4f, "10b_drogues"),
+                         ("principales", 2.6f, "10c_main_chutes"), ("descenso", 1.6f, "10d_final_descent"), ("amerizaje", 3.4f, "10e_splashdown") })
+            {
+                float t0 = Time.realtimeSinceStartup;
+                while (cine.Shot != shot && Time.realtimeSinceStartup - t0 < 20f) yield return null;
+                Assert.AreEqual(shot, cine.Shot);
+                yield return new WaitForSeconds(wait);
+                yield return Capture($"Logs/screenshot_{file}.png", cine.Camera);
+            }
+            float t1 = Time.realtimeSinceStartup;
+            while (cine.Playing && Time.realtimeSinceStartup - t1 < 10f) yield return null;
+            Assert.IsFalse(cine.Playing);
+            Assert.IsTrue(hud.enabled, "Al terminar vuelve la interfaz.");
+            Assert.IsTrue(mainCam.enabled, "Al terminar vuelve la cámara principal.");
+        }
+
+        private static IEnumerator Capture(string path, Camera camera = null)
+        {
+            var cam = camera != null ? camera : Camera.main;
             var rt = new RenderTexture(1920, 1080, 24);
             var previous = cam.targetTexture;
             cam.targetTexture = rt;

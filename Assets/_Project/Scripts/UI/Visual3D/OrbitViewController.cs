@@ -18,8 +18,12 @@ namespace MissionDesign.UI.Visual3D
         public const float EarthRadius = 6.371f;
         public const float ParkingRadius = EarthRadius + 0.2f;
         public const float MoonDisplayDistance = 70f;
-        public const float MoonDisplayRadius = 1.737f;
-        public const float LunarOrbitRadius = 2.6f;
+        /// <summary>Radio de la Luna en la vista (no a escala, como la ESA: ~la mitad de la Tierra para que se reconozca).</summary>
+        public const float MoonDisplayRadius = 3.2f;
+        public const float LunarOrbitRadius = MoonDisplayRadius + 1.2f;
+
+        /// <summary>Las órbitas previas a la TLI se dibujan más compactas (fracción de su altura en la vista).</summary>
+        public const float PreTliCompaction = 0.42f;
 
         [SerializeField] private Transform earth;
         [SerializeField] private Transform moon;
@@ -51,6 +55,8 @@ namespace MissionDesign.UI.Visual3D
         private readonly List<Vector3> parkingPath = new List<Vector3>();
         private readonly List<(float t, Vector3 p)> flybyPath = new List<(float, Vector3)>();
         private readonly List<GameObject> decorations = new List<GameObject>();
+        /// <summary>Círculos numerados y sus números: se achican durante el acercamiento a la Luna.</summary>
+        private readonly List<Transform> badges = new List<Transform>();
         private FreeReturnSolution freeReturn;
         private MissionPhase phase;
         private float phaseTime;
@@ -74,9 +80,19 @@ namespace MissionDesign.UI.Visual3D
         public bool ShowsFreeReturn => regime == OrbitRegime.LunarFlyby && freeReturn != null;
         public int MilestoneCount => decorations.FindAll(d => d.name.StartsWith("Milestone_")).Count;
 
+        private Material parkingDefaultMaterial;
+
         private void Start()
         {
             FreeReturnTrajectory.WarmUpAsync();
+            if (parkingLine != null) parkingDefaultMaterial = parkingLine.sharedMaterial;
+            if (moon != null && moon.TryGetComponent<MeshFilter>(out var moonMesh))
+            {
+                // Esfera con la parametrización del mapa de NASA (longitud 0 en +X local, norte en +Y local) y orientada
+                // como en el diagrama de la ESA: la cara visible mira a la cámara cenital y el norte lunar queda arriba.
+                moonMesh.sharedMesh = MoonPhotoStudio.HiResSphere(128, 64);
+                moon.localRotation = Quaternion.LookRotation(Vector3.back, Vector3.right);
+            }
             manager = MissionStateManager.Instance;
             if (manager == null) return;
             manager.PhaseChanged += OnPhaseChanged;
@@ -97,7 +113,8 @@ namespace MissionDesign.UI.Visual3D
             Vector3 center = transform.position;
             if (regime == OrbitRegime.LunarFlyby)
             {
-                // Como el diagrama de la ESA: Tierra arriba, Luna abajo, ida a la izquierda y vuelta a la derecha.
+                // Como el diagrama de la ESA: Tierra arriba y Luna abajo; la ida baja por la derecha, rodea la cara oculta
+                // en sentido horario y la vuelta sube por la izquierda hasta cruzarse con la ida cerca de la Tierra.
                 // El "8" ocupa la mitad izquierda de la pantalla; la derecha queda para la telemetría y las fotos.
                 Vector3 target = center + new Vector3(-33f, 0f, -38f);
                 var wide = new Pose(target + Vector3.up * 162f, Quaternion.LookRotation(Vector3.down, Vector3.right));
@@ -154,6 +171,7 @@ namespace MissionDesign.UI.Visual3D
             }
             if (craft != null) { Destroy(craft.gameObject); craft = null; trail = null; }
             if (marker != null) SetMarkerVisible(true);
+            if (parkingLine != null && parkingDefaultMaterial != null) parkingLine.sharedMaterial = parkingDefaultMaterial;
 
             float targetRadius = orbit != null ? EarthRadius + orbit.altitudeKm / 1000f : ParkingRadius + 0.5f;
             bool lunar = regime == OrbitRegime.Lunar || regime == OrbitRegime.Interplanetary;
@@ -201,7 +219,7 @@ namespace MissionDesign.UI.Visual3D
             var back = new List<Vector3>();
             foreach (var pre in freeReturn.preTliSamples)
             {
-                var p = Map(pre.xKm, pre.yKm);
+                var p = MapPreTli(pre.xKm, pre.yKm);
                 flybyPath.Add((pre.tDays, p));
                 kmPath.Add(pre);
                 parkingPath.Add(p);
@@ -218,61 +236,53 @@ namespace MissionDesign.UI.Visual3D
                     back.Add(p);
                 }
             }
+            // Como en la ESA, las vueltas a la Tierra antes de la TLI son parte de la ida (morado).
+            if (parkingLine != null && outboundMaterial != null) parkingLine.sharedMaterial = outboundMaterial;
             Draw(parkingLine, parkingPath);
             Draw(outboundLine, outbound);
             Draw(returnLine, back);
             AddArrows(outbound, outboundMaterial, 5);
             AddArrows(back, returnMaterial, 6);
 
+            // Como el diagrama de la ESA: un círculo numerado sobre cada hito y una leyenda aparte (1-8 + Ida/Vuelta),
+            // así ningún texto ni guía cruza la Tierra o la trayectoria.
+            var idaColor = new Color(0.62f, 0.5f, 1f);
+            var vueltaColor = new Color(1f, 0.68f, 0.2f);
             foreach (var m in freeReturn.milestones)
             {
-                var pos = Map(m.xKm, m.yKm);
+                var pos = m.tDays < 0f ? MapPreTli(m.xKm, m.yKm) : Map(m.xKm, m.yKm);
+                // Como en el diagrama de la ESA, el 1 (despegue desde Florida) va sobre la Tierra.
+                if (m.number == 1) pos = new Vector3(-1.5f, 0f, 1.5f);
+                bool ida = m.number <= 5;
                 var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 go.name = $"Milestone_{m.number}";
                 Destroy(go.GetComponent<Collider>());
                 go.transform.SetParent(transform, false);
-                go.transform.localPosition = pos + Vector3.up * 0.3f;
-                go.transform.localScale = Vector3.one * 1.6f;
-                if (milestoneMaterial != null) go.GetComponent<Renderer>().sharedMaterial = m.number <= 5 ? outboundMaterial : returnMaterial;
+                // Por encima de la esfera terrestre (radio 6,4) para que el hito del despegue no quede tapado.
+                go.transform.localPosition = new Vector3(pos.x, BadgeHeight, pos.z);
+                go.transform.localScale = Vector3.one * 3.0f;
+                if (milestoneMaterial != null) go.GetComponent<Renderer>().sharedMaterial = ida ? outboundMaterial : returnMaterial;
                 decorations.Add(go);
+                badges.Add(go.transform);
 
-                // Etiquetas como en el diagrama: hitos de ida a la izquierda (+Z) y de vuelta a la derecha (-Z);
-                // los de la Tierra (1-3 y 7-8) en columnas a ambos lados del planeta, con una guía hasta el hito.
-                var textGo = new GameObject($"MilestoneLabel_{m.number}");
-                textGo.transform.SetParent(transform, false);
-                // 1-4: columna a la izquierda de la Tierra · 5: bajo la Luna · 6: dentro del "8" · 7-8: columna a la derecha.
-                bool left = m.number <= 4 || m.number == 6;
-                bool center = false;
-                if (m.number == 5) left = true;
-                Vector3 labelPos;
-                if (m.number <= 4) labelPos = new Vector3(9f - 5.5f * (m.number - 1), 1.5f, 12f);
-                else if (m.number >= 7) labelPos = new Vector3(-4f + 6f * (m.number - 7), 1.5f, -21f);
-                else if (m.number == 5) labelPos = pos + new Vector3(0f, 1.5f, 6f);
-                else labelPos = pos + new Vector3(0f, 1.5f, 3f);
-                textGo.transform.localPosition = labelPos;
-                var tmp = textGo.AddComponent<TextMeshPro>();
-                tmp.text = $"<b>{m.number}</b>  {m.title}";
-                tmp.fontSize = 26f;
-                tmp.alignment = center ? TextAlignmentOptions.Center : left ? TextAlignmentOptions.Right : TextAlignmentOptions.Left;
-                tmp.textWrappingMode = TextWrappingModes.NoWrap;
-                tmp.outlineWidth = 0.2f;
-                tmp.rectTransform.sizeDelta = new Vector2(70f, 8f);
-                tmp.rectTransform.pivot = new Vector2(center ? 0.5f : left ? 1f : 0f, 0.5f);
-                tmp.color = m.number <= 5 ? new Color(0.86f, 0.8f, 1f) : new Color(1f, 0.86f, 0.62f);
-                textGo.AddComponent<FaceCamera>();
-                decorations.Add(textGo);
-                if (m.number <= 4 || m.number >= 7)
-                {
-                    var guide = new GameObject($"MilestoneGuide_{m.number}").AddComponent<LineRenderer>();
-                    guide.transform.SetParent(transform, false);
-                    guide.useWorldSpace = false;
-                    guide.sharedMaterial = left ? outboundMaterial : returnMaterial;
-                    guide.widthMultiplier = 0.12f;
-                    guide.positionCount = 2;
-                    guide.SetPositions(new[] { labelPos + new Vector3(0f, -1f, left ? -1f : 1f), pos });
-                    decorations.Add(guide.gameObject);
-                }
+                var number = new GameObject($"MilestoneNumber_{m.number}");
+                number.transform.SetParent(transform, false);
+                number.transform.localPosition = new Vector3(pos.x, BadgeHeight + 1.6f, pos.z);
+                var num = number.AddComponent<TextMeshPro>();
+                num.text = $"<b>{m.number}</b>";
+                num.fontSize = 22f;
+                num.alignment = TextAlignmentOptions.Center;
+                num.textWrappingMode = TextWrappingModes.NoWrap;
+                num.color = ida ? Color.white : new Color(0.12f, 0.07f, 0f);
+                num.rectTransform.sizeDelta = new Vector2(4f, 4f);
+                number.AddComponent<FaceCamera>();
+                decorations.Add(number);
+                badges.Add(number.transform);
+
+                AddLegendLine(LegendRow(m.number), $"<b>{m.number}</b>  {m.title}", ida ? new Color(0.88f, 0.84f, 1f) : new Color(1f, 0.88f, 0.66f), null);
             }
+            AddLegendLine(LegendRow(9) - 1.5f, "Ida", idaColor, outboundMaterial);
+            AddLegendLine(LegendRow(10) - 1.5f, "Vuelta", vueltaColor, returnMaterial);
 
             BuildCraft();
             if (marker != null)
@@ -281,6 +291,42 @@ namespace MissionDesign.UI.Visual3D
                 SetMarkerVisible(craft == null);
             }
             if (label != null) label.text = Caption(phase);
+        }
+
+        private const float BadgeHeight = 7.5f;
+
+        /// <summary>Borde izquierdo de la leyenda, pegada al margen izquierdo de la pantalla (+Z es la izquierda, +X arriba).</summary>
+        private const float LegendColumnZ = 60f;
+
+        private static float LegendRow(int row) => 11f - 5.2f * (row - 1);
+
+        private void AddLegendLine(float x, string text, Color color, Material swatch)
+        {
+            var textGo = new GameObject("Legend_" + text.Replace("<b>", "").Replace("</b>", "").Trim());
+            textGo.transform.SetParent(transform, false);
+            textGo.transform.localPosition = new Vector3(x, 1.5f, LegendColumnZ);
+            var tmp = textGo.AddComponent<TextMeshPro>();
+            tmp.text = text;
+            tmp.fontSize = 24f;
+            tmp.alignment = TextAlignmentOptions.Left;
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+            tmp.outlineWidth = 0.2f;
+            tmp.rectTransform.sizeDelta = new Vector2(70f, 6f);
+            tmp.rectTransform.pivot = new Vector2(0f, 0.5f);
+            if (swatch != null) textGo.transform.localPosition += new Vector3(0f, 0f, -8f);   // a la derecha de la muestra
+            tmp.color = color;
+            textGo.AddComponent<FaceCamera>();
+            decorations.Add(textGo);
+            if (swatch == null) return;
+            // Muestra de color de la línea (como "— Ida / — Vuelta" en el diagrama), a la derecha del texto.
+            var line = new GameObject("LegendSwatch_" + text).AddComponent<LineRenderer>();
+            line.transform.SetParent(transform, false);
+            line.useWorldSpace = false;
+            line.sharedMaterial = swatch;
+            line.widthMultiplier = 0.6f;
+            line.positionCount = 2;
+            line.SetPositions(new[] { new Vector3(x, 1.5f, LegendColumnZ - 0.5f), new Vector3(x, 1.5f, LegendColumnZ - 6.5f) });
+            decorations.Add(line.gameObject);
         }
 
         private void BuildCraft()
@@ -341,8 +387,11 @@ namespace MissionDesign.UI.Visual3D
         }
 
         /// <summary>
-        /// Del marco rotatorio CR3BP (km) a la vista: cerca de la Tierra 1 unidad ≈ 1 000 km, el tramo Tierra-Luna
-        /// se comprime a 70 unidades y alrededor de la Luna se amplía para que el sobrevuelo se lea (no a escala).
+        /// Del marco rotatorio CR3BP (km) a la vista, "no a escala" como el diagrama de la ESA: la Tierra y la Luna se
+        /// dibujan grandes, la zona cercana a la Tierra se amplía (órbitas previas a la TLI y el cruce del "8", que en la
+        /// física real queda a ~25 000 km de la Tierra) y alrededor de la Luna también, para que el sobrevuelo se lea.
+        /// Las distorsiones son radiales y monótonas: no cambian el recorrido, solo cómo se dibuja.
+        /// Orientación real (vista desde el norte): la Luna abajo, el sentido de avance de la Luna (+y) a la derecha.
         /// </summary>
         public static Vector3 Map(float xKm, float yKm)
         {
@@ -351,18 +400,49 @@ namespace MissionDesign.UI.Visual3D
             double sEarth = (MoonDisplayDistance - EarthRadius) / (L - FreeReturnTrajectory.EarthRadiusKm);
             double re = de <= FreeReturnTrajectory.EarthRadiusKm
                 ? de / FreeReturnTrajectory.EarthRadiusKm * EarthRadius                       // dentro de la Tierra: lineal
-                : EarthRadius + (de - FreeReturnTrajectory.EarthRadiusKm) * sEarth;
+                : EarthRadius + (MoonDisplayDistance - EarthRadius) * NearEarthWarp((de - FreeReturnTrajectory.EarthRadiusKm) / (L - FreeReturnTrajectory.EarthRadiusKm));
             Vector2 pe = de > 1e-6 ? new Vector2((float)(ex / de * re), (float)(ey / de * re)) : Vector2.zero;
 
             double mx = xKm - (1 - mu) * L, my = yKm, dm = System.Math.Sqrt(mx * mx + my * my);
             double rm = dm <= FreeReturnTrajectory.MoonRadiusKm
                 ? dm / FreeReturnTrajectory.MoonRadiusKm * MoonDisplayRadius
-                : MoonDisplayRadius + MoonZoom(dm - FreeReturnTrajectory.MoonRadiusKm, sEarth);
+                : MoonDisplayRadius + MoonZoom(dm - FreeReturnTrajectory.MoonRadiusKm, sEarth)
+                  // La Luna se dibuja más grande que su escala; ese extra se desvanece con la distancia para que, lejos de
+                  // la Luna, esta vista coincida con la terrestre y la mezcla entre ambas no forme ganchos.
+                  - (MoonDisplayRadius - sEarth * FreeReturnTrajectory.MoonRadiusKm) * (1 - System.Math.Exp(-(dm - FreeReturnTrajectory.MoonRadiusKm) / 25000.0));
             Vector2 pm = new Vector2(MoonDisplayDistance, 0f) + (dm > 1e-6 ? new Vector2((float)(mx / dm * rm), (float)(my / dm * rm)) : Vector2.zero);
 
             float w = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(60000f, 15000f, (float)dm));
             Vector2 p = Vector2.Lerp(pe, pm, w);
-            return new Vector3(-p.x, 0f, p.y);          // la Luna queda en −X, como en el resto de vistas
+            // La Luna queda en −X, como en el resto de vistas; +y (hacia donde avanza la Luna) va a −Z, que la cámara
+            // muestra a la derecha: así se ve desde el norte, con la Tierra en sentido antihorario y la Luna en horario.
+            return new Vector3(-p.x, 0f, -p.y);
+        }
+
+        /// <summary>Intensidad de la ampliación logarítmica cerca de la Tierra (más alto = el cruce del "8" baja hacia el centro).</summary>
+        public const double NearEarthLogK = 60.0;
+
+        /// <summary>
+        /// u ∈ [0,1] (superficie terrestre → distancia de la Luna) → fracción dibujada. Mezcla una escala logarítmica
+        /// (amplía las decenas de miles de km donde se cruza el "8", pero casi no despega la órbita baja de la superficie)
+        /// con la lineal: g(0)=0, g(1)=1, g'(1)=1 (empalma con la ampliación lunar) y es creciente en todo el tramo.
+        /// </summary>
+        public static double NearEarthWarp(double u)
+        {
+            if (u <= 0) return 0;
+            if (u >= 1) return u;
+            double log = System.Math.Log(1 + NearEarthLogK * u) / System.Math.Log(1 + NearEarthLogK);
+            double k = (1 - u) * (1 - u);
+            return u + (log - u) * k;
+        }
+
+        /// <summary>Como <see cref="Map"/>, pero con las órbitas previas a la TLI compactadas alrededor de la Tierra.</summary>
+        public static Vector3 MapPreTli(float xKm, float yKm)
+        {
+            var p = Map(xKm, yKm);
+            float r = p.magnitude;
+            if (r <= EarthRadius) return p;
+            return p / r * (EarthRadius + (r - EarthRadius) * PreTliCompaction);
         }
 
         /// <summary>
@@ -399,6 +479,7 @@ namespace MissionDesign.UI.Visual3D
         {
             foreach (var d in decorations) if (d != null) Destroy(d);
             decorations.Clear();
+            badges.Clear();
         }
 
         // ───────────── Animación ─────────────
@@ -409,6 +490,10 @@ namespace MissionDesign.UI.Visual3D
             phaseTime += Time.deltaTime;
             if (regime == OrbitRegime.LunarFlyby && flybyPath.Count > 1) AnimateFreeReturn();
             else AnimateOrbit();
+            // En el acercamiento a la Luna los círculos numerados se ocultan: vistos en ángulo se separan de la línea.
+            float shrink = 1f - FlybyZoom();
+            foreach (var b in badges)
+                if (b != null) b.localScale = (b.name.StartsWith("MilestoneNumber") ? Vector3.one : Vector3.one * 3f) * shrink;
 
             if (linkLine != null && linkLine.enabled)
             {

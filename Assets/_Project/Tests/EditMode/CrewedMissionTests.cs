@@ -26,7 +26,9 @@ namespace MissionDesign.Tests
             Assert.IsTrue(s.passesFarSide, "debe rodear la cara oculta de la Luna");
             Assert.AreEqual(7400f, s.flybyAltitudeKm, 370f);
             Assert.Less(s.returnPerigeeAltitudeKm, (float)FreeReturnTrajectory.EntryInterfaceKm, "debe volver a la atmósfera sin motor");
-            Assert.That(s.totalDays, Is.InRange(6f, 12f), "Artemis II duró ~10 días");
+            Assert.That(s.totalDays, Is.InRange(6f, 12f), "Artemis II duró ~9 días");
+            Assert.AreEqual(MissionSimulator.ArtemisIIMissionDays, s.totalDays - s.launchDays, 0.6f,
+                "Desde el despegue, la trayectoria dura casi lo mismo que Artemis II (9,06 días)");
             Assert.That(s.tliDeltaVKmS, Is.InRange(3.0f, 3.3f), "TLI desde LEO ≈ 3,1-3,2 km/s");
         }
 
@@ -42,13 +44,34 @@ namespace MissionDesign.Tests
         [Test]
         public void FreeReturn_DrawsAFigureEight()
         {
-            // En el marco rotatorio, la vuelta cruza la línea Tierra-Luna entre ambos cuerpos: el "8".
-            var back = FreeReturnTrajectory.Default.samples.Where(p => p.leg == 1).ToList();
+            // Como en el diagrama de la ESA: la nave rodea la Luna en sentido horario y la IDA y la VUELTA se cruzan
+            // entre la Tierra y la Luna (el cruce del "8"; en la física real queda cerca de la Tierra). Una "O" no tiene cruce.
+            var s = FreeReturnTrajectory.Default;
+            Assert.IsTrue(s.retrogradeFlyby, "debe rodear la Luna en sentido horario (marco rotatorio)");
+            var outbound = s.samples.Where(p => p.leg == 0).ToList();
+            var back = s.samples.Where(p => p.leg == 1).ToList();
             bool crosses = false;
-            for (int i = 1; i < back.Count; i++)
-                if (back[i].xKm > 40000 && back[i].xKm < 340000 && System.Math.Sign(back[i].yKm) != System.Math.Sign(back[i - 1].yKm)) crosses = true;
-            var outbound = FreeReturnTrajectory.Default.samples.Where(p => p.leg == 0).ToList();
-            Assert.IsTrue(crosses || outbound.Any(p => p.yKm > 0) && back.Any(p => p.yKm < 0), "ida y vuelta deben ir por lados opuestos");
+            for (int i = 1; i < outbound.Count && !crosses; i++)
+                for (int j = 1; j < back.Count && !crosses; j++)
+                {
+                    if (!Intersect(outbound[i - 1], outbound[i], back[j - 1], back[j], out float x)) continue;
+                    crosses = x - (float)(-FreeReturnTrajectory.Mu * FreeReturnTrajectory.LengthKm) > 9000f && x < 340000;
+                }
+            Assert.IsTrue(crosses, "la ida y la vuelta deben cruzarse entre la Tierra y la Luna");
+            Assert.That(s.flybyTimeDays, Is.InRange(3.3f, 4.6f), "Artemis II llegó a la Luna ~4 días después de la TLI");
+        }
+
+        private static bool Intersect(TrajectorySample a, TrajectorySample b, TrajectorySample c, TrajectorySample d, out float x)
+        {
+            x = 0;
+            double rx = b.xKm - a.xKm, ry = b.yKm - a.yKm, sx = d.xKm - c.xKm, sy = d.yKm - c.yKm;
+            double den = rx * sy - ry * sx;
+            if (System.Math.Abs(den) < 1e-9) return false;
+            double t = ((c.xKm - a.xKm) * sy - (c.yKm - a.yKm) * sx) / den;
+            double u = ((c.xKm - a.xKm) * ry - (c.yKm - a.yKm) * rx) / den;
+            if (t < 0 || t > 1 || u < 0 || u > 1) return false;
+            x = (float)(a.xKm + t * rx);
+            return true;
         }
 
         [Test]

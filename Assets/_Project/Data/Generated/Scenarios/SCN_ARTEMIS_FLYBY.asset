@@ -16,11 +16,12 @@ MonoBehaviour:
   displayName: Sobrevuelo lunar tripulado (tipo Artemis II)
   briefing: "Lleva a 4 astronautas alrededor de la Luna y de vuelta a casa. Dise\xF1a
     el lanzamiento, la nave y las comunicaciones: las fotos que el enlace no alcance
-    a enviar volver\xE1n en las tarjetas SD... si la c\xE1psula regresa."
+    a enviar volver\xE1n en las tarjetas SD... si la c\xE1psula regresa. Duraci\xF3n
+    como la real: ~9 d\xEDas."
   scienceObjectiveTag: luna
   budgetLimitMUSD: 4500
   maxDevelopmentMonths: 72
-  targetMissionLifeMonths: 0.31
+  targetMissionLifeMonths: 0.2976347
   minScienceValue: 80
   allowedOrbits: 05000000
   crewed: 1

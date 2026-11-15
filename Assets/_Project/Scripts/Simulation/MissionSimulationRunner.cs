@@ -28,6 +28,11 @@ namespace MissionDesign.Simulation
         [SerializeField] private bool allowLaunchFailure = true;
         [SerializeField] private bool exportReport = true;
         [SerializeField] private bool recordLeaderboard = true;
+        [Tooltip("Cinemáticas (IMissionCinematic) que se reproducen tras el vuelo y antes del análisis, p. ej. el amerizaje.")]
+        [SerializeField] private MonoBehaviour[] cinematics = new MonoBehaviour[0];
+
+        /// <summary>True mientras se reproduce una cinemática de cierre (el HUD de simulación puede ocultarse).</summary>
+        public bool PlayingCinematic { get; private set; }
 
         private MissionStateManager manager;
         private Coroutine playback;
@@ -122,6 +127,16 @@ namespace MissionDesign.Simulation
                     yield return Wait(slot + (isEvent ? secondsPerEvent : 0f), from, to);
                 }
             }
+
+            // Cinemáticas de cierre (amerizaje…): el botón "Saltar" también las corta.
+            if (cinematics != null)
+                foreach (var c in cinematics)
+                {
+                    if (!(c is IMissionCinematic cine) || !c.isActiveAndEnabled || skipRequested || !cine.WantsToPlay(outcome)) continue;
+                    PlayingCinematic = true;
+                    yield return cine.Play(outcome, () => skipRequested);
+                    PlayingCinematic = false;
+                }
 
             foreach (var e in outcome.timeline.Where(e => e.phase == MissionPhase.PostMission))
                 EntryEmitted?.Invoke(e);

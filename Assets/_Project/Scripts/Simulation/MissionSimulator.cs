@@ -29,6 +29,12 @@ namespace MissionDesign.Simulation
     public static class MissionSimulator
     {
         public const float DaysPerMonth = 30.44f;
+
+        /// <summary>
+        /// Duración real de Artemis II: despegue el 1 de abril de 2026 (22:35 UTC) y amerizaje el 10 de abril, ~9 días y 1,5 h.
+        /// Es la duración planificada del escenario tripulado (y por tanto de la demo 1, que reproduce Artemis II).
+        /// </summary>
+        public const float ArtemisIIMissionDays = 9.06f;
         /// <summary>Por debajo de esta fracción de la ciencia objetivo la misión es un fallo.</summary>
         public const float PartialThreshold = 0.4f;
         /// <summary>Días de datos que debe guardar la memoria para absorber un corte de enlace.</summary>

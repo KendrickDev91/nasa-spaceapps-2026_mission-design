@@ -1,7 +1,7 @@
 %  MISSION TRADE-OFF - validacion de la trayectoria de retorno libre (tipo Artemis II) con NASA GMAT
 %  Estado inicial = salida del modelo CR3BP del juego justo despues de la TLI:
-%    parking 185 km - angulo 228.000 deg - 10.9702 km/s
-%    CR3BP: sobrevuelo 7283 km (dia 2.82) - perigeo de regreso 50 km (dia 9.31)
+%    parking 185 km - angulo 235.500 deg - 10.9452 km/s
+%    CR3BP: sobrevuelo 7671 km (dia 3.72) - perigeo de regreso 51 km (dia 7.68)
 %  Generado automaticamente por Unity (NASA SpaceApps -> Export GMAT Validation Script).
 
 Create CoordinateSystem EarthMoonRot;
@@ -17,11 +17,11 @@ Orion.DateFormat = UTCGregorian;
 Orion.Epoch = '02 Apr 2026 23:30:00.000';
 Orion.CoordinateSystem = EarthMoonRot;
 Orion.DisplayStateType = Cartesian;
-Orion.X = -4391.5958404262592;
-Orion.Y = -4877.3613004492272;
+Orion.X = -3717.4017305921366;
+Orion.Y = -5408.85308121413;
 Orion.Z = 0;
-Orion.VX = 8.1394394718977114;
-Orion.VY = -7.3287842188141781;
+Orion.VX = 9.0058142573396616;
+Orion.VY = -6.1895246557724786;
 Orion.VZ = 0;
 Orion.DryMass = 26500;
 
@@ -30,11 +30,11 @@ OrionTCM.DateFormat = UTCGregorian;
 OrionTCM.Epoch = '02 Apr 2026 23:30:00.000';
 OrionTCM.CoordinateSystem = EarthMoonRot;
 OrionTCM.DisplayStateType = Cartesian;
-OrionTCM.X = -4391.5958404262592;
-OrionTCM.Y = -4877.3613004492272;
+OrionTCM.X = -3717.4017305921366;
+OrionTCM.Y = -5408.85308121413;
 OrionTCM.Z = 0;
-OrionTCM.VX = 8.1394394718977114;
-OrionTCM.VY = -7.3287842188141781;
+OrionTCM.VX = 9.0058142573396616;
+OrionTCM.VY = -6.1895246557724786;
 OrionTCM.VZ = 0;
 OrionTCM.DryMass = 26500;
 
@@ -94,9 +94,9 @@ Target 'Corregir retorno libre' DC {SolveMode = Solve, ExitMode = SaveAndContinu
    Propagate 'A periselenio' CislunarProp(OrionTCM) {OrionTCM.Luna.Periapsis, OrionTCM.ElapsedDays = 7};
    corrFlybyAlt = OrionTCM.Luna.Altitude;
    corrFlybyDay = OrionTCM.A1ModJulian - t0;
-   Achieve 'Sobrevuelo 7400 km' DC(OrionTCM.Luna.Altitude = 7283, {Tolerance = 25});
+   Achieve 'Sobrevuelo 7400 km' DC(OrionTCM.Luna.Altitude = 7671, {Tolerance = 25});
    Propagate 'A perigeo' CislunarProp(OrionTCM) {OrionTCM.Earth.Periapsis, OrionTCM.ElapsedDays = 9};
-   Achieve 'Perigeo 50 km' DC(OrionTCM.Earth.Altitude = 50, {Tolerance = 10});
+   Achieve 'Perigeo 50 km' DC(OrionTCM.Earth.Altitude = 51, {Tolerance = 10});
 EndTarget;
 corrPerigeeAlt = OrionTCM.Earth.Altitude;
 corrReturnDay = OrionTCM.A1ModJulian - t0;

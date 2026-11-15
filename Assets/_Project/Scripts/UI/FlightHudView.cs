@@ -66,7 +66,10 @@ namespace MissionDesign.UI
             if (!flying || telemetryText == null) return;
             string dim = UiTheme.Hex(UiTheme.TextDim);
             float day = orbit.CurrentDay;
-            string clock = day < 0f ? $"T{day:F1} d (antes de la TLI)" : $"Día {day:F1} de {orbit.Solution.totalDays:F1}";
+            // Reloj de misión desde el despegue, como la NASA (la trayectoria guarda los días desde la TLI).
+            float sinceLaunch = Mathf.Max(0f, day - orbit.Solution.launchDays);
+            float total = orbit.Solution.totalDays - orbit.Solution.launchDays;
+            string clock = $"Día {sinceLaunch:F1} de {total:F1}" + (day < 0f ? $"  <size=70%>(órbita terrestre, antes de la TLI)</size>" : "");
             string where = day < 0f ? "Órbita terrestre" : orbit.DistanceMoonKm < 20000f ? "Sobrevuelo lunar" : "Espacio cislunar";
             telemetryText.text =
                 $"<color={UiTheme.Hex(UiTheme.Accent)}><b>TELEMETRÍA DE VUELO</b></color>   <color={dim}>{where}</color>\n" +

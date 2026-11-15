@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using MissionDesign.Core;
 using MissionDesign.Data;
+using MissionDesign.Simulation;
 using UnityEditor;
 using UnityEngine;
 
@@ -490,8 +491,10 @@ namespace MissionDesign.Editor
 
             var scn = Scenario("SCN_ARTEMIS_FLYBY", "Sobrevuelo lunar tripulado (tipo Artemis II)",
                 "Lleva a 4 astronautas alrededor de la Luna y de vuelta a casa. Diseña el lanzamiento, la nave y las comunicaciones: " +
-                "las fotos que el enlace no alcance a enviar volverán en las tarjetas SD... si la cápsula regresa.",
-                "luna", budget: 4500, devMonths: 72, lifeMonths: 0.31f, minScience: 80, orbits: new[] { OrbitRegime.LunarFlyby });
+                "las fotos que el enlace no alcance a enviar volverán en las tarjetas SD... si la cápsula regresa. " +
+                "Duración como la real: ~9 días.",
+                "luna", budget: 4500, devMonths: 72, lifeMonths: MissionSimulator.ArtemisIIMissionDays / MissionSimulator.DaysPerMonth,
+                minScience: 80, orbits: new[] { OrbitRegime.LunarFlyby });
             scn.crewed = true; scn.crewSize = 4; Save(scn);
             if (!db.scenarios.Contains(scn)) db.scenarios.Add(scn);
 

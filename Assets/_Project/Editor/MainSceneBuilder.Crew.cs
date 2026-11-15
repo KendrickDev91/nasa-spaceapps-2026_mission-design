@@ -165,6 +165,49 @@ namespace MissionDesign.Editor
         private static List<Transform> Seats(Transform model) =>
             model.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith("Seat_")).OrderBy(t => t.name).ToList();
 
+        // ───────────── Cinemática del amerizaje (Artemis II) ─────────────
+
+        /// <summary>Lugar apartado del resto de áreas: el set del océano se dibuja solo con su propia cámara.</summary>
+        private static readonly Vector3 SplashdownSetPos = new Vector3(0f, 0f, -9000f);
+
+        private static void BuildSplashdownCinematic(MissionSimulationRunner runner)
+        {
+            var go = new GameObject("SplashdownCinematic");
+            go.transform.position = SplashdownSetPos;
+            var cine = go.AddComponent<SplashdownCinematic>();
+
+            Material Lit(string name, Color color, float smooth, float metal = 0f, Texture tex = null, bool doubleSided = false)
+            {
+                var m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                m.SetColor("_BaseColor", color);
+                if (tex != null) m.SetTexture("_BaseMap", tex);
+                m.SetFloat("_Smoothness", smooth);
+                m.SetFloat("_Metallic", metal);
+                if (doubleSided) { m.SetFloat("_Cull", 0f); m.doubleSidedGI = true; }
+                return SaveMaterial(name, m);
+            }
+
+            // Paracaídas principales de Orion: gajos naranja y blanco alternados; los de frenado, con franjas más finas.
+            var mainStripes = TextureFactory.ChuteStripes("Chute_Main_Stripes", 32, new Color(0.86f, 0.3f, 0.04f), new Color(0.93f, 0.92f, 0.89f));
+            var drogueStripes = TextureFactory.ChuteStripes("Chute_Drogue_Stripes", 16, new Color(0.86f, 0.3f, 0.04f), new Color(0.93f, 0.92f, 0.89f));
+            Wire(cine, "capsuleMaterial", Lit("MAT_Cine_OrionCapsule", new Color(0.66f, 0.67f, 0.7f), 0.55f, 0.55f));
+            Wire(cine, "heatShieldMaterial", Lit("MAT_Cine_HeatShield", new Color(0.14f, 0.11f, 0.09f), 0.12f));
+            Wire(cine, "chuteMaterial", Lit("MAT_Cine_ChuteMain", Color.white, 0.15f, 0f, mainStripes, true));
+            Wire(cine, "drogueMaterial", Lit("MAT_Cine_ChuteDrogue", Color.white, 0.15f, 0f, drogueStripes, true));
+            Wire(cine, "lineMaterial", UnlitMaterial("MAT_Cine_ChuteLines", new Color(0.86f, 0.85f, 0.8f)));
+            Wire(cine, "oceanMaterial", Lit("MAT_Cine_Ocean", new Color(0.03f, 0.15f, 0.23f), 0.9f, 0.05f));
+            Wire(cine, "airbagMaterial", Lit("MAT_Cine_Airbag", new Color(1f, 0.5f, 0.08f), 0.35f));
+            Wire(cine, "shipMaterial", Lit("MAT_Cine_ShipGrey", new Color(0.46f, 0.49f, 0.52f), 0.3f, 0.2f));
+            Wire(cine, "skyMaterial", UnlitMaterial("MAT_Cine_Sky", Color.white, TextureFactory.SkyGradient()));
+            var plasmaMat = ParticleMaterial("MAT_Cine_Plasma", true);
+            plasmaMat.SetFloat("_Cull", 0f);       // la capa de choque y la estela se ven por ambos lados
+            EditorUtility.SetDirty(plasmaMat);
+            Wire(cine, "plasmaMaterial", plasmaMat);
+            Wire(cine, "sprayMaterial", ParticleMaterial("MAT_Cine_Spray", false));
+            Wire(cine, "cloudMaterial", ParticleMaterial("MAT_Cine_Cloud", false));
+            WireArray(runner, "cinematics", new Object[] { cine });
+        }
+
         // ───────────── Estudio de fotografía lunar (escena de diseño) ─────────────
 
         private static MoonPhotoStudio BuildPhotoStudio(MissionSimulationRunner runner, Material earthMat, Transform lunarArea)
@@ -174,7 +217,7 @@ namespace MissionDesign.Editor
             var moonMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
             moonMat.SetTexture("_BaseMap", TextureFactory.MoonPhoto());
             moonMat.SetTexture("_BumpMap", TextureFactory.MoonPhotoNormal());
-            moonMat.SetFloat("_BumpScale", 1.4f);
+            moonMat.SetFloat("_BumpScale", 1f);
             moonMat.EnableKeyword("_NORMALMAP");
             moonMat.SetColor("_BaseColor", Color.white);
             moonMat.SetFloat("_Smoothness", 0.02f);

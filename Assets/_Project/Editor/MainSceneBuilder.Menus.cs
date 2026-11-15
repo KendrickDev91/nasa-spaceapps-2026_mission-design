@@ -22,7 +22,7 @@ namespace MissionDesign.Editor
             var main = Panel("MainMenu", container, new Color(0.01f, 0.02f, 0.05f, 0.93f));
             Stretch(main);
             var mainGroup = main.gameObject.AddComponent<CanvasGroup>();
-            var title = Text("Title", main, $"<b>{GameInfo.Title}</b>", 96, UiTheme.Text, TextAlignmentOptions.Center);
+            var title = Text("Title", main, $"<b>{GameInfo.StartScreenTitle}</b>", 112, UiTheme.Text, TextAlignmentOptions.Center);
             Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(1600f, 120f));
             var tagline = Text("Tagline", main, GameInfo.Tagline, 30, UiTheme.Accent, TextAlignmentOptions.Center);
             Place(tagline.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -295f), new Vector2(1600f, 44f));
@@ -45,6 +45,8 @@ namespace MissionDesign.Editor
             var footer = Text("Footer", main, $"{GameInfo.Event} · Proyecto independiente, no es un producto oficial de la NASA · F1 ayuda · Esc pausa",
                 15, UiTheme.TextDim, TextAlignmentOptions.Center);
             Place(footer.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1600f, 26f));
+            var team = Text("TeamLine", main, $"<b>{GameInfo.TeamLine}</b>", 22, UiTheme.Accent, TextAlignmentOptions.Center);
+            Place(team.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 76f), new Vector2(1600f, 30f));
 
             // ── Pausa ──
             var pause = Panel("PauseMenu", container, new Color(0f, 0f, 0f, 0.72f));

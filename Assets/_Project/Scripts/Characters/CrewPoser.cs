@@ -19,17 +19,22 @@ namespace MissionDesign.Characters
         [Tooltip("Punto del asiento (superficie). Si es nulo, el personaje está de pie.")]
         [SerializeField] private Transform seat;
         [SerializeField] private bool seatedByDefault = true;
-        [Tooltip("0 = celebra con los brazos arriba, 1 = aplaude.")]
+        [Tooltip("Estilo al celebrar: 0 = brazos en V con puños, 1 = aplaude frente al pecho, 2 = aplaude sobre la cabeza, 3 = aplaude y luego levanta los brazos.")]
         [SerializeField] private int variant;
         [SerializeField] private float blendSpeed = 3f;
         [Tooltip("Ambiente: de vez en cuando señala la pantalla o mira al compañero.")]
         [SerializeField] private bool ambient;
 
         private Transform hips, spine, chest, head, lUpLeg, lLeg, lFoot, rUpLeg, rLeg, rFoot, lArm, lFore, lHand, rArm, rFore, rHand;
+        private Transform lIndex, lLittle, rIndex, rLittle;
         private Vector3 headForwardLocal;
         private float sit, armsUp, clap, handsHead, point, bounce, typing;
         private float sitTarget, armsUpTarget, clapTarget, handsHeadTarget, pointTarget, bounceTarget;
         private float reactionEnd, pendingAt = -1f;
+        private bool highClap;
+        private float switchToCheerAt = -1f;
+        /// <summary>Palmadas por segundo de esta persona (cada una aplaude a su ritmo).</summary>
+        private float clapRate = 3f;
         private CrewReaction pending = CrewReaction.None;
         private float phase, nextAmbient, glanceUntil;
         private float glanceSide = 1f;
@@ -42,6 +47,7 @@ namespace MissionDesign.Characters
         {
             if (animator == null) animator = GetComponentInChildren<Animator>();
             phase = Random.value * 10f;
+            clapRate = 2.4f + Random.value * 1.2f;
             nextAmbient = Time.time + Random.Range(4f, 12f);
             Bind();
             sit = sitTarget = seat != null && seatedByDefault ? 1f : 0f;
@@ -56,6 +62,8 @@ namespace MissionDesign.Characters
             rUpLeg = B(HumanBodyBones.RightUpperLeg); rLeg = B(HumanBodyBones.RightLowerLeg); rFoot = B(HumanBodyBones.RightFoot);
             lArm = B(HumanBodyBones.LeftUpperArm); lFore = B(HumanBodyBones.LeftLowerArm); lHand = B(HumanBodyBones.LeftHand);
             rArm = B(HumanBodyBones.RightUpperArm); rFore = B(HumanBodyBones.RightLowerArm); rHand = B(HumanBodyBones.RightHand);
+            lIndex = B(HumanBodyBones.LeftIndexProximal); lLittle = B(HumanBodyBones.LeftLittleProximal);
+            rIndex = B(HumanBodyBones.RightIndexProximal); rLittle = B(HumanBodyBones.RightLittleProximal);
             if (head != null) headForwardLocal = Quaternion.Inverse(head.rotation) * transform.forward;
         }
 
@@ -86,8 +94,14 @@ namespace MissionDesign.Characters
             {
                 case CrewReaction.Celebrate:
                     sitTarget = 0f;
-                    if (variant % 2 == 0) { armsUpTarget = 1f; bounceTarget = 1f; } else clapTarget = 1f;
-                    reactionEnd = Time.time + 5f;
+                    highClap = variant % 4 == 2;
+                    switch (variant % 4)
+                    {
+                        case 0: armsUpTarget = 1f; bounceTarget = 1f; break;                 // brazos en V, saltitos
+                        case 3: clapTarget = 1f; switchToCheerAt = Time.time + 2.4f; break;  // aplaude y luego festeja
+                        default: clapTarget = 1f; bounceTarget = 0.35f; break;               // aplauso (pecho o cabeza)
+                    }
+                    reactionEnd = Time.time + 6f;
                     break;
                 case CrewReaction.Stress:
                     handsHeadTarget = 1f;
@@ -107,6 +121,7 @@ namespace MissionDesign.Characters
         {
             sitTarget = seat != null && seatedByDefault ? 1f : 0f;
             armsUpTarget = clapTarget = handsHeadTarget = pointTarget = bounceTarget = 0f;
+            switchToCheerAt = -1f;
         }
 
         private void LateUpdate()
@@ -115,6 +130,11 @@ namespace MissionDesign.Characters
             float dt = Time.deltaTime;
             if (pendingAt > 0f && Time.time >= pendingAt) { pendingAt = -1f; React(pending); }
             if (reactionEnd > 0f && Time.time > reactionEnd) { reactionEnd = 0f; Current = CrewReaction.None; ResetTargets(); }
+            if (switchToCheerAt > 0f && Time.time > switchToCheerAt)
+            {
+                switchToCheerAt = -1f;
+                clapTarget = 0f; armsUpTarget = 1f; bounceTarget = 1f;
+            }
             if (ambient && Current == CrewReaction.None && Time.time > nextAmbient)
             {
                 nextAmbient = Time.time + Random.Range(7f, 16f);
@@ -142,7 +162,11 @@ namespace MissionDesign.Characters
             // ── Cadera y piernas ──
             if (seat != null && s > 0.001f)
                 hips.position = Vector3.Lerp(hips.position, seat.position + up * 0.1f + fwd * 0.02f, s);
-            if (bounce > 0.001f) hips.position += up * (Mathf.Abs(Mathf.Sin(t * 7f)) * 0.07f * bounce * (1f - s));
+            if (bounce > 0.001f)
+            {
+                float hop = armsUp > clap ? Mathf.Abs(Mathf.Sin(t * 7f)) * 0.07f : (1f - ClapOpen(t)) * 0.02f;
+                hips.position += up * (hop * bounce * (1f - s));
+            }
             if (s > 0.001f)
             {
                 foreach (var (thigh, shin, foot, side) in new[] { (lUpLeg, lLeg, lFoot, -1f), (rUpLeg, rLeg, rFoot, 1f) })
@@ -173,7 +197,10 @@ namespace MissionDesign.Characters
             {
                 Vector3 look = head.position + fwd * 6f + up * (1.2f + 1.2f * s);
                 if (Time.time < glanceUntil) look = head.position + right * glanceSide * 3f + fwd * 1.5f;
-                look = Vector3.Lerp(look, head.position + fwd * 2f + up * 3.5f, Mathf.Max(armsUp, clap) * 0.7f);
+                // Con los brazos arriba miran hacia arriba; al aplaudir siguen mirando la pantalla grande (apenas más alto).
+                look = Vector3.Lerp(look, head.position + fwd * 2f + up * 3.5f, Mathf.Max(armsUp * 0.7f, clap * (highClap ? 0.35f : 0.15f)));
+                // Asiente al ritmo de sus palmadas.
+                look += up * (clap * (1f - ClapOpen(t)) * 0.25f);
                 look = Vector3.Lerp(look, head.position + fwd * 2f - up * 1.2f, handsHead * 0.8f);
                 Vector3 desired = (look - head.position).normalized;
                 Vector3 current = head.rotation * headForwardLocal;
@@ -207,13 +234,16 @@ namespace MissionDesign.Characters
                 pole = Vector3.Lerp(pole, shoulder + sd * 0.45f - fwd * 0.2f, armsUp);
                 w = Mathf.Max(w, armsUp);
             }
-            // Aplaudir: las manos se juntan frente al pecho.
+            // Aplaudir: palmas enfrentadas que se cierran rápido y se abren más lento, a la altura del pecho o sobre la cabeza.
             if (clap > 0.001f)
             {
-                float open = 0.015f + 0.12f * Mathf.Abs(Mathf.Sin(t * 7.5f));
-                Vector3 c = chestPos + fwd * 0.34f + up * 0.24f + sd * open;   // a la altura del pecho
-                target = Vector3.Lerp(target, c, clap);
-                pole = Vector3.Lerp(pole, shoulder - up * 0.3f + sd * 0.4f, clap);
+                float open = 0.022f + 0.2f * ClapOpen(t);
+                Vector3 center = highClap && head != null
+                    ? head.position + up * 0.3f + fwd * 0.16f
+                    : chestPos + fwd * 0.27f + up * 0.17f;
+                target = Vector3.Lerp(target, center + sd * open, clap);
+                Vector3 elbowHint = highClap ? shoulder + sd * 0.5f + up * 0.05f - fwd * 0.05f : shoulder - up * 0.38f + sd * 0.42f - fwd * 0.05f;
+                pole = Vector3.Lerp(pole, elbowHint, clap);
                 w = Mathf.Max(w, clap);
             }
             // Tensión: manos sobre la cabeza.
@@ -231,6 +261,30 @@ namespace MissionDesign.Characters
                 w = Mathf.Max(w, point);
             }
             TwoBoneIK(arm, fore, hand, target, pole, Mathf.Clamp01(w));
+
+            // Al aplaudir, gira la mano sobre su eje para que la palma mire a la otra mano. La normal de la palma se calcula
+            // con los dedos índice y meñique (sirve para cualquier esqueleto humanoide, sin suponer ejes de los huesos).
+            if (clap > 0.001f)
+            {
+                Transform index = isRight ? rIndex : lIndex, little = isRight ? rLittle : lLittle;
+                if (index != null && little != null)
+                {
+                    Vector3 along = ((index.position + little.position) * 0.5f - hand.position).normalized;
+                    Vector3 across = index.position - little.position;                 // hacia el pulgar
+                    Vector3 palm = side * Vector3.Cross(along, across);                 // normal de la palma (lado interno)
+                    Vector3 want = -sd;                                                 // hacia la otra mano
+                    Vector3 a = Vector3.ProjectOnPlane(palm, along), b = Vector3.ProjectOnPlane(want, along);
+                    if (a.sqrMagnitude > 1e-6f && b.sqrMagnitude > 1e-6f)
+                        hand.rotation = Quaternion.Slerp(Quaternion.identity, Quaternion.FromToRotation(a, b), clap) * hand.rotation;
+                }
+            }
+        }
+
+        /// <summary>Apertura de las manos (0 = palmada, 1 = abiertas): cierre rápido y apertura más lenta, como un aplauso real.</summary>
+        private float ClapOpen(float t)
+        {
+            float p = Mathf.Repeat(t * clapRate, 1f);
+            return Mathf.Sin(Mathf.PI * Mathf.Pow(p, 0.55f));
         }
 
         /// <summary>IK analítica de dos huesos: coloca el codo en el plano del vector polar y la mano en el objetivo.</summary>

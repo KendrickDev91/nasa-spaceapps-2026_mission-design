@@ -71,12 +71,24 @@ namespace MissionDesign.UI
 
         public static readonly string[][] CreditsPages =
         {
+            new[] { "EQUIPO " + GameInfo.Team,
+                "<size=120%><b>" + GameInfo.Title + "</b></size>\n" + GameInfo.Event + "\n\n" +
+                "Desarrollado por el equipo <b>" + GameInfo.Team + "</b>:\n\n" +
+                "• " + string.Join("\n• ", GameInfo.TeamMembers) + "\n\n" +
+                "<size=85%>Gracias por jugar. Cada misión que diseñan es un trade-off: no hay una única respuesta correcta.</size>" },
             new[] { "FUENTES Y CRÉDITOS",
                 GameInfo.Title + " — " + GameInfo.Event + ". Proyecto independiente: <b>no es un producto oficial de la NASA</b>.\n\n" +
                 "<b>Recursos del reto:</b> Design and Develop Science Missions (NASA Small Spacecraft Systems Virtual Institute), " +
                 "Concept Maturity Levels (JPL), CubeSat 101 (NASA CubeSat Launch Initiative), Mission Design Lab (NASA Goddard), GMAT y NASA Mission Viz.\n\n" +
                 "<b>Datos:</b> cada pieza indica su fuente y si es dato oficial, aproximado o estimación de juego (pasa el ratón por ella).\n\n" +
-                "<b>Arte:</b> modelos 3D propios generados con Blender (ArtSource/Blender) y texturas procedurales propias." }
+                "<b>Arte:</b> modelos 3D propios generados con Blender (ArtSource/Blender) y texturas procedurales propias." },
+            new[] { "LUNA, TRAYECTORIA Y ARTEMIS II",
+                "<b>Luna:</b> color y relieve reales del Lunar Reconnaissance Orbiter (LROC y LOLA), del <i>CGI Moon Kit</i> de " +
+                "NASA's Scientific Visualization Studio (Ernie Wright, NASA/GSFC). Dominio público.\n\n" +
+                "<b>Trayectoria:</b> retorno libre calculado con el problema restringido de tres cuerpos y validado con " +
+                "<b>NASA GMAT R2026a</b> (docs/validacion/gmat). Esquema de 8 hitos basado en el diagrama de Artemis II de la ESA.\n\n" +
+                "<b>Artemis II:</b> despegue el 1 de abril de 2026, sobrevuelo lunar el 6 de abril y amerizaje en el Pacífico " +
+                "frente a San Diego el 10 de abril. La cinemática del amerizaje es una recreación propia, no metraje real." }
         };
 
         private void Start()

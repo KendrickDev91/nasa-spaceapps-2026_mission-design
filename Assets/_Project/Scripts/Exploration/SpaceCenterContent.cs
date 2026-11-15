@@ -104,10 +104,10 @@ namespace MissionDesign.Exploration
                 "3. Correcciones de rumbo pequeñas.\n" +
                 "4. <b>Sobrevuelo</b> por la cara oculta a ~7 400 km de altura.\n" +
                 "5. La gravedad lunar curva la trayectoria y la devuelve a la Tierra <b>sin encender el motor principal</b>.\n" +
-                "6. Reentrada y amerizaje tras ~10 días.\n\n" +
+                "6. Reentrada y amerizaje en el Pacífico el 10 de abril, ~9 días después del despegue.\n\n" +
                 "En el juego la trayectoria se calcula con un modelo de 3 cuerpos Tierra-Luna (órbita “Sobrevuelo lunar con retorno libre”) " +
-                "y se validó con <b>NASA GMAT</b>: con efemérides reales, una corrección de rumbo de ~140 m/s tras la TLI reproduce el mismo " +
-                "sobrevuelo (7 283 km) y el perigeo de regreso de 50 km." },
+                "y dibuja el mismo \"8\" que el diagrama de la ESA. Se validó con <b>NASA GMAT</b>: con efemérides reales, una corrección de rumbo " +
+                "de solo ~27 m/s tras la TLI reproduce el sobrevuelo (7 672 km) y el perigeo de regreso de 50 km." },
             new[] { "LAS FOTOS DE ARTEMIS II",
                 "Durante el sobrevuelo se tomaron unas <b>10 000 fotos</b>. Orion lleva <b>32 cámaras</b> (muchas externas) y la tripulación usó " +
                 "cámaras Nikon D5 y Z9 con objetivos de 80–400 mm y 35 mm.\n\n" +

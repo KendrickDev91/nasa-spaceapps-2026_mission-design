@@ -39,6 +39,8 @@ namespace MissionDesign.Simulation
         public float returnPerigeeAltitudeKm;
         public float totalDays;
         public bool passesFarSide;
+        /// <summary>Rodea la Luna en sentido horario (marco rotatorio): la trayectoria forma la figura de 8.</summary>
+        public bool retrogradeFlyby;
         public List<TrajectorySample> samples = new List<TrajectorySample>();
         /// <summary>Despegue, órbita de estacionamiento y órbita terrestre alta (~1 día) hasta la TLI; tDays negativos.</summary>
         public List<TrajectorySample> preTliSamples = new List<TrajectorySample>();
@@ -84,6 +86,12 @@ namespace MissionDesign.Simulation
         /// <summary>Calcula la solución en segundo plano para que no se note al entrar en la vista orbital.</summary>
         public static void WarmUpAsync() => System.Threading.Tasks.Task.Run(() => { _ = Default; });
 
+        /// <summary>Artemis II: TLI el 2 de abril y sobrevuelo el 6 de abril de 2026 (~4 días de ida).</summary>
+        public const double TargetFlybyDays = 4.0;
+
+        /// <summary>El cruce del "8" debe quedar fuera de la órbita de estacionamiento (≥ ~9 600 km del centro de la Tierra).</summary>
+        private const double CrossingMinFromEarth = 0.025;
+
         public static FreeReturnSolution Solve(double parkingAltKm = 185.0, double targetFlybyAltKm = 7400.0,
             double targetReturnPerigeeKm = 50.0)
         {
@@ -93,7 +101,7 @@ namespace MissionDesign.Simulation
             double bestCost = double.MaxValue, bestTheta = 0, bestV = 0;
             for (double th = 0; th < 360; th += 3.0)
             {
-                for (double v = vEsc - 0.12; v <= vEsc + 0.02; v += 0.004)
+                for (double v = vEsc - 0.26; v <= vEsc + 0.02; v += 0.004)
                 {
                     var r = Propagate(parkingAltKm, th, v, null);
                     double cost = Cost(r, targetFlybyAltKm, targetReturnPerigeeKm);
@@ -118,6 +126,7 @@ namespace MissionDesign.Simulation
             // 3) Trayectoria final muestreada + hitos.
             var samples = new List<TrajectorySample>();
             var final = Propagate(parkingAltKm, bestTheta, bestV, samples);
+            double entryDays = AppendEntryArc(samples);
             var sol = new FreeReturnSolution
             {
                 parkingAltitudeKm = (float)parkingAltKm,
@@ -127,11 +136,12 @@ namespace MissionDesign.Simulation
                 flybyAltitudeKm = (float)final.flybyAltKm,
                 flybyTimeDays = (float)final.flybyDays,
                 returnPerigeeAltitudeKm = (float)final.returnPerigeeAltKm,
-                totalDays = (float)final.endDays,
+                totalDays = (float)(final.endDays + entryDays),
                 passesFarSide = final.farSide,
+                retrogradeFlyby = final.retrograde,
                 samples = samples
             };
-            sol.converged = final.returned && final.farSide
+            sol.converged = final.returned && final.farSide && final.retrograde && final.outboundCrossed
                             && Math.Abs(final.flybyAltKm - targetFlybyAltKm) < 0.05 * targetFlybyAltKm
                             && final.returnPerigeeAltKm < EntryInterfaceKm;
             BuildPreTli(sol);
@@ -142,7 +152,7 @@ namespace MissionDesign.Simulation
         private struct Run
         {
             public double flybyAltKm, flybyDays, returnPerigeeAltKm, endDays;
-            public bool returned, farSide, hitMoon;
+            public bool returned, farSide, hitMoon, retrograde, outboundCrossed;
         }
 
         private static double Cost(Run r, double targetFlyby, double targetPerigee)
@@ -151,6 +161,15 @@ namespace MissionDesign.Simulation
             double c = Math.Abs(r.flybyAltKm - targetFlyby) / 500.0;
             c += Math.Abs(r.returnPerigeeAltKm - targetPerigee) / 50.0;
             if (!r.farSide) c += 50.0;
+            // Figura de 8 (Apollo 13, Artemis II): la nave rodea la Tierra en sentido antihorario y la Luna en sentido
+            // HORARIO; ese cambio de sentido es lo que cruza la trayectoria entre ambos cuerpos. Con el mismo sentido
+            // saldría una "O" (otra familia de retorno libre que no es la de Artemis II).
+            if (!r.retrograde) c += 80.0;
+            // La vuelta cruza la ida (y la línea Tierra-Luna) antes de llegar a la Tierra: el cruce del "8". En la física real
+            // el cruce queda cerca de la Tierra; el diagrama de la ESA lo dibuja a medio camino porque "no está a escala".
+            // Además la ida dura ~4 días como Artemis II.
+            if (!r.outboundCrossed) c += 60.0;
+            c += Math.Abs(r.flybyDays - TargetFlybyDays) * 2.0;
             if (!r.returned) c += 100.0;
             return c;
         }
@@ -171,7 +190,8 @@ namespace MissionDesign.Simulation
             double minMoon = double.MaxValue;
             bool pastFlyby = false, leftEarth = false;
             double lastSampleT = -1;
-            double flybyX = 0;
+            double lastX = x, lastY = y;
+            double flybyX = 0, prevY = 0;
 
             while (t < tMax)
             {
@@ -180,7 +200,10 @@ namespace MissionDesign.Simulation
                 double rMin = Math.Min(r1, r2);
                 double dt = Math.Max(2e-6, Math.Min(2e-3, 0.02 * Math.Pow(rMin, 1.5)));
 
-                if (output != null && (t - lastSampleT) * TimeUnitS > 1800.0)   // una muestra cada ~30 min
+                // Una muestra cada ~30 min o cada 2 000 km (cerca de la Tierra la nave va a ~10 km/s y la vista amplía esa
+                // zona: sin esto el dibujo mostraría tramos rectos con esquinas).
+                double moved = Math.Sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY)) * LengthKm;
+                if (output != null && ((t - lastSampleT) * TimeUnitS > 1800.0 || moved > 2000.0))
                 {
                     output.Add(new TrajectorySample
                     {
@@ -188,14 +211,23 @@ namespace MissionDesign.Simulation
                         xKm = (float)(x * LengthKm), yKm = (float)(y * LengthKm), leg = pastFlyby ? 1 : 0
                     });
                     lastSampleT = t;
+                    lastX = x; lastY = y;
                 }
 
                 if (r1 > 0.2) leftEarth = true;
+                if (pastFlyby && x > -Mu + CrossingMinFromEarth && x < 0.88 && prevY != 0 && Math.Sign(prevY) != Math.Sign(y))
+                    run.outboundCrossed = true;
+                prevY = y;
                 double moonAlt = r2 * LengthKm - MoonRadiusKm;
                 if (moonAlt < 0) { run.hitMoon = true; break; }
                 if (!pastFlyby)
                 {
-                    if (r2 < minMoon) { minMoon = r2; run.flybyDays = t * TimeUnitS / 86400.0; flybyX = x; }
+                    if (r2 < minMoon)
+                    {
+                        minMoon = r2; run.flybyDays = t * TimeUnitS / 86400.0; flybyX = x;
+                        // Sentido de giro alrededor de la Luna en el marco rotatorio (el del dibujo): < 0 = horario.
+                        run.retrograde = (x - 1 + Mu) * vy - y * vx < 0;
+                    }
                     else if (minMoon < 0.2 && r2 > minMoon * 1.05) pastFlyby = true;
                 }
                 if (pastFlyby && leftEarth)
@@ -243,6 +275,43 @@ namespace MissionDesign.Simulation
             y += h / 6 * (vy + 2 * vy2 + 2 * vy3 + vy4);
             vx += h / 6 * (a1x + 2 * a2x + 2 * a3x + a4x);
             vy += h / 6 * (a1y + 2 * a2y + 2 * a3y + a4y);
+        }
+
+        /// <summary>Arco de la reentrada: desde la interfaz de entrada (122 km) hasta el amerizaje, siguiendo el giro de la nave.</summary>
+        public const double EntryArcDeg = 60.0;
+        /// <summary>Minutos desde la interfaz de entrada hasta el amerizaje (Orion: ~20 min).</summary>
+        public const double EntryMinutes = 20.0;
+
+        /// <summary>
+        /// La integración se detiene en la interfaz de entrada; aquí se añade el tramo atmosférico hasta el amerizaje: un arco
+        /// alrededor de la Tierra en el sentido de avance mientras la altura baja a cero (como el último tramo del diagrama
+        /// de la ESA, que rodea la Tierra hasta el punto 8). Devuelve los días añadidos.
+        /// </summary>
+        private static double AppendEntryArc(List<TrajectorySample> samples)
+        {
+            if (samples.Count < 2) return 0;
+            var a = samples[samples.Count - 2];
+            var b = samples[samples.Count - 1];
+            double ex = -Mu * LengthKm;
+            double bx = b.xKm - ex, by = b.yKm, ax = a.xKm - ex, ay = a.yKm;
+            double r0 = Math.Sqrt(bx * bx + by * by);
+            double th0 = Math.Atan2(by, bx);
+            double sense = Math.Sign(ax * by - ay * bx);          // sentido de giro alrededor de la Tierra (+1 antihorario)
+            if (sense == 0) sense = 1;
+            const int steps = 30;
+            double days = EntryMinutes / 1440.0;
+            for (int k = 1; k <= steps; k++)
+            {
+                double f = (double)k / steps;
+                double th = th0 + sense * EntryArcDeg * Math.PI / 180.0 * f;
+                double r = EarthRadiusKm + (r0 - EarthRadiusKm) * (1 - f) * (1 - f);   // baja rápido y luego planea
+                samples.Add(new TrajectorySample
+                {
+                    tDays = (float)(b.tDays + days * f),
+                    xKm = (float)(ex + r * Math.Cos(th)), yKm = (float)(r * Math.Sin(th)), leg = 1
+                });
+            }
+            return days;
         }
 
         /// <summary>Hitos numerados como en el diagrama de Artemis II (ida 1-5, vuelta 6-8).</summary>
@@ -308,8 +377,10 @@ namespace MissionDesign.Simulation
             var last = s.samples[s.samples.Count - 1];
             float heoStart = pre.Count > 41 ? pre[40].tDays : s.launchDays;
             Add(1, "Despegue: Florida", "El cohete SLS despega y deja la nave en una órbita baja de estacionamiento", pre[0]);
-            Add(2, "Hacia la órbita alta", $"La etapa superior eleva el apogeo a ~{s.highOrbitApogeeKm:N0} km (~1 día de pruebas)", At(pre, heoStart));
-            Add(3, "Se separa del lanzador", "Orion se separa de la etapa superior y practica maniobras de proximidad", At(pre, heoStart + 0.14f));
+            Add(2, "Hacia la órbita alta", $"La etapa superior eleva el apogeo a ~{s.highOrbitApogeeKm:N0} km (~1 día de pruebas)", At(pre, heoStart + 0.08f));
+            // Como en el diagrama de la ESA, el 3 queda sobre la órbita alta (Orion se separa ~3 h 24 min tras el despegue
+            // y pasa el resto de esa vuelta de ~1 día haciendo pruebas de proximidad).
+            Add(3, "Se separa del lanzador", "Orion se separa de la etapa superior y practica maniobras de proximidad", At(pre, heoStart + 0.4f));
             Add(4, "Motor rumbo a la Luna (TLI)", $"El motor principal se enciende e impulsa la cápsula a la Luna: Δv ≈ {s.tliDeltaVKmS:F2} km/s", s.samples[0]);
             Add(5, "Sobrevuelo lunar", $"{s.flybyAltitudeKm:N0} km sobre la cara oculta, día {s.flybyTimeDays:F1}", At(s.samples, s.flybyTimeDays));
             Add(6, "Regreso a la Tierra", "Retorno libre: la gravedad lunar devuelve la nave sin encender el motor", At(s.samples, (s.flybyTimeDays + s.totalDays) * 0.55f));
