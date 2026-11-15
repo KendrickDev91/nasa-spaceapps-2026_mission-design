@@ -1,3 +1,37 @@
+# AstroByte · MISSION TRADE-OFF — NASA Space Apps Challenge 2026
+
+**Team ASTROBYTE:** Alejandro Marco Toranzo Cazorla · Keni Breython Ramos Ramirez · Jhamil Obando Requis · Tony Cahuaya
+
+## 🎬 Demo video (30 s, English)
+
+[![AstroByte — 30-second demo (click to watch)](docs/video/thumbnail_en_1280x720.jpg)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_EN.mp4)
+
+| Video | Language | Length |
+|---|---|---|
+| [**30-second demo**](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_EN.mp4) | English narration + English captions | 0:29 |
+| [Full walkthrough](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 1:13 |
+
+Subtitles (SRT): [`docs/video/`](docs/video/) · **Play the game (Windows):** [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest)
+
+### About (English)
+
+**AstroByte** is a cooperative game for 1-4 players that answers the **Space Mission Design Game** challenge. Four roles
+(Mission Director, Systems Engineer, Principal Scientist, Telecom & Launch Engineer) design a mission part by part
+from real data: instruments, rockets, antennas and ground stations. **Mass, power, budget, data, communications and time**
+pull against each other, and nothing launches without team consensus. Then the mission flies: launch, mission control,
+operations, and a post-mission analysis that explains **what went right, what failed and why** (grade A-F).
+
+- **Real physics.** The crewed Artemis II-style free-return "figure eight" is computed with the restricted three-body problem
+  and **validated with NASA GMAT R2026a** (a 27 m/s correction reproduces the flyby and the 50 km return perigee; see
+  [`docs/validacion/gmat`](docs/validacion/gmat/README.md)).
+- **Real data.** The Moon uses NASA LRO color (LROC) and elevation (LOLA) from the CGI Moon Kit (public domain), and every
+  part shows its source.
+- **Engaging.** Walkable space center, live mission control, onboard cameras that photograph the far side, and a
+  splashdown cinematic with parachutes.
+- Independent project, **not an official NASA product.**
+
+---
+
 # MISSION TRADE-OFF — proyecto para NASA Space Apps Challenge 2026
 
 Juego de diseño de misiones espaciales para 1-4 jugadores (hot-seat) que responde al reto

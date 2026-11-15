@@ -1,0 +1,172 @@
+1
+00:00:00,216 --> 00:00:01,999
+Could you fly four astronauts to
+
+2
+00:00:02,009 --> 00:00:02,651
+the Moon...
+
+3
+00:00:02,661 --> 00:00:04,278
+and bring them back alive?
+
+4
+00:00:04,794 --> 00:00:05,995
+We built AstroByte:
+
+5
+00:00:06,005 --> 00:00:07,873
+a game where your team designs
+
+6
+00:00:07,883 --> 00:00:08,902
+a space mission,
+
+7
+00:00:08,912 --> 00:00:09,910
+part by part.
+
+8
+00:00:10,326 --> 00:00:11,367
+Four roles.
+
+9
+00:00:11,377 --> 00:00:11,892
+Mass,
+
+10
+00:00:11,902 --> 00:00:12,505
+power,
+
+11
+00:00:12,515 --> 00:00:13,993
+budget and data,
+
+12
+00:00:14,003 --> 00:00:15,044
+in tension.
+
+13
+00:00:15,054 --> 00:00:16,270
+If one fails,
+
+14
+00:00:16,280 --> 00:00:18,181
+there is no launch.
+
+15
+00:00:18,597 --> 00:00:20,685
+Every part comes from real data:
+
+16
+00:00:20,695 --> 00:00:21,512
+instruments,
+
+17
+00:00:21,522 --> 00:00:22,084
+rockets,
+
+18
+00:00:22,094 --> 00:00:24,152
+antennas and ground stations.
+
+19
+00:00:24,568 --> 00:00:26,356
+When the whole team approves...
+
+20
+00:00:26,366 --> 00:00:27,022
+liftoff!
+
+21
+00:00:29,188 --> 00:00:31,433
+And mission control erupts with joy.
+
+22
+00:00:32,599 --> 00:00:34,633
+The trajectory isn't a drawing:
+
+23
+00:00:34,643 --> 00:00:35,846
+it's real physics.
+
+24
+00:00:35,856 --> 00:00:37,890
+A figure eight around the Moon,
+
+25
+00:00:37,900 --> 00:00:39,231
+validated with GMAT,
+
+26
+00:00:39,241 --> 00:00:40,477
+NASA's software.
+
+27
+00:00:40,893 --> 00:00:43,153
+The cameras photograph the far side,
+
+28
+00:00:43,163 --> 00:00:44,724
+using real lunar data.
+
+29
+00:00:45,140 --> 00:00:46,093
+And the way home:
+
+30
+00:00:46,103 --> 00:00:47,163
+three parachutes...
+
+31
+00:00:47,173 --> 00:00:48,982
+and splashdown in the Pacific.
+
+32
+00:00:50,548 --> 00:00:51,334
+At the end,
+
+33
+00:00:51,344 --> 00:00:53,855
+an analysis explains what went right,
+
+34
+00:00:53,865 --> 00:00:55,249
+what failed and why,
+
+35
+00:00:55,259 --> 00:00:56,404
+graded A to F.
+
+36
+00:00:56,820 --> 00:00:58,339
+And you can explore the space
+
+37
+00:00:58,349 --> 00:00:58,746
+center,
+
+38
+00:00:58,756 --> 00:01:00,071
+ride up the tower and see
+
+39
+00:01:00,081 --> 00:01:01,403
+the rocket on the pad.
+
+40
+00:01:01,819 --> 00:01:03,721
+We are Team AstroByte,
+
+41
+00:01:03,731 --> 00:01:05,882
+for NASA Space Apps 2026.
+
+42
+00:01:05,892 --> 00:01:07,793
+Subscribe and tell me:
+
+43
+00:01:07,803 --> 00:01:10,530
+what mission would you design?
+

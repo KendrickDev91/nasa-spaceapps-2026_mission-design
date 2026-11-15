@@ -1,0 +1,34 @@
+{
+  "voice": "en-US-AndrewNeural",
+  "rate": "+12%",
+  "lines": {
+    "hook": "Could you fly four astronauts around the Moon... and bring them home?",
+    "intro": "AstroByte is a co-op game: four roles design a space mission from real NASA data.",
+    "launch": "Mass, power, budget and data compete. When the team agrees: liftoff!",
+    "eight": "The figure-eight free return is real physics, validated with NASA GMAT.",
+    "splash": "Real lunar data. Three parachutes. Splashdown.",
+    "cta": "AstroByte. Team ASTROBYTE, for NASA Space Apps 2026."
+  },
+  "judges": [
+    "hook",
+    "intro",
+    "launch",
+    "eight",
+    "splash",
+    "cta"
+  ],
+  "subtitles_en": {
+    "hook": "Could you fly four astronauts to the Moon... and bring them back alive?",
+    "intro": "We built AstroByte: a game where your team designs a space mission, part by part.",
+    "roles": "Four roles. Mass, power, budget and data, in tension. If one fails, there is no launch.",
+    "datos": "Every part comes from real data: instruments, rockets, antennas and ground stations.",
+    "launch": "When the whole team approves... liftoff!",
+    "room": "And mission control erupts with joy.",
+    "eight": "The trajectory isn't a drawing: it's real physics. A figure eight around the Moon, validated with GMAT, NASA's software.",
+    "moon": "The cameras photograph the far side, using real lunar data.",
+    "splash": "And the way home: three parachutes... and splashdown in the Pacific.",
+    "analysis": "At the end, an analysis explains what went right, what failed and why, graded A to F.",
+    "center": "And you can explore the space center, ride up the tower and see the rocket on the pad.",
+    "cta_h": "We are Team AstroByte, for NASA Space Apps 2026. Subscribe and tell me: what mission would you design?"
+  }
+}

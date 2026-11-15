@@ -81,4 +81,22 @@ text(d, (540, 560), "Diseña la misión en equipo", 58, (255, 255, 255), stroke=
 d.rounded_rectangle((250, 1600, 830, 1720), radius=22, fill=(10, 20, 40))
 text(d, (540, 1660), "AstroByte", 76, BLUE, font=FONT2, stroke=0, anchor="mm")
 v.save(os.path.join(out, "portada_vertical_1080x1920.jpg"), quality=92)
+
+# ── Miniatura en inglés con botón "play" (para el README del repositorio y el jurado) ──
+en = frame("splash_H", 250).resize((1280, 720))
+en = Image.composite(Image.new("RGB", en.size, (0, 0, 0)), en, shade)
+m = moon.resize((300, 300))
+en.paste(m, (930, 26), m)
+d = ImageDraw.Draw(en)
+text(d, (40, 70), "TO THE MOON", 128, YELLOW)
+text(d, (40, 215), "AND BACK?", 128, YELLOW)
+text(d, (44, 380), "Design the mission", 60, (255, 255, 255), stroke=7)
+text(d, (44, 452), "as a team · 30 s demo", 60, (255, 255, 255), stroke=7)
+d.rounded_rectangle((36, 585, 660, 680), radius=18, fill=(10, 20, 40))
+text(d, (60, 600), "AstroByte", 64, BLUE, font=FONT2, stroke=0)
+text(d, (448, 604), "NASA\nSpace Apps", 28, (255, 255, 255), font=FONT2, stroke=0)
+cx, cy, r = 1010, 500, 92                       # botón de reproducir
+d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(220, 30, 40), outline=(255, 255, 255), width=6)
+d.polygon([(cx - 30, cy - 46), (cx - 30, cy + 46), (cx + 50, cy)], fill=(255, 255, 255))
+en.save(os.path.join(out, "thumbnail_en_1280x720.jpg"), quality=90)
 print("ok")

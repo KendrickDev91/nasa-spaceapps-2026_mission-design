@@ -1,0 +1,62 @@
+{
+ "text": "The figure-eight free return is real physics, validated with NASA GMAT.",
+ "rate": "+12%",
+ "voice": "en-US-AndrewNeural",
+ "words": [
+  {
+   "w": "The",
+   "t0": 0.1,
+   "t1": 0.145
+  },
+  {
+   "w": "figure-eight",
+   "t0": 0.156,
+   "t1": 0.614
+  },
+  {
+   "w": "free",
+   "t0": 0.625,
+   "t1": 0.848
+  },
+  {
+   "w": "return",
+   "t0": 0.859,
+   "t1": 1.295
+  },
+  {
+   "w": "is",
+   "t0": 1.429,
+   "t1": 1.551
+  },
+  {
+   "w": "real",
+   "t0": 1.562,
+   "t1": 1.864
+  },
+  {
+   "w": "physics",
+   "t0": 1.875,
+   "t1": 2.422
+  },
+  {
+   "w": "validated",
+   "t0": 2.701,
+   "t1": 3.181
+  },
+  {
+   "w": "with",
+   "t0": 3.192,
+   "t1": 3.326
+  },
+  {
+   "w": "NASA",
+   "t0": 3.337,
+   "t1": 3.672
+  },
+  {
+   "w": "GMAT",
+   "t0": 3.683,
+   "t1": 4.163
+  }
+ ]
+}

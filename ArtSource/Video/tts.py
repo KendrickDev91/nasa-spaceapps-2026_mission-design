@@ -23,7 +23,7 @@ async def synth(line_id, text, voice, rate, out):
                 t0 = chunk["offset"] / TICKS
                 words.append({"w": chunk["text"], "t0": round(t0, 3), "t1": round(t0 + chunk["duration"] / TICKS, 3)})
     with open(os.path.join(out, line_id + ".json"), "w", encoding="utf-8") as f:
-        json.dump({"text": text, "words": words}, f, ensure_ascii=False, indent=1)
+        json.dump({"text": text, "rate": rate, "voice": voice, "words": words}, f, ensure_ascii=False, indent=1)
     print(line_id, len(words), "palabras", words[-1]["t1"] if words else 0, "s")
 
 
@@ -32,7 +32,20 @@ async def main():
     os.makedirs(out, exist_ok=True)
     g = json.load(open(script, encoding="utf-8"))
     for line_id, text in g["lines"].items():
-        await synth(line_id, text, g["voice"], g["rate"], out)
+        done = os.path.join(out, line_id + ".json")
+        prev = json.load(open(done, encoding="utf-8")) if os.path.exists(done) else {}
+        if prev.get("text") == text and prev.get("rate") == g["rate"] and prev.get("voice") == g["voice"]:
+            continue                                   # ya generada con el mismo texto, voz y velocidad
+        for attempt in range(6):                       # el servicio a veces limita: reintentos con espera creciente
+            try:
+                await synth(line_id, text, g["voice"], g["rate"], out)
+                break
+            except edge_tts.exceptions.NoAudioReceived:
+                wait = 5 * (attempt + 1)
+                print(line_id, "sin audio, reintento en", wait, "s")
+                await asyncio.sleep(wait)
+        else:
+            raise SystemExit(f"No se pudo generar {line_id}")
 
 
 asyncio.run(main())

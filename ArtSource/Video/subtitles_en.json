@@ -1,0 +1,52 @@
+{
+ "items": [
+  {
+   "id": "hook",
+   "text": "Could you fly four astronauts to the Moon... and bring them back alive?"
+  },
+  {
+   "id": "intro",
+   "text": "We built AstroByte: a game where your team designs a space mission, part by part."
+  },
+  {
+   "id": "roles",
+   "text": "Four roles. Mass, power, budget and data, in tension. If one fails, there is no launch."
+  },
+  {
+   "id": "datos",
+   "text": "Every part comes from real data: instruments, rockets, antennas and ground stations."
+  },
+  {
+   "id": "launch",
+   "text": "When the whole team approves... liftoff!"
+  },
+  {
+   "id": "room",
+   "text": "And mission control erupts with joy."
+  },
+  {
+   "id": "eight",
+   "text": "The trajectory isn't a drawing: it's real physics. A figure eight around the Moon, validated with GMAT, NASA's software."
+  },
+  {
+   "id": "moon",
+   "text": "The cameras photograph the far side, using real lunar data."
+  },
+  {
+   "id": "splash",
+   "text": "And the way home: three parachutes... and splashdown in the Pacific."
+  },
+  {
+   "id": "analysis",
+   "text": "At the end, an analysis explains what went right, what failed and why, graded A to F."
+  },
+  {
+   "id": "center",
+   "text": "And you can explore the space center, ride up the tower and see the rocket on the pad."
+  },
+  {
+   "id": "cta_h",
+   "text": "We are Team AstroByte, for NASA Space Apps 2026. Subscribe and tell me: what mission would you design?"
+  }
+ ]
+}

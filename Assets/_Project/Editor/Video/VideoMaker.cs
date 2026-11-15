@@ -40,7 +40,20 @@ namespace MissionDesign.Editor.Video
             public Vector2 pan; public Layout layout = Layout.Full;
         }
 
+        /// <summary>at ≥ 0: segundos desde el inicio del segmento · at &lt; 0: fracción de la duración del segmento (−0,5 = la mitad).</summary>
         private sealed class Sfx { public string id; public float at; public float gain = 0.6f; }
+
+        /// <summary>Una versión del video: formato, voz, subtítulos opcionales en otro idioma y textos de la tarjeta final.</summary>
+        private sealed class Profile
+        {
+            public string name; public bool vertical; public Func<List<Seg>> segs; public string voiceDir = VoiceDir;
+            public Dictionary<string, string> subs;    // subtítulos traducidos (id de línea → texto); null = los de la voz
+            public string endSub = "Equipo ASTROBYTE · NASA Space Apps Challenge 2026";
+            public string endHandle = $"Síguenos  <color=#8CD2FF>{Handle}</color>\n<size=62%><color=#FFFFFFCC>Código en GitHub: {GitHub}</color></size>";
+        }
+
+        public const string RepoUrl = "github.com/KendrickDev91/nasa-spaceapps-2026_mission-design";
+        private const string Team = "<size=70%><color=#FFFFFFDD>Alejandro Marco Toranzo Cazorla · Keni Breython Ramos Ramirez\nJhamil Obando Requis · Tony Cahuaya</color></size>";
 
         private sealed class Seg
         {
@@ -52,7 +65,9 @@ namespace MissionDesign.Editor.Video
         }
 
         [Serializable] private sealed class Word { public string w; public float t0, t1; }
-        [Serializable] private sealed class Line { public string text; public Word[] words; [NonSerialized] public float[] pcm; [NonSerialized] public float length; }
+        [Serializable] private sealed class Line { public string text; public Word[] words; [NonSerialized] public float[] pcm; [NonSerialized] public float length; [NonSerialized] public string subtitle; }
+        [Serializable] private sealed class SubItem { public string id; public string text; }
+        [Serializable] private sealed class SubList { public SubItem[] items; }
 
         private static Shot S(string plate, bool v, int from, float weight = 1f, float zoom = 1.07f, Layout layout = Layout.Full, float panX = 0f, float panY = 0f) =>
             new Shot { plate = plate, v = v, from = from, weight = weight, zoom = zoom, layout = layout, pan = new Vector2(panX, panY) };
@@ -73,7 +88,7 @@ namespace MissionDesign.Editor.Video
             new Seg { line = "moon", intensity = 0.7f, shots = { S("flight", false, 300, 1f, 1.12f) },
                 sfx = { new Sfx { id = "shutter", at = 0.9f }, new Sfx { id = "shutter", at = 2.2f } } },
             new Seg { line = "splash", hold = 1.4f, intensity = 1f, shots = { S("splash", false, 230, 0.58f, 1.06f), S("splash", false, 352, 0.42f, 1.05f) },
-                sfx = { new Sfx { id = "chute", at = 0f, gain = 0.6f }, new Sfx { id = "splash", at = -0.42f, gain = 0.85f } } },
+                sfx = { new Sfx { id = "chute", at = 0f, gain = 0.6f }, new Sfx { id = "splash", at = -0.58f, gain = 0.85f } } },
             new Seg { line = "analysis", intensity = 0.8f, shots = { S("analysis", false, 0, 1f, 1.06f) } },
             new Seg { line = "center", intensity = 0.85f, shots = { S("center", false, 0, 1f, 1.06f) } },
             new Seg { line = "cta_h", hold = 2.2f, intensity = 0.9f, endCard = true, shots = { S("splash", false, 470, 1f, 1.1f) } },
@@ -92,30 +107,66 @@ namespace MissionDesign.Editor.Video
             new Seg { line = "moon", intensity = 0.7f, shots = { S("flight", true, 300, 1f, 1.12f) },
                 sfx = { new Sfx { id = "shutter", at = 0.9f }, new Sfx { id = "shutter", at = 2.2f } } },
             new Seg { line = "splash", hold = 1.4f, intensity = 1f, shots = { S("splash", true, 230, 0.58f, 1.06f), S("splash", true, 352, 0.42f, 1.05f) },
-                sfx = { new Sfx { id = "chute", at = 0f, gain = 0.6f }, new Sfx { id = "splash", at = -0.42f, gain = 0.85f } } },
+                sfx = { new Sfx { id = "chute", at = 0f, gain = 0.6f }, new Sfx { id = "splash", at = -0.58f, gain = 0.85f } } },
             new Seg { line = "cta_v", hold = 2.2f, intensity = 0.9f, endCard = true, shots = { S("splash", true, 470, 1f, 1.1f) } },
         };
+
+        /// <summary>30 s en inglés para el jurado (formato de demo de NASA Space Apps): voz en inglés y tarjeta final con el repositorio.</summary>
+        private static List<Seg> JudgesEn() => new List<Seg>
+        {
+            new Seg { line = "hook", hold = 0.3f, intensity = 0.35f, title = "TO THE MOON… AND BACK?",
+                shots = { S("flight", false, 318, 0.5f, 1.12f), S("splash", false, 232, 0.5f, 1.1f) } },
+            new Seg { line = "intro", intensity = 0.55f, shots = { S("design", false, 0, 0.55f, 1.12f), S("consensus", false, 30, 0.45f, 1.25f, panX: -0.06f, panY: -0.22f) } },
+            new Seg { line = "launch", hold = 1.2f, intensity = 1f, shots = { S("design", false, 200, 0.42f, 1.4f, panX: 0.3f, panY: 0.1f), S("launch", false, 40, 0.58f, 1.08f) },
+                sfx = { new Sfx { id = "roar", at = -0.5f, gain = 0.9f }, new Sfx { id = "applause", at = -0.8f, gain = 0.35f } } },
+            new Seg { line = "eight", intensity = 0.9f, shots = { S("flight", false, 0, 1f, 1.1f, panX: -0.05f) }, sfx = { new Sfx { id = "chime", at = 0.2f, gain = 0.5f } } },
+            new Seg { line = "splash", hold = 0.9f, intensity = 1f, shots = { S("flight", false, 300, 0.3f, 1.12f), S("splash", false, 230, 0.36f, 1.06f), S("splash", false, 352, 0.34f, 1.05f) },
+                sfx = { new Sfx { id = "shutter", at = 0.4f }, new Sfx { id = "chute", at = -0.3f, gain = 0.6f }, new Sfx { id = "splash", at = -0.66f, gain = 0.85f } } },
+            new Seg { line = "cta", hold = 1.0f, intensity = 0.9f, endCard = true, shots = { S("center", false, 30, 1f, 1.08f) } },
+        };
+
+        private static Profile[] Profiles()
+        {
+            string endEn = $"Play it and read the code\n<size=62%><color=#8CD2FF>{RepoUrl}</color></size>";
+            string subEn = "Team ASTROBYTE · NASA Space Apps Challenge 2026\n" + Team;
+            return new[]
+            {
+                new Profile { name = "AstroByte_YouTube_16x9", vertical = false, segs = Horizontal, endSub = "Equipo ASTROBYTE · NASA Space Apps Challenge 2026\n" + Team },
+                new Profile { name = "AstroByte_Shorts_Reels_TikTok_9x16", vertical = true, segs = Vertical, endSub = "Equipo ASTROBYTE · NASA Space Apps Challenge 2026\n" + Team },
+                new Profile { name = "AstroByte_Jury_30s_EN", vertical = false, segs = JudgesEn, voiceDir = "Assets/_Project/Video/Voice_en", endSub = subEn, endHandle = endEn },
+                new Profile { name = "AstroByte_Jury_ES_subs_EN", vertical = false, segs = Horizontal, subs = LoadSubs("ArtSource/Video/subtitles_en.json"),
+                    endSub = subEn, endHandle = endEn },
+            };
+        }
+
+        private static Dictionary<string, string> LoadSubs(string path) =>
+            JsonUtility.FromJson<SubList>(File.ReadAllText(path)).items.ToDictionary(i => i.id, i => i.text);
+
+        /// <summary>Versiones para el jurado (local e internacional): 30 s en inglés y la de 73 s con subtítulos en inglés.</summary>
+        [MenuItem("NASA SpaceApps/Video/Make Jury Versions")]
+        public static void MakeJury()
+        {
+            foreach (var p in Profiles().Where(p => p.name.StartsWith("AstroByte_Jury"))) Make(p);
+        }
 
         [MenuItem("NASA SpaceApps/Video/Make All")]
         public static void MakeAll()
         {
-            Make(false);
-            Make(true);
+            foreach (var p in Profiles()) Make(p);
         }
-
-        public static void MakeHorizontal() => Make(false);
-        public static void MakeVertical() => Make(true);
 
         // ───────────── Montaje ─────────────
 
-        private static void Make(bool vertical)
+        private static void Make(Profile profile)
         {
+            bool vertical = profile.vertical;
             int W = vertical ? 1080 : 1920, H = vertical ? 1920 : 1080;
-            var segs = vertical ? Vertical() : Horizontal();
+            var segs = profile.segs();
             float t = 0f;
             foreach (var s in segs)
             {
-                s.voice = LoadLine(s.line);
+                s.voice = LoadLine(s.line, profile.voiceDir);
+                if (profile.subs != null && profile.subs.TryGetValue(s.line, out string sub)) s.voice.subtitle = sub;
                 s.start = t;
                 s.voiceStart = t + 0.12f;
                 s.duration = 0.12f + s.voice.length + s.hold;
@@ -127,11 +178,11 @@ namespace MissionDesign.Editor.Video
 
             var mix = MixAudio(segs, total);
             Directory.CreateDirectory(OutDir);
-            string name = vertical ? "AstroByte_Shorts_Reels_TikTok_9x16" : "AstroByte_YouTube_16x9";
+            string name = profile.name;
             string path = Path.Combine(OutDir, name + ".mp4");
             WriteSrt(segs, Path.Combine(OutDir, name + ".srt"));
 
-            var rig = new Rig(W, H, vertical);
+            var rig = new Rig(W, H, vertical, profile);
             var plateCount = new Dictionary<string, int>();
             var va = new VideoTrackAttributes { frameRate = new MediaRational(Fps), width = (uint)W, height = (uint)H, includeAlpha = false, bitRateMode = VideoBitrateMode.High };
             var aa = new AudioTrackAttributes { sampleRate = new MediaRational(Rate), channelCount = 2, language = "es" };
@@ -168,10 +219,10 @@ namespace MissionDesign.Editor.Video
             Debug.Log($"[Video] Listo: {path} ({new FileInfo(path).Length / 1048576f:F1} MB)");
         }
 
-        private static Line LoadLine(string id)
+        private static Line LoadLine(string id, string voiceDir)
         {
-            var line = JsonUtility.FromJson<Line>(File.ReadAllText(Path.Combine(VoiceDir, id + ".json")));
-            string clipPath = $"{VoiceDir}/{id}.mp3";
+            var line = JsonUtility.FromJson<Line>(File.ReadAllText(Path.Combine(voiceDir, id + ".json")));
+            string clipPath = $"{voiceDir}/{id}.mp3";
             if (AssetImporter.GetAtPath(clipPath) is AudioImporter ai && ai.defaultSampleSettings.loadType != AudioClipLoadType.DecompressOnLoad)
             {
                 var st = ai.defaultSampleSettings; st.loadType = AudioClipLoadType.DecompressOnLoad; ai.defaultSampleSettings = st; ai.SaveAndReimport();
@@ -227,9 +278,39 @@ namespace MissionDesign.Editor.Video
             return outList;
         }
 
-        /// <summary>Frases cortas (máx. 3 palabras / 16 letras) que cortan en la puntuación, como en los videos virales.</summary>
+        /// <summary>Subtítulo traducido: palabras con tiempos proporcionales a sus letras dentro del tramo hablado.</summary>
+        private static List<(string text, float t0, float t1)> TranslatedTokens(Line line)
+        {
+            var toks = line.subtitle.Split(' ').Where(x => x.Length > 0).ToList();
+            float a = line.words.Length > 0 ? line.words[0].t0 : 0f, b = line.words.Length > 0 ? line.words.Last().t1 : line.length;
+            float total = toks.Sum(x => x.Length + 1f), acc = 0f;
+            var outList = new List<(string, float, float)>();
+            foreach (var tok in toks)
+            {
+                float t0 = a + (b - a) * acc / total;
+                acc += tok.Length + 1f;
+                outList.Add((tok, t0, a + (b - a) * acc / total));
+            }
+            return outList;
+        }
+
+        /// <summary>Frases cortas (máx. 3 palabras / 16 letras) que cortan en la puntuación, como en los videos virales.
+        /// Con subtítulos traducidos, frases más largas (hasta 6 palabras / 34 letras) sin resaltar palabra por palabra.</summary>
         private static List<List<(string text, float t0, float t1)>> Chunks(Line line)
         {
+            if (line.subtitle != null)
+            {
+                var list = new List<List<(string, float, float)>>();
+                var cur2 = new List<(string, float, float)>();
+                foreach (var tok in TranslatedTokens(line))
+                {
+                    cur2.Add(tok);
+                    bool punct = ",.:;?!…".IndexOf(tok.text[tok.text.Length - 1]) >= 0;
+                    if (cur2.Count >= 6 || cur2.Sum(c => c.Item1.Length) >= 34 || punct) { list.Add(cur2); cur2 = new List<(string, float, float)>(); }
+                }
+                if (cur2.Count > 0) list.Add(cur2);
+                return list;
+            }
             var chunks = new List<List<(string, float, float)>>();
             var cur = new List<(string, float, float)>();
             foreach (var tok in Tokens(line))
@@ -288,7 +369,6 @@ namespace MissionDesign.Editor.Video
                     if (clip == null) continue;
                     var pcm = ToMono48k(clip);
                     float at = e.at >= 0f ? s.start + e.at : s.start + s.duration * -e.at;
-                    if (e.id == "splash") at = s.start + s.duration * 0.58f;
                     int o = Mathf.RoundToInt(at * Rate);
                     for (int i = 0; i < pcm.Length && o + i < n; i++) sfx[o + i] += pcm[i] * e.gain;
                 }
@@ -346,10 +426,11 @@ namespace MissionDesign.Editor.Video
                 new[] { 130.81f, 261.63f, 329.63f, 392f },// C
                 new[] { 98f, 196f, 246.94f, 293.66f },    // G
             };
-            var launch = segs.FirstOrDefault(s => s.line == "launch");
-            float impact = launch != null ? launch.start + 1.5f : -10f;
-            var splash = segs.FirstOrDefault(s => s.line == "splash");
-            float splashHit = splash != null ? splash.start + splash.duration * 0.58f : -10f;
+            float At(Seg sg, Sfx e) => e.at >= 0f ? sg.start + e.at : sg.start + sg.duration * -e.at;
+            var launch = segs.FirstOrDefault(sg => sg.sfx.Any(e => e.id == "roar"));
+            float impact = launch != null ? At(launch, launch.sfx.First(e => e.id == "roar")) : -10f;
+            var splash = segs.FirstOrDefault(sg => sg.sfx.Any(e => e.id == "splash"));
+            float splashHit = splash != null ? At(splash, splash.sfx.First(e => e.id == "splash")) : -10f;
             var rng = new System.Random(7);
             float intensity = 0.3f;
             int segIndex = 0;
@@ -434,7 +515,7 @@ namespace MissionDesign.Editor.Video
             private readonly CanvasGroup endGroup;
             private string loaded;
 
-            public Rig(int width, int height, bool vertical)
+            public Rig(int width, int height, bool vertical, Profile profile)
             {
                 w = width; h = height; this.vertical = vertical;
                 root = new GameObject("VideoRig") { hideFlags = HideFlags.HideAndDontSave };
@@ -522,11 +603,11 @@ namespace MissionDesign.Editor.Video
                 endTitle.rectTransform.sizeDelta = new Vector2(vertical ? 1000 : 1600, 220);
                 endTitle.rectTransform.anchoredPosition = new Vector2(0, vertical ? 360 : 170);
                 endSub = Txt("EndSub", end, vertical ? 44 : 40, new Color(1f, 0.82f, 0.25f), TextAlignmentOptions.Center);
-                endSub.text = "Equipo ASTROBYTE · NASA Space Apps Challenge 2026\n<size=70%><color=#FFFFFFDD>Alejandro Marco Toranzo Cazorla · Keni Breython Ramos Ramirez\nJhamil Obando Requis · Tony Cahuaya</color></size>";
+                endSub.text = profile.endSub;
                 endSub.rectTransform.sizeDelta = new Vector2(vertical ? 1000 : 1600, 260);
                 endSub.rectTransform.anchoredPosition = new Vector2(0, vertical ? 140 : 0);
                 endHandle = Txt("EndHandle", end, vertical ? 62 : 54, Color.white, TextAlignmentOptions.Center);
-                endHandle.text = $"Síguenos  <color=#8CD2FF>{Handle}</color>\n<size=62%><color=#FFFFFFCC>Código en GitHub: {GitHub}</color></size>";
+                endHandle.text = profile.endHandle;
                 endHandle.rectTransform.sizeDelta = new Vector2(vertical ? 1000 : 1600, 220);
                 endHandle.rectTransform.anchoredPosition = new Vector2(0, vertical ? -120 : -190);
 
@@ -595,7 +676,7 @@ namespace MissionDesign.Editor.Video
                     var sb = new StringBuilder();
                     for (int i = 0; i < c.Count; i++)
                     {
-                        bool now = vt >= c[i].t0 - 0.03f && vt <= c[i].t1 + 0.08f;
+                        bool now = seg.voice.subtitle == null && vt >= c[i].t0 - 0.03f && vt <= c[i].t1 + 0.08f;
                         string txt = c[i].text.ToUpperInvariant();
                         sb.Append(now ? $"<color=#FFD23F>{txt}</color>" : txt);
                         if (i < c.Count - 1) sb.Append(' ');

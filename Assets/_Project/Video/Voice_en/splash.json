@@ -1,0 +1,37 @@
+{
+ "text": "Real lunar data. Three parachutes. Splashdown.",
+ "rate": "+12%",
+ "voice": "en-US-AndrewNeural",
+ "words": [
+  {
+   "w": "Real",
+   "t0": 0.089,
+   "t1": 0.279
+  },
+  {
+   "w": "lunar",
+   "t0": 0.29,
+   "t1": 0.502
+  },
+  {
+   "w": "data",
+   "t0": 0.513,
+   "t1": 0.815
+  },
+  {
+   "w": "Three",
+   "t0": 1.205,
+   "t1": 1.317
+  },
+  {
+   "w": "parachutes",
+   "t0": 1.328,
+   "t1": 1.953
+  },
+  {
+   "w": "Splashdown",
+   "t0": 2.321,
+   "t1": 2.879
+  }
+ ]
+}
