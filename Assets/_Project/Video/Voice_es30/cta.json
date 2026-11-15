@@ -1,0 +1,42 @@
+{
+ "text": "AstroByte: equipo ASTROBYTE, NASA Space Apps 2026.",
+ "rate": "+18%",
+ "voice": "es-MX-JorgeNeural",
+ "words": [
+  {
+   "w": "AstroByte",
+   "t0": 0.092,
+   "t1": 0.696
+  },
+  {
+   "w": "equipo",
+   "t0": 0.929,
+   "t1": 1.236
+  },
+  {
+   "w": "ASTROBYTE",
+   "t0": 1.247,
+   "t1": 1.724
+  },
+  {
+   "w": "NASA",
+   "t0": 1.967,
+   "t1": 2.232
+  },
+  {
+   "w": "Space",
+   "t0": 2.243,
+   "t1": 2.539
+  },
+  {
+   "w": "Apps",
+   "t0": 2.55,
+   "t1": 2.762
+  },
+  {
+   "w": "2026",
+   "t0": 2.772,
+   "t1": 3.779
+  }
+ ]
+}

@@ -48,6 +48,9 @@ namespace MissionDesign.Editor.Video
         {
             public string name; public bool vertical; public Func<List<Seg>> segs; public string voiceDir = VoiceDir;
             public Dictionary<string, string> subs;    // subtítulos traducidos (id de línea → texto); null = los de la voz
+            /// <summary>Escala de salida (0,667 = 720p) y calidad: la versión liviana cabe en los 10 MB que GitHub permite arrastrar al README.</summary>
+            public float scale = 1f;
+            public VideoBitrateMode bitrate = VideoBitrateMode.High;
             public string endSub = "Equipo ASTROBYTE · NASA Space Apps Challenge 2026";
             public string endHandle = $"Síguenos  <color=#8CD2FF>{Handle}</color>\n<size=62%><color=#FFFFFFCC>Código en GitHub: {GitHub}</color></size>";
         }
@@ -125,6 +128,16 @@ namespace MissionDesign.Editor.Video
             new Seg { line = "cta", hold = 1.0f, intensity = 0.9f, endCard = true, shots = { S("center", false, 30, 1f, 1.08f) } },
         };
 
+        /// <summary>El mismo demo de 30 s con voz en español (más larga): pausas más cortas y título bilingüe.</summary>
+        private static List<Seg> JudgesEsSubs()
+        {
+            var segs = JudgesEn();
+            float[] holds = { 0.25f, 0.2f, 0.8f, 0.2f, 0.6f, 0.6f };
+            for (int i = 0; i < segs.Count; i++) segs[i].hold = holds[i];
+            segs[0].title = "¿A LA LUNA… Y DE VUELTA?\n<size=58%><color=#FFFFFF>TO THE MOON… AND BACK?</color></size>";
+            return segs;
+        }
+
         private static Profile[] Profiles()
         {
             string endEn = $"Play it and read the code\n<size=62%><color=#8CD2FF>{RepoUrl}</color></size>";
@@ -134,6 +147,11 @@ namespace MissionDesign.Editor.Video
                 new Profile { name = "AstroByte_YouTube_16x9", vertical = false, segs = Horizontal, endSub = "Equipo ASTROBYTE · NASA Space Apps Challenge 2026\n" + Team },
                 new Profile { name = "AstroByte_Shorts_Reels_TikTok_9x16", vertical = true, segs = Vertical, endSub = "Equipo ASTROBYTE · NASA Space Apps Challenge 2026\n" + Team },
                 new Profile { name = "AstroByte_Jury_30s_EN", vertical = false, segs = JudgesEn, voiceDir = "Assets/_Project/Video/Voice_en", endSub = subEn, endHandle = endEn },
+                new Profile { name = "AstroByte_Jury_30s_EN_720p_light", vertical = false, segs = JudgesEn, voiceDir = "Assets/_Project/Video/Voice_en",
+                    endSub = subEn, endHandle = endEn, scale = 2f / 3f, bitrate = VideoBitrateMode.Low },
+                new Profile { name = "AstroByte_Jury_30s_ES_subs_EN", vertical = false, segs = JudgesEsSubs, voiceDir = "Assets/_Project/Video/Voice_es30",
+                    subs = LoadSubs("ArtSource/Video/subtitles_en30.json"), endSub = subEn,
+                    endHandle = $"Juega y lee el código · Play it and read the code\n<size=62%><color=#8CD2FF>{RepoUrl}</color></size>" },
                 new Profile { name = "AstroByte_Jury_ES_subs_EN", vertical = false, segs = Horizontal, subs = LoadSubs("ArtSource/Video/subtitles_en.json"),
                     endSub = subEn, endHandle = endEn },
             };
@@ -149,6 +167,12 @@ namespace MissionDesign.Editor.Video
             foreach (var p in Profiles().Where(p => p.name.StartsWith("AstroByte_Jury"))) Make(p);
         }
 
+        /// <summary>Solo el demo de 30 s en español con subtítulos en inglés.</summary>
+        public static void MakeJuryEsSubs30()
+        {
+            foreach (var p in Profiles().Where(p => p.name == "AstroByte_Jury_30s_ES_subs_EN")) Make(p);
+        }
+
         [MenuItem("NASA SpaceApps/Video/Make All")]
         public static void MakeAll()
         {
@@ -160,7 +184,8 @@ namespace MissionDesign.Editor.Video
         private static void Make(Profile profile)
         {
             bool vertical = profile.vertical;
-            int W = vertical ? 1080 : 1920, H = vertical ? 1920 : 1080;
+            int W = vertical ? 1080 : 1920, H = vertical ? 1920 : 1080;            // tamaño de maquetación
+            int OW = Mathf.RoundToInt(W * profile.scale / 2f) * 2, OH = Mathf.RoundToInt(H * profile.scale / 2f) * 2;   // tamaño de salida (par)
             var segs = profile.segs();
             float t = 0f;
             foreach (var s in segs)
@@ -182,9 +207,9 @@ namespace MissionDesign.Editor.Video
             string path = Path.Combine(OutDir, name + ".mp4");
             WriteSrt(segs, Path.Combine(OutDir, name + ".srt"));
 
-            var rig = new Rig(W, H, vertical, profile);
+            var rig = new Rig(W, H, OW, OH, vertical, profile);
             var plateCount = new Dictionary<string, int>();
-            var va = new VideoTrackAttributes { frameRate = new MediaRational(Fps), width = (uint)W, height = (uint)H, includeAlpha = false, bitRateMode = VideoBitrateMode.High };
+            var va = new VideoTrackAttributes { frameRate = new MediaRational(Fps), width = (uint)OW, height = (uint)OH, includeAlpha = false, bitRateMode = profile.bitrate };
             var aa = new AudioTrackAttributes { sampleRate = new MediaRational(Rate), channelCount = 2, language = "es" };
             int spf = Rate / Fps;
             var chunk = new NativeArray<float>(spf * 2, Allocator.Persistent);
@@ -502,7 +527,7 @@ namespace MissionDesign.Editor.Video
 
         private sealed class Rig : IDisposable
         {
-            private readonly int w, h;
+            private readonly int w, h, ow, oh;
             private readonly bool vertical;
             private readonly GameObject root;
             private readonly Camera cam;
@@ -515,12 +540,12 @@ namespace MissionDesign.Editor.Video
             private readonly CanvasGroup endGroup;
             private string loaded;
 
-            public Rig(int width, int height, bool vertical, Profile profile)
+            public Rig(int width, int height, int outWidth, int outHeight, bool vertical, Profile profile)
             {
-                w = width; h = height; this.vertical = vertical;
+                w = width; h = height; ow = outWidth; oh = outHeight; this.vertical = vertical;
                 root = new GameObject("VideoRig") { hideFlags = HideFlags.HideAndDontSave };
-                rt = new RenderTexture(w, h, 24) { antiAliasing = 4 };
-                read = new Texture2D(w, h, TextureFormat.RGBA32, false);
+                rt = new RenderTexture(ow, oh, 24) { antiAliasing = 4 };
+                read = new Texture2D(ow, oh, TextureFormat.RGBA32, false);
                 plateTex = new Texture2D(2, 2, TextureFormat.RGB24, false);
                 cam = new GameObject("VideoRigCam").AddComponent<Camera>();
                 cam.transform.SetParent(root.transform);
@@ -539,7 +564,10 @@ namespace MissionDesign.Editor.Video
                 canvas.worldCamera = cam;
                 canvas.planeDistance = 1f;
                 var scaler = canvasGo.AddComponent<CanvasScaler>();
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+                // La maquetación se escribe a 1920×1080 (o 1080×1920) y se escala a la salida real.
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(w, h);
+                scaler.matchWidthOrHeight = 0.5f;
 
                 RectTransform Rect(string n, Transform parent)
                 {
@@ -714,7 +742,7 @@ namespace MissionDesign.Editor.Video
             public Texture2D Read()
             {
                 RenderTexture.active = rt;
-                read.ReadPixels(new UnityEngine.Rect(0, 0, w, h), 0, 0);
+                read.ReadPixels(new UnityEngine.Rect(0, 0, ow, oh), 0, 0);
                 // Sin Apply(): el codificador lee la copia en CPU; volver a subirla a la GPU solo carga la tarjeta.
                 RenderTexture.active = null;
                 return read;

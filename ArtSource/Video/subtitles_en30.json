@@ -1,0 +1,28 @@
+{
+ "items": [
+  {
+   "id": "hook",
+   "text": "Could you fly four astronauts around the Moon... and bring them home?"
+  },
+  {
+   "id": "intro",
+   "text": "AstroByte is a co-op game: four roles design a space mission from real NASA data."
+  },
+  {
+   "id": "launch",
+   "text": "Mass, power, budget and data compete. When the team agrees: liftoff!"
+  },
+  {
+   "id": "eight",
+   "text": "The figure-eight free return is real physics, validated with NASA GMAT."
+  },
+  {
+   "id": "splash",
+   "text": "Real lunar data. Three parachutes. Splashdown."
+  },
+  {
+   "id": "cta",
+   "text": "AstroByte. Team ASTROBYTE, for NASA Space Apps 2026."
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+  "voice": "es-MX-JorgeNeural",
+  "rate": "+18%",
+  "lines": {
+    "hook":   "¿Podrías llevar a cuatro astronautas alrededor de la Luna... y traerlos a casa?",
+    "intro":  "AstroByte: un juego cooperativo donde cuatro roles diseñan una misión con datos reales de la NASA.",
+    "launch": "Masa, energía, presupuesto y datos compiten. Con el equipo de acuerdo: ¡despegue!",
+    "eight":  "El ocho de retorno libre es física real, validada con GMAT de la NASA.",
+    "splash": "Datos reales de la Luna, tres paracaídas y amerizaje.",
+    "cta":    "AstroByte: equipo ASTROBYTE, NASA Space Apps 2026."
+  }
+}

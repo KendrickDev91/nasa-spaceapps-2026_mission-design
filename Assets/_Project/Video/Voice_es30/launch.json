@@ -1,0 +1,67 @@
+{
+ "text": "Masa, energía, presupuesto y datos compiten. Con el equipo de acuerdo: ¡despegue!",
+ "rate": "+18%",
+ "voice": "es-MX-JorgeNeural",
+ "words": [
+  {
+   "w": "Masa",
+   "t0": 0.092,
+   "t1": 0.516
+  },
+  {
+   "w": "energía",
+   "t0": 0.696,
+   "t1": 1.236
+  },
+  {
+   "w": "presupuesto",
+   "t0": 1.48,
+   "t1": 2.01
+  },
+  {
+   "w": "y",
+   "t0": 2.02,
+   "t1": 2.073
+  },
+  {
+   "w": "datos",
+   "t0": 2.084,
+   "t1": 2.391
+  },
+  {
+   "w": "compiten",
+   "t0": 2.402,
+   "t1": 2.931
+  },
+  {
+   "w": "Con",
+   "t0": 3.655,
+   "t1": 3.803
+  },
+  {
+   "w": "el",
+   "t0": 3.814,
+   "t1": 3.909
+  },
+  {
+   "w": "equipo",
+   "t0": 3.92,
+   "t1": 4.216
+  },
+  {
+   "w": "de",
+   "t0": 4.227,
+   "t1": 4.29
+  },
+  {
+   "w": "acuerdo",
+   "t0": 4.301,
+   "t1": 4.693
+  },
+  {
+   "w": "despegue",
+   "t0": 4.915,
+   "t1": 5.392
+  }
+ ]
+}

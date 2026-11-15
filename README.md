@@ -9,9 +9,18 @@
 | Video | Language | Length |
 |---|---|---|
 | [**30-second demo**](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_EN.mp4) | English narration + English captions | 0:29 |
+| [30-second demo (Spanish)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 0:29 |
 | [Full walkthrough](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 1:13 |
 
 Subtitles (SRT): [`docs/video/`](docs/video/) · **Play the game (Windows):** [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest)
+
+## 📊 Presentation (7 slides)
+
+[![AstroByte — 7-slide presentation (click for the PDF)](docs/video/presentation_cover.jpg)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Presentation_NASA_Space_Apps_2026.pdf)
+
+Objective · How a mission plays · Impact · Solidity · Creativity · Presentation.
+[**PDF**](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Presentation_NASA_Space_Apps_2026.pdf) ·
+[PowerPoint](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Presentation_NASA_Space_Apps_2026.pptx) (speaker notes in Spanish)
 
 ### About (English)
 

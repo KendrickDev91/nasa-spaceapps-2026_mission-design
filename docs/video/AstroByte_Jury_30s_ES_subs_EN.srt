@@ -1,0 +1,80 @@
+1
+00:00:00,212 --> 00:00:02,162
+Could you fly four astronauts around
+
+2
+00:00:02,172 --> 00:00:02,798
+the Moon...
+
+3
+00:00:02,808 --> 00:00:04,070
+and bring them home?
+
+4
+00:00:04,482 --> 00:00:06,111
+AstroByte is a co-op game:
+
+5
+00:00:06,121 --> 00:00:08,176
+four roles design a space mission
+
+6
+00:00:08,186 --> 00:00:09,611
+from real NASA data.
+
+7
+00:00:09,973 --> 00:00:10,424
+Mass,
+
+8
+00:00:10,434 --> 00:00:10,962
+power,
+
+9
+00:00:10,972 --> 00:00:12,882
+budget and data compete.
+
+10
+00:00:12,892 --> 00:00:14,572
+When the team agrees:
+
+11
+00:00:14,582 --> 00:00:15,423
+liftoff!
+
+12
+00:00:16,385 --> 00:00:18,242
+The figure-eight free return is real
+
+13
+00:00:18,252 --> 00:00:18,697
+physics,
+
+14
+00:00:18,707 --> 00:00:20,169
+validated with NASA GMAT.
+
+15
+00:00:20,531 --> 00:00:21,571
+Real lunar data.
+
+16
+00:00:21,581 --> 00:00:22,683
+Three parachutes.
+
+17
+00:00:22,693 --> 00:00:23,584
+Splashdown.
+
+18
+00:00:24,346 --> 00:00:25,101
+AstroByte.
+
+19
+00:00:25,111 --> 00:00:26,214
+Team ASTROBYTE,
+
+20
+00:00:26,224 --> 00:00:28,183
+for NASA Space Apps 2026.
+
