@@ -509,9 +509,10 @@ namespace MissionDesign.Simulation
             if (!o.launchSucceeded || !o.orbitInsertionSucceeded) return 0;
             float target = o.scienceTarget > 0f ? o.scienceTarget : Mathf.Max(1f, o.scienceAchieved);
             float science = Mathf.Clamp01(o.scienceAchieved / target) * 60f;
-            float budget = t.budgetLimitMUSD > 0f ? Mathf.Clamp01((t.budgetLimitMUSD - t.totalCostMUSD) / (t.budgetLimitMUSD * 0.3f)) * 20f : 10f;
+            // Sin límite (Sandbox) no hay nada que incumplir: puntos completos. Antes el Sandbox no podía pasar de 80 (B).
+            float budget = t.budgetLimitMUSD > 0f ? Mathf.Clamp01((t.budgetLimitMUSD - t.totalCostMUSD) / (t.budgetLimitMUSD * 0.3f)) * 20f : 20f;
             float data = o.dataReturnFraction * 10f;
-            float time = t.maxDevelopmentMonths > 0f && t.developmentMonths <= t.maxDevelopmentMonths ? 10f : 0f;
+            float time = t.maxDevelopmentMonths <= 0f || t.developmentMonths <= t.maxDevelopmentMonths ? 10f : 0f;
             return Mathf.RoundToInt(science + budget + data + time);
         }
 
