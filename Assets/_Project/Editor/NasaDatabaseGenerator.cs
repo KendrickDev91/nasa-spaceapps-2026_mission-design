@@ -386,7 +386,7 @@ namespace MissionDesign.Editor
 
             db.scenarios.Add(Scenario("SCN_CUBESAT_EDU", "CubeSat universitario",
                 "Tu universidad tiene un hueco en un lanzamiento compartido. Con muy poco presupuesto, ¿cuánta ciencia puedes devolver? Ojo con el enlace de datos.",
-                "sol", budget: 9, devMonths: 30, lifeMonths: 12, minScience: 30, orbits: new[] { OrbitRegime.LEO }));
+                "sol", budget: 9, devMonths: 30, lifeMonths: 12, minScience: 20, orbits: new[] { OrbitRegime.LEO }));
             var sandbox = Scenario("SCN_SANDBOX", "Sandbox: laboratorio libre",
                 "Sin límites de presupuesto, calendario ni órbita. Experimenta con cualquier combinación y compara resultados.",
                 "", budget: 0, devMonths: 0, lifeMonths: 60, minScience: 0, orbits: new OrbitRegime[0]);
@@ -440,7 +440,9 @@ namespace MissionDesign.Editor
 
             var esm = Solar("SOL_ESM", "Alas del módulo de servicio europeo (4 alas)", "Cuatro alas solares de ~7 m que entregan unos 11 kW; incluidas en la masa del módulo de servicio.",
                 11200, 1, 1, 0.02f, 0, SpacecraftSocket.SolarWingLeft);
-            esm.dataConfidence = DataConfidence.Approximate; esm.sourceUrl = "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Orion"; Save(esm);
+            esm.dataConfidence = DataConfidence.Approximate; esm.sourceUrl = "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Orion";
+            // Masa y costo incluidos en Orion: fuera de Orion serían 11 kW por 1 kg y $1 M.
+            esm.requiredBusId = orion.componentId; esm.requiredBusName = orion.displayName; Save(esm);
             if (!db.solarArrays.Contains(esm)) db.solarArrays.Add(esm);
 
             var o2o = Antenna("ANT_O2O", "Enlace láser O2O (comunicación óptica)", CommBand.Optical,
@@ -483,6 +485,8 @@ namespace MissionDesign.Editor
                 orbits: new[] { OrbitRegime.LunarFlyby }, tags: new[] { "luna", "radiacion", "cubesat" },
                 conf: DataConfidence.GameEstimate, url: "https://www.argentina.gob.ar/ciencia/conae", notes: "Viaja en el adaptador (no consume energía de Orion). Valores aproximados.");
             atenea.requiredPointingDeg = 2f; Save(atenea);
+            // Las cámaras de Orion y las de la tripulación viajan en la cápsula: no se montan en satélites.
+            foreach (var i in new[] { cams, nikon }) { i.requiredBusId = orion.componentId; i.requiredBusName = orion.displayName; Save(i); }
             foreach (var i in new[] { cams, nikon, atenea }) if (!db.instruments.Contains(i)) db.instruments.Add(i);
 
             var cdh = Computer("CDH_ORION", "Computadoras de vuelo y memoria de Orion", "Computadoras redundantes endurecidas y memoria para guardar fotos y video que vuelven a la Tierra.",

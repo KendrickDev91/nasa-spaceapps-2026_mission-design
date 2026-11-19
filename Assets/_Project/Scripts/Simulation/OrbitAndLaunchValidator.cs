@@ -250,6 +250,17 @@ namespace MissionDesign.Simulation
                     "Cualquier corte de enlace hará perder ciencia.");
             }
 
+            // ── Piezas que solo existen como parte de otro vehículo ──
+            foreach (var c in design.AllComponents)
+            {
+                if (c == null || string.IsNullOrEmpty(c.requiredBusId)) continue;
+                if (bus != null && bus.componentId == c.requiredBusId) continue;
+                string busName = string.IsNullOrEmpty(c.requiredBusName) ? c.requiredBusId : c.requiredBusName;
+                Add(issues, IssueSeverity.Blocking, ResourceKind.Mass, MissionRole.SystemsEngineer,
+                    $"{c.displayName}: pieza exclusiva",
+                    $"{c.displayName} forma parte de {busName} y solo se monta en ese bus. Elige otra pieza o cambia el bus.");
+            }
+
             // ── Presupuesto y calendario ──
             if (scenario != null)
             {
@@ -287,6 +298,13 @@ namespace MissionDesign.Simulation
                     Add(issues, IssueSeverity.Info, ResourceKind.Data, MissionRole.PrincipalScientist,
                         $"{i.displayName} fuera de su órbita óptima",
                         $"Diseñado para {string.Join("/", i.preferredOrbits ?? Array.Empty<OrbitRegime>())}: en {orbit.regime} aporta {MissionTelemetry.OffOrbitScienceFactor:P0} de su valor.");
+                }
+                if (!MissionTelemetry.MatchesObjective(i, scenario))
+                {
+                    Add(issues, IssueSeverity.Info, ResourceKind.Data, MissionRole.PrincipalScientist,
+                        $"{i.displayName} fuera del objetivo",
+                        $"Estudia {string.Join("/", i.scienceObjectives ?? Array.Empty<string>())}, pero el objetivo de \"{scenario.displayName}\" es " +
+                        $"{scenario.scienceObjectiveTag}: aporta {MissionTelemetry.OffObjectiveScienceFactor:P0} de su valor.");
                 }
             }
 

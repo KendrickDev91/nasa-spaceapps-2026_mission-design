@@ -231,7 +231,7 @@ namespace MissionDesign.Simulation
             o.dataReturnedTotalTB = Mathf.Min(o.dataGeneratedGBPerDay, o.downlinkGBPerDay) * opsDays / 1000f;
             o.dataLostTotalTB = Mathf.Max(0f, o.dataGeneratedGBPerDay - o.downlinkGBPerDay) * opsDays / 1000f;
 
-            float potential = d.Instruments.Sum(i => MissionTelemetry.InstrumentScience(i, orbit, d.AttitudeControl) * Alive(i));
+            float potential = d.Instruments.Sum(i => MissionTelemetry.InstrumentScience(i, orbit, d.AttitudeControl, d.Scenario) * Alive(i));
             float timeFrac = days > 0f ? opsDays / days : 0f;
             float science = potential * sciMult * o.dataReturnFraction * powerFrac * timeFrac;
 

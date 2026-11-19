@@ -47,10 +47,22 @@ namespace MissionDesign.Simulation
             return 1f / (1f + Mathf.Log10(adcs.pointingAccuracyDeg / instrument.requiredPointingDeg));
         }
 
-        /// <summary>Valor científico de un instrumento en este diseño (órbita + apuntamiento).</summary>
-        public static float InstrumentScience(InstrumentSO i, OrbitSO orbit, AttitudeControlSO adcs) =>
+        /// <summary>Un instrumento que no estudia el objetivo del escenario aporta esta fracción de su valor.</summary>
+        public const float OffObjectiveScienceFactor = 0.5f;
+
+        /// <summary>
+        /// ¿El instrumento estudia el objetivo científico del escenario? (la etiqueta del escenario está entre las del instrumento).
+        /// Sin escenario, en Sandbox o sin etiqueta, todo cuenta como objetivo.
+        /// </summary>
+        public static bool MatchesObjective(InstrumentSO i, MissionScenarioSO scenario) =>
+            scenario == null || scenario.isSandbox || string.IsNullOrEmpty(scenario.scienceObjectiveTag) ||
+            (i.scienceObjectives != null && Array.IndexOf(i.scienceObjectives, scenario.scienceObjectiveTag) >= 0);
+
+        /// <summary>Valor científico de un instrumento en este diseño (órbita + objetivo del escenario + apuntamiento).</summary>
+        public static float InstrumentScience(InstrumentSO i, OrbitSO orbit, AttitudeControlSO adcs, MissionScenarioSO scenario = null) =>
             i.scienceValue
             * (orbit != null && i.IsPreferredOrbit(orbit.regime) ? 1f : OffOrbitScienceFactor)
+            * (MatchesObjective(i, scenario) ? 1f : OffObjectiveScienceFactor)
             * PointingFactor(i, adcs);
 
         private readonly SpacecraftDesign design;
@@ -159,7 +171,7 @@ namespace MissionDesign.Simulation
                 : 1f;
 
             // CIENCIA
-            r.potentialScienceValue = d.Instruments.Sum(i => InstrumentScience(i, orbit, d.AttitudeControl));
+            r.potentialScienceValue = d.Instruments.Sum(i => InstrumentScience(i, orbit, d.AttitudeControl, d.Scenario));
             r.expectedScienceValue = r.potentialScienceValue * r.dataReturnFraction * r.powerAvailabilityFraction;
 
             BuildReadings(r, d);

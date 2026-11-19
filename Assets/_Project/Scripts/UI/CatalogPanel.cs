@@ -41,6 +41,7 @@ namespace MissionDesign.UI
         private DifficultyLevel lastDifficulty;
         private OrbitSO lastOrbit;
         private GroundNetworkSO lastNetwork;
+        private MissionScenarioSO lastScenario;
 
         public int ItemCount => items.Count;
 
@@ -71,8 +72,8 @@ namespace MissionDesign.UI
         private void OnDesignEvaluated(TelemetryReport t, LaunchValidationResult v)
         {
             var d = manager.Design;
-            // La dificultad cambia qué piezas existen; la órbita y la red cambian los GB/día de las antenas.
-            if (d.Difficulty != lastDifficulty || d.Orbit != lastOrbit || d.GroundNetwork != lastNetwork)
+            // La dificultad cambia qué piezas existen; la órbita y la red, los GB/día de las antenas; el escenario, qué instrumentos son objetivo.
+            if (d.Difficulty != lastDifficulty || d.Orbit != lastOrbit || d.GroundNetwork != lastNetwork || d.Scenario != lastScenario)
                 Rebuild(roles.ActiveRole);
             RefreshSelection();
         }
@@ -90,6 +91,7 @@ namespace MissionDesign.UI
             lastDifficulty = design.Difficulty;
             lastOrbit = design.Orbit;
             lastNetwork = design.GroundNetwork;
+            lastScenario = design.Scenario;
             if (db == null) return;
 
             if (titleText != null) titleText.text = RoleTurnManager.RoleDisplayName(role).ToUpperInvariant();
@@ -149,10 +151,18 @@ namespace MissionDesign.UI
                 case MissionRole.PrincipalScientist:
                     SetHint("Clic para añadir o quitar instrumentos. Maximiza el valor científico sin saturar el enlace.");
                     Section("Instrumentos científicos (NASA)");
-                    foreach (var i in Visible(db.instruments, advanced))
+                    var scenario = manager.Design.Scenario;
+                    // Primero los que estudian el objetivo del escenario: valen el doble.
+                    foreach (var i in Visible(db.instruments, advanced).OrderBy(x => MissionTelemetry.MatchesObjective(x, scenario) ? 0 : 1))
+                    {
+                        bool onTarget = MissionTelemetry.MatchesObjective(i, scenario);
+                        string objective = scenario == null || scenario.isSandbox || string.IsNullOrEmpty(scenario.scienceObjectiveTag) ? ""
+                            : onTarget ? $" · <color={UiTheme.Hex(UiTheme.Ok)}>objetivo: {scenario.scienceObjectiveTag}</color>"
+                                       : $" · <color={UiTheme.Hex(UiTheme.Warning)}>fuera del objetivo (×{MissionTelemetry.OffObjectiveScienceFactor:0.#})</color>";
                         AddData(i, i.displayName,
-                            $"{i.massKg:N0} kg · {i.peakPowerW:N0} W · {i.dataVolumeGBPerDay:N0} GB/día · ciencia {i.scienceValue} · {string.Join("/", i.preferredOrbits ?? Array.Empty<OrbitRegime>())}",
+                            $"{i.massKg:N0} kg · {i.peakPowerW:N0} W · {i.dataVolumeGBPerDay:N0} GB/día · ciencia {i.scienceValue} · {string.Join("/", i.preferredOrbits ?? Array.Empty<OrbitRegime>())}{objective}",
                             () => manager.ToggleInstrument(i));
+                    }
                     break;
 
                 case MissionRole.TelecomLaunchEngineer:

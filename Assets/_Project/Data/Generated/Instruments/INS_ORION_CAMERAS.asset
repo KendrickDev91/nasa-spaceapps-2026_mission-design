@@ -23,6 +23,8 @@ MonoBehaviour:
   developmentMonths: 24
   technologyReadinessLevel: 9
   advancedOnly: 0
+  requiredBusId: BUS_ORION
+  requiredBusName: "Orion (c\xE1psula + m\xF3dulo de servicio europeo)"
   prefab: {fileID: 919132149155446097, guid: 5dab7d975911c6c459bc0d4241043cb0, type: 3}
   socket: 1
   icon: {fileID: 0}

@@ -21,7 +21,7 @@ MonoBehaviour:
   budgetLimitMUSD: 9
   maxDevelopmentMonths: 30
   targetMissionLifeMonths: 12
-  minScienceValue: 30
+  minScienceValue: 20
   allowedOrbits: 00000000
   crewed: 0
   crewSize: 0

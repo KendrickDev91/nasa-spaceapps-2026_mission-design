@@ -26,6 +26,11 @@ namespace MissionDesign.Data
         [Range(1, 9)] public int technologyReadinessLevel = 9;
         [Tooltip("Solo aparece en dificultad Avanzada.")]
         public bool advancedOnly;
+        [Tooltip("Si se indica, la pieza es parte de otro vehículo y solo se monta en el bus con este componentId " +
+                 "(p. ej. las alas del módulo de servicio europeo solo van en Orion).")]
+        public string requiredBusId;
+        [Tooltip("Nombre legible del bus requerido, para el mensaje de validación.")]
+        public string requiredBusName;
 
         [Header("Arte 3D (Blender)")]
         public GameObject prefab;
