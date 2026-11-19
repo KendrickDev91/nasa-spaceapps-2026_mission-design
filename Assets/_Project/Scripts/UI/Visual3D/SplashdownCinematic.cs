@@ -122,7 +122,7 @@ namespace MissionDesign.UI.Visual3D
             {
                 case 0:
                     Shot = "reentrada";
-                    Caption("REENTRADA", "Interfaz de entrada a 122 km · ~11 km/s · el escudo térmico supera los 2 700 °C");
+                    Caption(Loc.L("REENTRADA", "REENTRY"), Loc.L("Interfaz de entrada a 122 km · ~11 km/s · el escudo térmico supera los 2 700 °C", "Entry interface at 122 km · ~11 km/s · the heat shield tops 2,700 °C"));
                     PlaySound(Synth.ReentryRoar(TDrogues));
                     ocean.gameObject.SetActive(false);
                     foreach (var d in drogues) d.gameObject.SetActive(false);
@@ -135,7 +135,7 @@ namespace MissionDesign.UI.Visual3D
                     break;
                 case 1:
                     Shot = "frenado";
-                    Caption("PARACAÍDAS DE FRENADO", "A ~7 600 m se suelta la cubierta y se abren 2 paracaídas de frenado (drogues)");
+                    Caption(Loc.L("PARACAÍDAS DE FRENADO", "DROGUE PARACHUTES"), Loc.L("A ~7 600 m se suelta la cubierta y se abren 2 paracaídas de frenado (drogues)", "At ~7,600 m the cover is jettisoned and 2 drogue parachutes open"));
                     PlaySound(Synth.ChuteSnap());
                     plasma.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                     shockGlow.gameObject.SetActive(false);
@@ -145,20 +145,20 @@ namespace MissionDesign.UI.Visual3D
                     break;
                 case 2:
                     Shot = "principales";
-                    Caption("3 PARACAÍDAS PRINCIPALES", "A ~2 900 m se sueltan los de frenado y se abren los 3 principales (35 m de diámetro cada uno)");
+                    Caption(Loc.L("3 PARACAÍDAS PRINCIPALES", "3 MAIN PARACHUTES"), Loc.L("A ~2 900 m se sueltan los de frenado y se abren los 3 principales (35 m de diámetro cada uno)", "At ~2,900 m the drogues are released and the 3 mains open (35 m across each)"));
                     PlaySound(Synth.ChuteSnap());
                     foreach (var d in drogues) d.gameObject.SetActive(false);
                     foreach (var m in mains) m.gameObject.SetActive(true);
                     break;
                 case 3:
                     Shot = "descenso";
-                    Caption("DESCENSO FINAL", "Océano Pacífico, frente a San Diego · bajando a ~27 km/h");
+                    Caption(Loc.L("DESCENSO FINAL", "FINAL DESCENT"), Loc.L("Océano Pacífico, frente a San Diego · bajando a ~27 km/h", "Pacific Ocean, off San Diego · descending at ~27 km/h"));
                     ocean.gameObject.SetActive(true);
                     clouds.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                     break;
                 case 4:
                     Shot = "amerizaje";
-                    Caption("¡AMERIZAJE!", "Océano Pacífico, frente a San Diego · Bienvenidos a casa, tripulación");
+                    Caption(Loc.L("¡AMERIZAJE!", "SPLASHDOWN!"), Loc.L("Océano Pacífico, frente a San Diego · Bienvenidos a casa, tripulación", "Pacific Ocean, off San Diego · Welcome home, crew"));
                     PlaySound(Synth.Splash());
                     spray.Play();
                     foam.Play();
@@ -676,7 +676,7 @@ namespace MissionDesign.UI.Visual3D
             title.fontStyle = FontStyles.Bold;
             subtitle = Label("Subtitle", 24f, new Vector2(80f, 22f), new Vector2(1760f, 48f), TextAlignmentOptions.TopLeft, new Color(0.92f, 0.95f, 1f));
             hint = Label("SkipHint", 18f, new Vector2(1500f, 1000f), new Vector2(380f, 40f), TextAlignmentOptions.TopRight, new Color(0.7f, 0.76f, 0.85f));
-            hint.text = "Espacio / clic: saltar";
+            hint.text = Loc.L("Espacio / clic: saltar", "Space / click: skip");
             var hrt = hint.rectTransform;
             hrt.anchorMin = hrt.anchorMax = new Vector2(1f, 1f);
             hrt.pivot = new Vector2(1f, 1f);

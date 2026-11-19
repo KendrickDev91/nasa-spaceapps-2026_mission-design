@@ -49,6 +49,9 @@ namespace MissionDesign.Core
             }
             Instance = this;
 
+            // Textos del catálogo en el idioma elegido (en memoria; los .asset quedan en español).
+            DataLocalizer.Apply(database);
+
             Design = new SpacecraftDesign();
             Telemetry = new MissionTelemetry(Design);
             Telemetry.Updated += OnTelemetryUpdated;

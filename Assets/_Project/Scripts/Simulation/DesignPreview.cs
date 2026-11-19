@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MissionDesign.Core;
 using UnityEngine;
 
 namespace MissionDesign.Simulation
@@ -25,27 +26,29 @@ namespace MissionDesign.Simulation
             var v1 = OrbitAndLaunchValidator.Validate(after, t1);
 
             if (Changed(t0.totalMassKg, t1.totalMassKg, 0.5f))
-                lines.Add($"Masa: {t0.totalMassKg:N0} → {t1.totalMassKg:N0} kg" +
-                          (t1.launchCapacityKg > 0f ? $" (el lanzador admite {t1.launchCapacityKg:N0} kg)" : ""));
+                lines.Add($"{Loc.L("Masa", "Mass")}: {t0.totalMassKg:N0} → {t1.totalMassKg:N0} kg" +
+                          (t1.launchCapacityKg > 0f ? Loc.L($" (el lanzador admite {t1.launchCapacityKg:N0} kg)", $" (the launcher takes {t1.launchCapacityKg:N0} kg)") : ""));
             if (Changed(t0.powerBalanceW, t1.powerBalanceW, 0.5f))
-                lines.Add($"Balance energético: {t0.powerBalanceW:+#,0;-#,0;0} → {t1.powerBalanceW:+#,0;-#,0;0} W");
+                lines.Add($"{Loc.L("Balance energético", "Power balance")}: {t0.powerBalanceW:+#,0;-#,0;0} → {t1.powerBalanceW:+#,0;-#,0;0} W");
             if (Changed(t0.totalCostMUSD, t1.totalCostMUSD, 0.05f))
-                lines.Add($"Costo: ${t0.totalCostMUSD:N1}M → ${t1.totalCostMUSD:N1}M" +
-                          (t1.budgetLimitMUSD > 0f ? $" (límite ${t1.budgetLimitMUSD:N0}M)" : ""));
+                lines.Add($"{Loc.L("Costo", "Cost")}: ${t0.totalCostMUSD:N1}M → ${t1.totalCostMUSD:N1}M" +
+                          (t1.budgetLimitMUSD > 0f ? $" ({Loc.L("límite", "limit")} ${t1.budgetLimitMUSD:N0}M)" : ""));
             if (Changed(t0.dataReturnFraction, t1.dataReturnFraction, 0.005f) || Changed(t0.dataGeneratedGBPerDay, t1.dataGeneratedGBPerDay, 0.05f))
-                lines.Add($"Datos que llegan a tierra: {t0.dataReturnFraction:P0} → {t1.dataReturnFraction:P0} " +
-                          $"({t1.dataGeneratedGBPerDay:N0} GB/día generados, {t1.downlinkCapacityGBPerDay:N0} de enlace)");
+                lines.Add(Loc.L($"Datos que llegan a tierra: {t0.dataReturnFraction:P0} → {t1.dataReturnFraction:P0} " +
+                                $"({t1.dataGeneratedGBPerDay:N0} GB/día generados, {t1.downlinkCapacityGBPerDay:N0} de enlace)",
+                                $"Data reaching the ground: {t0.dataReturnFraction:P0} → {t1.dataReturnFraction:P0} " +
+                                $"({t1.dataGeneratedGBPerDay:N0} GB/day generated, {t1.downlinkCapacityGBPerDay:N0} of link)"));
             if (Changed(t0.expectedScienceValue, t1.expectedScienceValue, 0.5f))
-                lines.Add($"Ciencia esperada: {t0.expectedScienceValue:N0} → {t1.expectedScienceValue:N0}");
+                lines.Add($"{Loc.L("Ciencia esperada", "Expected science")}: {t0.expectedScienceValue:N0} → {t1.expectedScienceValue:N0}");
             if (Changed(t0.developmentMonths, t1.developmentMonths, 0.5f))
-                lines.Add($"Desarrollo: {t0.developmentMonths:N0} → {t1.developmentMonths:N0} meses");
+                lines.Add($"{Loc.L("Desarrollo", "Development")}: {t0.developmentMonths:N0} → {t1.developmentMonths:N0} {Loc.L("meses", "months")}");
 
             var before = new HashSet<string>(v0.Blocking.Select(i => i.title));
             var afterTitles = new HashSet<string>(v1.Blocking.Select(i => i.title));
             foreach (var issue in v1.Blocking.Where(i => !before.Contains(i.title)))
-                lines.Add($"Provocaría: {issue.title}. {issue.explanation}");
+                lines.Add($"{Loc.L("Provocaría", "Would cause")}: {issue.title}. {issue.explanation}");
             foreach (var title in before.Where(b => !afterTitles.Contains(b)))
-                lines.Add($"Resolvería: {title}.");
+                lines.Add($"{Loc.L("Resolvería", "Would fix")}: {title}.");
 
             return lines;
         }

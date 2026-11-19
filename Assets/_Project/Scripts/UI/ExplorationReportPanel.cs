@@ -132,7 +132,7 @@ namespace MissionDesign.UI
             index = Mathf.Clamp(i, 0, n - 1);
             var p = studio.Photos[index];
             if (mainPhoto != null) mainPhoto.texture = p.texture;
-            if (captionText != null) captionText.text = $"<b>Foto {index + 1} de {n}</b> · {p.caption}";
+            if (captionText != null) captionText.text = $"<b>{Loc.L($"Foto {index + 1} de {n}", $"Photo {index + 1} of {n}")}</b> · {p.caption}";
             for (int k = 0; k < thumbs.Count; k++)
                 thumbs[k].transform.localScale = Vector3.one * (k == index ? 1.12f : 1f);
             if (prevButton != null) prevButton.interactable = index > 0;

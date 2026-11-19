@@ -213,6 +213,28 @@ namespace MissionDesign.Tests
         }
 
         [Test]
+        public void Translations_LoadWithoutDuplicateKeys_AndCoverEveryCatalogEntry()
+        {
+            // Un diccionario con claves repetidas lanza al iniciar el juego: esto lo detecta antes.
+            Assert.Greater(Loc.StaticLabels.Count, 50);
+            Assert.Greater(DataTranslations.ByAsset.Count, 150);
+            var db = AssetDatabase.LoadAssetAtPath<NasaDatabaseSO>(DatabasePath);
+            var missing = new List<string>();
+            void Check(ScriptableObject so, string es)
+            {
+                if (so == null || string.IsNullOrEmpty(es)) return;
+                bool sameInBoth = es.Length < 24 && !System.Text.RegularExpressions.Regex.IsMatch(es, "[áéíóúñ]|\\b(de|del|con|para)\\b");
+                if (!DataTranslations.ByAsset.ContainsKey(so.name + ".displayName") && !DataTranslations.ByText.ContainsKey(es) && !sameInBoth)
+                    missing.Add($"{so.name}: {es}");
+            }
+            foreach (var c in db.AllComponents) Check(c, c.displayName);
+            foreach (var s in db.scenarios) Check(s, s.displayName);
+            foreach (var o in db.orbits) Check(o, o.displayName);
+            foreach (var e in db.randomEvents) Check(e, e.displayName);
+            Assert.IsEmpty(missing, "Nombres del catálogo sin traducción al inglés:\n" + string.Join("\n", missing));
+        }
+
+        [Test]
         public void InstrumentOffTheScenarioObjective_GivesHalfItsScience()
         {
             var db = AssetDatabase.LoadAssetAtPath<NasaDatabaseSO>(DatabasePath);

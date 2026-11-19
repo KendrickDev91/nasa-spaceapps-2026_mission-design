@@ -33,8 +33,8 @@ namespace MissionDesign.UI
             switch (role)
             {
                 case MissionRole.MissionDirector: return "DIR";
-                case MissionRole.SystemsEngineer: return "SIS";
-                case MissionRole.PrincipalScientist: return "CIE";
+                case MissionRole.SystemsEngineer: return Loc.L("SIS", "SYS");
+                case MissionRole.PrincipalScientist: return Loc.L("CIE", "SCI");
                 case MissionRole.TelecomLaunchEngineer: return "TEL";
                 default: return "?";
             }

@@ -3,6 +3,8 @@ namespace MissionDesign.Core
     /// <summary>
     /// Identidad del juego en un único lugar. El título es provisional: evita nombres de
     /// instalaciones reales de la NASA (p. ej. el "Mission Design Lab" de Goddard) y no uses sus logos.
+    /// Los textos con versión en inglés tienen la pareja Es/En; el constructor de escenas escribe la Es
+    /// y <see cref="Loc.StaticLabels"/> la cambia por la En al cargar la escena.
     /// </summary>
     public static class GameInfo
     {
@@ -10,8 +12,14 @@ namespace MissionDesign.Core
 
         /// <summary>Título grande de la pantalla inicial (el nombre del equipo); el resto del juego sigue usando <see cref="Title"/>.</summary>
         public const string StartScreenTitle = "AstroByte";
-        public const string Tagline = "Diseña, negocia y vuela tu misión espacial";
-        public const string Event = "Proyecto para NASA Space Apps Challenge 2026";
+
+        public const string TaglineEs = "Diseña, negocia y vuela tu misión espacial";
+        public const string TaglineEn = "Design, negotiate and fly your space mission";
+        public static string Tagline => Loc.L(TaglineEs, TaglineEn);
+
+        public const string EventEs = "Proyecto para NASA Space Apps Challenge 2026";
+        public const string EventEn = "Project for the NASA Space Apps Challenge 2026";
+        public static string Event => Loc.L(EventEs, EventEn);
 
         /// <summary>Equipo autor del proyecto (créditos, menú principal y README).</summary>
         public const string Team = "ASTROBYTE";
@@ -26,6 +34,16 @@ namespace MissionDesign.Core
         };
 
         /// <summary>Línea corta para el menú principal.</summary>
-        public static string TeamLine => $"Equipo {Team} · NASA Space Apps Challenge 2026";
+        public static string TeamLine => Loc.L(TeamLineEs, TeamLineEn);
+        public const string TeamLineEs = "Equipo " + Team + " · NASA Space Apps Challenge 2026";
+        public const string TeamLineEn = "Team " + Team + " · NASA Space Apps Challenge 2026";
+
+        // Textos fijos del menú principal y la barra superior (el constructor de escenas los escribe tal cual).
+        public const string RolesLineEs = "1 a 4 jugadores · Director de Misión · Ingeniero de Sistemas · Científico Principal · Ingeniero de Telecom y Lanzamiento";
+        public const string RolesLineEn = "1 to 4 players · Mission Director · Systems Engineer · Principal Scientist · Telecom & Launch Engineer";
+        public const string FooterEs = EventEs + " · Proyecto independiente, no es un producto oficial de la NASA · F1 ayuda · Esc pausa";
+        public const string FooterEn = EventEn + " · Independent project, not an official NASA product · F1 help · Esc pause";
+        public const string TopBarEs = "<b>" + Title + "</b>\n<size=60%><color=#9FB3D1>" + TaglineEs + "</color></size>";
+        public const string TopBarEn = "<b>" + Title + "</b>\n<size=60%><color=#9FB3D1>" + TaglineEn + "</color></size>";
     }
 }

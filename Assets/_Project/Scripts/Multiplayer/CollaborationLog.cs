@@ -12,7 +12,7 @@ namespace MissionDesign.Multiplayer
     /// </summary>
     public sealed class CollaborationLog
     {
-        private const string IncompleteTitle = "Selección incompleta";
+        private static string IncompleteTitle => Loc.L("Selección incompleta", "Incomplete selection");
 
         private readonly Dictionary<MissionRole, int> contributions = new Dictionary<MissionRole, int>();
         private readonly HashSet<MissionRole> approvers = new HashSet<MissionRole>();
@@ -67,8 +67,11 @@ namespace MissionDesign.Multiplayer
 
         public string Notes =>
             // Corto a propósito: la tarjeta post-misión recorta cada viñeta a ~110 caracteres.
-            $"{RolesParticipated} de 4 roles {(RolesParticipated == 1 ? "participó" : "participaron")} " +
-            $"({RolesApproved} {(RolesApproved == 1 ? "aprobó" : "aprobaron")}, {RolesContributed} con cambios) " +
-            $"y {(ConflictsResolved == 1 ? "resolvió 1 conflicto" : $"resolvieron {ConflictsResolved} conflictos")}";
+            Loc.L($"{RolesParticipated} de 4 roles {(RolesParticipated == 1 ? "participó" : "participaron")} " +
+                  $"({RolesApproved} {(RolesApproved == 1 ? "aprobó" : "aprobaron")}, {RolesContributed} con cambios) " +
+                  $"y {(ConflictsResolved == 1 ? "resolvió 1 conflicto" : $"resolvieron {ConflictsResolved} conflictos")}",
+                  $"{RolesParticipated} of 4 roles took part " +
+                  $"({RolesApproved} approved, {RolesContributed} made changes) " +
+                  $"and resolved {(ConflictsResolved == 1 ? "1 conflict" : $"{ConflictsResolved} conflicts")}");
     }
 }

@@ -28,7 +28,7 @@ namespace MissionDesign.Multiplayer
 
         public string TeamName
         {
-            get => teamName;
+            get => teamName == "Equipo 1" ? Loc.L("Equipo 1", "Team 1") : teamName;   // nombre por defecto: se traduce
             set => teamName = string.IsNullOrWhiteSpace(value) ? teamName : value.Trim();
         }
 
@@ -46,10 +46,10 @@ namespace MissionDesign.Multiplayer
         {
             switch (role)
             {
-                case MissionRole.MissionDirector: return "Director de Misión";
-                case MissionRole.SystemsEngineer: return "Ing. de Sistemas";
-                case MissionRole.PrincipalScientist: return "Científico Principal";
-                case MissionRole.TelecomLaunchEngineer: return "Ing. Telecom y Lanzamiento";
+                case MissionRole.MissionDirector: return Loc.L("Director de Misión", "Mission Director");
+                case MissionRole.SystemsEngineer: return Loc.L("Ing. de Sistemas", "Systems Engineer");
+                case MissionRole.PrincipalScientist: return Loc.L("Científico Principal", "Principal Scientist");
+                case MissionRole.TelecomLaunchEngineer: return Loc.L("Ing. Telecom y Lanzamiento", "Telecom & Launch Eng.");
                 default: return role.ToString();
             }
         }
@@ -91,8 +91,9 @@ namespace MissionDesign.Multiplayer
 
         public string PlayerName(int index) =>
             playerNames != null && index >= 0 && index < playerNames.Length && !string.IsNullOrEmpty(playerNames[index])
+                && !playerNames[index].StartsWith("Jugador ")   // nombre por defecto: se traduce
                 ? playerNames[index]
-                : $"Jugador {index + 1}";
+                : Loc.L($"Jugador {index + 1}", $"Player {index + 1}");
 
         public void SetActiveRole(MissionRole role)
         {
@@ -135,22 +136,22 @@ namespace MissionDesign.Multiplayer
         {
             if (manager == null)
             {
-                message = "No hay MissionStateManager en la escena.";
+                message = Loc.L("No hay MissionStateManager en la escena.", "There is no MissionStateManager in the scene.");
                 return false;
             }
             if (!AllApproved)
             {
                 var pending = AllRoles.Where(r => !approvals.Contains(r)).Select(RoleDisplayName);
-                message = "Falta consenso del equipo: " + string.Join(", ", pending) + ".";
+                message = Loc.L("Falta consenso del equipo: ", "Team consensus missing: ") + string.Join(", ", pending) + ".";
                 return false;
             }
             if (!manager.TryLaunch())
             {
                 int blocking = manager.CurrentValidation?.Blocking.Count() ?? 0;
-                message = $"Lanzamiento bloqueado: {blocking} problema(s) crítico(s) por resolver.";
+                message = Loc.L($"Lanzamiento bloqueado: {blocking} problema(s) crítico(s) por resolver.", $"Launch blocked: {blocking} critical issue(s) to resolve.");
                 return false;
             }
-            message = "¡Lanzamiento autorizado! Cuenta regresiva iniciada.";
+            message = Loc.L("¡Lanzamiento autorizado! Cuenta regresiva iniciada.", "Launch authorized! Countdown started.");
             return true;
         }
     }

@@ -51,7 +51,7 @@ namespace MissionDesign.Exploration
         {
             entering = true;
             if (label != null) label.SetActive(false);
-            if (hud != null) hud.ShowToast("Entrando a la consola de diseño de misión…");
+            if (hud != null) hud.ShowToast(Loc.L("Entrando a la consola de diseño de misión…", "Entering the mission design console…"));
             if (hud != null) hud.CutsceneLock = true;
             var target = seat != null ? seat : transform;
             Vector3 face = Vector3.ProjectOnPlane(target.forward, Vector3.up);

@@ -51,7 +51,7 @@ namespace MissionDesign.UI
         private void OnPhaseChanged(MissionPhase phase)
         {
             if (phase == MissionPhase.OrbitInsertion)
-                ShowBanner($"<color={UiTheme.Hex(UiTheme.Ok)}><size=130%><b>¡DESPEGUE EXITOSO!</b></size></color>\n<size=80%>La sala de control celebra: el cohete llegó al espacio</size>");
+                ShowBanner($"<color={UiTheme.Hex(UiTheme.Ok)}><size=130%><b>{Loc.L("¡DESPEGUE EXITOSO!", "SUCCESSFUL LIFTOFF!")}</b></size></color>\n<size=80%>{Loc.L("La sala de control celebra: el cohete llegó al espacio", "Mission control celebrates: the rocket reached space")}</size>");
             if (phase != MissionPhase.Launch) return;
             foreach (var t in thumbs) Destroy(t);
             thumbs.Clear();
@@ -69,21 +69,22 @@ namespace MissionDesign.UI
             // Reloj de misión desde el despegue, como la NASA (la trayectoria guarda los días desde la TLI).
             float sinceLaunch = Mathf.Max(0f, day - orbit.Solution.launchDays);
             float total = orbit.Solution.totalDays - orbit.Solution.launchDays;
-            string clock = $"Día {sinceLaunch:F1} de {total:F1}" + (day < 0f ? $"  <size=70%>(órbita terrestre, antes de la TLI)</size>" : "");
-            string where = day < 0f ? "Órbita terrestre" : orbit.DistanceMoonKm < 20000f ? "Sobrevuelo lunar" : "Espacio cislunar";
+            string clock = Loc.L($"Día {sinceLaunch:F1} de {total:F1}", $"Day {sinceLaunch:F1} of {total:F1}")
+                           + (day < 0f ? Loc.L("  <size=70%>(órbita terrestre, antes de la TLI)</size>", "  <size=70%>(Earth orbit, before TLI)</size>") : "");
+            string where = day < 0f ? Loc.L("Órbita terrestre", "Earth orbit") : orbit.DistanceMoonKm < 20000f ? Loc.L("Sobrevuelo lunar", "Lunar flyby") : Loc.L("Espacio cislunar", "Cislunar space");
             telemetryText.text =
-                $"<color={UiTheme.Hex(UiTheme.Accent)}><b>TELEMETRÍA DE VUELO</b></color>   <color={dim}>{where}</color>\n" +
+                $"<color={UiTheme.Hex(UiTheme.Accent)}><b>{Loc.L("TELEMETRÍA DE VUELO", "FLIGHT TELEMETRY")}</b></color>   <color={dim}>{where}</color>\n" +
                 $"<size=130%><b>{clock}</b></size>\n" +
-                $"<color={dim}>Distancia a la Tierra</color>  <b>{orbit.DistanceEarthKm:N0} km</b>\n" +
-                $"<color={dim}>Distancia a la Luna</color>  <b>{orbit.DistanceMoonKm:N0} km</b>\n" +
-                $"<color={dim}>Velocidad</color>  <b>{orbit.SpeedKmS:F2} km/s</b>  <color={dim}>({orbit.SpeedKmS * 3600f:N0} km/h)</color>";
+                $"<color={dim}>{Loc.L("Distancia a la Tierra", "Distance to Earth")}</color>  <b>{orbit.DistanceEarthKm:N0} km</b>\n" +
+                $"<color={dim}>{Loc.L("Distancia a la Luna", "Distance to the Moon")}</color>  <b>{orbit.DistanceMoonKm:N0} km</b>\n" +
+                $"<color={dim}>{Loc.L("Velocidad", "Speed")}</color>  <b>{orbit.SpeedKmS:F2} km/s</b>  <color={dim}>({orbit.SpeedKmS * 3600f:N0} km/h)</color>";
         }
 
         private void OnMilestone(TrajectoryMilestone m)
         {
             if (bannerText == null) return;
             string color = m.number <= 5 ? "#B9A3FF" : "#FFB347";
-            ShowBanner($"<color={color}><size=150%><b>{m.number}</b></size></color>  <b>{m.title}</b>\n<size=80%>{m.detail}</size>");
+            ShowBanner($"<color={color}><size=150%><b>{m.number}</b></size></color>  <b>{m.Title}</b>\n<size=80%>{m.Detail}</size>");
         }
 
         public void ShowBanner(string text)
@@ -116,7 +117,7 @@ namespace MissionDesign.UI
             SetAlpha(photosGroup, 1f);
             var o = manager != null ? manager.LastOutcome : null;
             if (photoCounter != null)
-                photoCounter.text = $"<b>CÁMARAS</b>  foto {number} de {total}  <color={UiTheme.Hex(UiTheme.TextDim)}>· {photo.title}</color>";
+                photoCounter.text = $"<b>{Loc.L("CÁMARAS", "CAMERAS")}</b>  {Loc.L($"foto {number} de {total}", $"photo {number} of {total}")}  <color={UiTheme.Hex(UiTheme.TextDim)}>· {photo.title}</color>";
             if (thumbStrip != null)
             {
                 var go = new GameObject($"Thumb_{number}", typeof(RectTransform));

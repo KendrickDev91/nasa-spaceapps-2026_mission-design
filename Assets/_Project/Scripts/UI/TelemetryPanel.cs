@@ -39,8 +39,10 @@ namespace MissionDesign.UI
             if (scienceText != null)
             {
                 scienceText.text =
-                    $"VALOR CIENTÍFICO  <b>{report.expectedScienceValue:N0}</b> <color={UiTheme.Hex(UiTheme.TextDim)}>/ {report.potentialScienceValue:N0} potencial · " +
-                    $"datos {report.dataReturnFraction:P0} · energía {report.powerAvailabilityFraction:P0}</color>";
+                    Loc.L($"VALOR CIENTÍFICO  <b>{report.expectedScienceValue:N0}</b> <color={UiTheme.Hex(UiTheme.TextDim)}>/ {report.potentialScienceValue:N0} potencial · " +
+                          $"datos {report.dataReturnFraction:P0} · energía {report.powerAvailabilityFraction:P0}</color>",
+                          $"SCIENCE VALUE  <b>{report.expectedScienceValue:N0}</b> <color={UiTheme.Hex(UiTheme.TextDim)}>/ {report.potentialScienceValue:N0} potential · " +
+                          $"data {report.dataReturnFraction:P0} · power {report.powerAvailabilityFraction:P0}</color>");
             }
 
             if (alertsText != null)

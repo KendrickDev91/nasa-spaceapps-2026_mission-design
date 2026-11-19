@@ -33,7 +33,7 @@ namespace MissionDesign.Simulation
 
         public static DesignSnapshot Capture(SpacecraftDesign d, string name, string team = null) => new DesignSnapshot
         {
-            designName = string.IsNullOrWhiteSpace(name) ? "Diseño sin nombre" : name.Trim(),
+            designName = string.IsNullOrWhiteSpace(name) ? Loc.L("Diseño sin nombre", "Untitled design") : name.Trim(),
             teamName = team,
             savedAtUtc = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
             difficulty = d.Difficulty,

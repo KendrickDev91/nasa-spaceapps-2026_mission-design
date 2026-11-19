@@ -1,3 +1,4 @@
+using MissionDesign.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,17 +32,17 @@ namespace MissionDesign.Simulation
 
             return new List<ComparisonRow>
             {
-                Text("Órbita", a.Orbit != null ? a.Orbit.regime.ToString() : "—", b.Orbit != null ? b.Orbit.regime.ToString() : "—"),
-                Text("Lanzador", a.LaunchVehicle != null ? a.LaunchVehicle.displayName : "—", b.LaunchVehicle != null ? b.LaunchVehicle.displayName : "—"),
-                Text("Instrumentos", a.Instruments.Count.ToString(), b.Instruments.Count.ToString()),
-                Row("Ciencia esperada", ta.expectedScienceValue, tb.expectedScienceValue, "N0", higherIsBetter: true),
-                Row("Masa total (kg)", ta.totalMassKg, tb.totalMassKg, "N0", higherIsBetter: false),
-                Row("Margen de lanzamiento", marginA, marginB, "P0", higherIsBetter: true),
-                Row("Balance energético (W)", ta.powerBalanceW, tb.powerBalanceW, "N0", higherIsBetter: true),
-                Row("Costo total ($M)", ta.totalCostMUSD, tb.totalCostMUSD, "N1", higherIsBetter: false),
-                Row("Datos que llegan a tierra", ta.dataReturnFraction, tb.dataReturnFraction, "P0", higherIsBetter: true),
-                Row("Desarrollo (meses)", ta.developmentMonths, tb.developmentMonths, "N0", higherIsBetter: false),
-                Row("Problemas bloqueantes", va.Blocking.Count(), vb.Blocking.Count(), "N0", higherIsBetter: false)
+                Text(Loc.L("Órbita", "Orbit"), a.Orbit != null ? a.Orbit.regime.ToString() : "—", b.Orbit != null ? b.Orbit.regime.ToString() : "—"),
+                Text(Loc.L("Lanzador", "Launcher"), a.LaunchVehicle != null ? a.LaunchVehicle.displayName : "—", b.LaunchVehicle != null ? b.LaunchVehicle.displayName : "—"),
+                Text(Loc.L("Instrumentos", "Instruments"), a.Instruments.Count.ToString(), b.Instruments.Count.ToString()),
+                Row(Loc.L("Ciencia esperada", "Expected science"), ta.expectedScienceValue, tb.expectedScienceValue, "N0", higherIsBetter: true),
+                Row(Loc.L("Masa total (kg)", "Total mass (kg)"), ta.totalMassKg, tb.totalMassKg, "N0", higherIsBetter: false),
+                Row(Loc.L("Margen de lanzamiento", "Launch margin"), marginA, marginB, "P0", higherIsBetter: true),
+                Row(Loc.L("Balance energético (W)", "Power balance (W)"), ta.powerBalanceW, tb.powerBalanceW, "N0", higherIsBetter: true),
+                Row(Loc.L("Costo total ($M)", "Total cost ($M)"), ta.totalCostMUSD, tb.totalCostMUSD, "N1", higherIsBetter: false),
+                Row(Loc.L("Datos que llegan a tierra", "Data reaching the ground"), ta.dataReturnFraction, tb.dataReturnFraction, "P0", higherIsBetter: true),
+                Row(Loc.L("Desarrollo (meses)", "Development (months)"), ta.developmentMonths, tb.developmentMonths, "N0", higherIsBetter: false),
+                Row(Loc.L("Problemas bloqueantes", "Blocking issues"), va.Blocking.Count(), vb.Blocking.Count(), "N0", higherIsBetter: false)
             };
         }
 

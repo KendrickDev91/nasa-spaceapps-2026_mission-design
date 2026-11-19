@@ -39,7 +39,63 @@ namespace MissionDesign.UI
 
         public bool IsBlocking => Visible(mainMenu) || Visible(pauseMenu) || Visible(infoPanel) || OptionsMenu.IsOpen;
 
-        public static readonly string[][] TutorialPages =
+        public static string[][] TutorialPages => Loc.English ? TutorialEn : TutorialEs;
+        public static string[][] CreditsPages => Loc.English ? CreditsEn : CreditsEs;
+
+        private static readonly string[][] TutorialEn =
+        {
+            new[] { "1 · YOUR MISSION",
+                "Design a complete space mission and see it through. The <b>Director</b> picks the goal (scenario), the difficulty and the orbit.\n\n" +
+                "There are 4 roles: <b>Mission Director</b>, <b>Systems Engineer</b> (bus, power, computer), <b>Principal Scientist</b> (instruments) and " +
+                "<b>Telecom & Launch Engineer</b> (rocket, antenna and ground station network).\n\n" +
+                "Play with 1 to 4 people on the same screen: the <b>players</b> button splits the roles and <b>Next turn</b> (or Tab) hands over control." },
+            new[] { "2 · THE 6 RESOURCES",
+                "On the right you will see <b>Mass, Power, Budget, Data, Comms and Schedule</b>. Every part changes several at once: " +
+                "a powerful instrument gives more science, but it weighs, draws power, costs and generates data that must be brought down to the ground.\n\n" +
+                "Green = fine · amber = no margin · red = problem. <b>Hover</b> over a bar to understand what it measures." },
+            new[] { "3 · CHOOSING PARTS",
+                "The catalog on the left changes with the active role (keys <b>1-4</b>). Hover over any option: the tooltip tells you what it is, " +
+                "where its numbers come from and <b>what would happen to your mission if you chose it</b> (\"Would cause: Mass exceeds launcher capacity…\").\n\n" +
+                "In <b>Advanced</b> you also choose the onboard computer and the attitude control." },
+            new[] { "4 · NEGOTIATE AND LAUNCH",
+                "The bottom panel lists the conflicts and the role that must solve them. When nothing is red, each player presses " +
+                "<b>Approve design</b>. Any change clears the approvals: the team has to agree.\n\n" +
+                "With consensus and no blockers, press <b>LAUNCH MISSION</b>." },
+            new[] { "5 · SIMULATION AND ANALYSIS",
+                "You will see the launch, the trajectory and the control room. 1 or 2 real-world events will happen (solar storms, micrometeoroids, DSN outages…).\n\n" +
+                "At the end, the <b>post-mission analysis</b> explains what went well, what failed and why, with an A-F rank, the most similar real NASA mission and the leaderboard. " +
+                "The report is saved as JSON and TXT." },
+            new[] { "6 · ENGINEERING TIPS",
+                "• Keep ~10% margin on mass and budget: real projects always grow.\n" +
+                "• Farther = weaker signal (1/r²): the Moon needs big antennas and the DSN.\n" +
+                "• The battery must ride out the eclipse and safe mode.\n" +
+                "• Save several alternatives in <b>Designs</b> and compare them: there is almost never a single perfect solution.\n" +
+                "• Try the <b>Sandbox</b> scenario to experiment without limits." }
+        };
+
+        private static readonly string[][] CreditsEn =
+        {
+            new[] { "TEAM " + GameInfo.Team,
+                "<size=120%><b>" + GameInfo.Title + "</b></size>\n" + GameInfo.EventEn + "\n\n" +
+                "Developed by team <b>" + GameInfo.Team + "</b>:\n\n" +
+                "• " + string.Join("\n• ", GameInfo.TeamMembers) + "\n\n" +
+                "<size=85%>Thanks for playing. Every mission you design is a trade-off: there is no single right answer.</size>" },
+            new[] { "SOURCES & CREDITS",
+                GameInfo.Title + " — " + GameInfo.EventEn + ". Independent project: <b>not an official NASA product</b>.\n\n" +
+                "<b>Challenge resources:</b> Design and Develop Science Missions (NASA Small Spacecraft Systems Virtual Institute), " +
+                "Concept Maturity Levels (JPL), CubeSat 101 (NASA CubeSat Launch Initiative), Mission Design Lab (NASA Goddard), GMAT and NASA Mission Viz.\n\n" +
+                "<b>Data:</b> every part shows its source and whether it is official data, approximate data or a game estimate (hover over it).\n\n" +
+                "<b>Art:</b> our own 3D models made in Blender (ArtSource/Blender) and our own procedural textures." },
+            new[] { "MOON, TRAJECTORY AND ARTEMIS II",
+                "<b>Moon:</b> real color and relief from the Lunar Reconnaissance Orbiter (LROC and LOLA), from the <i>CGI Moon Kit</i> by " +
+                "NASA's Scientific Visualization Studio (Ernie Wright, NASA/GSFC). Public domain.\n\n" +
+                "<b>Trajectory:</b> free return computed with the restricted three-body problem and validated with " +
+                "<b>NASA GMAT R2026a</b> (docs/validacion/gmat). 8-milestone layout based on ESA's Artemis II diagram.\n\n" +
+                "<b>Artemis II:</b> launch on April 1, 2026, lunar flyby on April 6 and splashdown in the Pacific " +
+                "off San Diego on April 10. The splashdown cinematic is our own recreation, not real footage." }
+        };
+
+        private static readonly string[][] TutorialEs =
         {
             new[] { "1 · TU MISIÓN",
                 "Diseña una misión espacial completa y llévala a buen término. El <b>Director</b> elige el objetivo (escenario), la dificultad y la órbita.\n\n" +
@@ -70,15 +126,15 @@ namespace MissionDesign.UI
                 "• Prueba el escenario <b>Sandbox</b> para experimentar sin límites." }
         };
 
-        public static readonly string[][] CreditsPages =
+        private static readonly string[][] CreditsEs =
         {
             new[] { "EQUIPO " + GameInfo.Team,
-                "<size=120%><b>" + GameInfo.Title + "</b></size>\n" + GameInfo.Event + "\n\n" +
+                "<size=120%><b>" + GameInfo.Title + "</b></size>\n" + GameInfo.EventEs + "\n\n" +
                 "Desarrollado por el equipo <b>" + GameInfo.Team + "</b>:\n\n" +
                 "• " + string.Join("\n• ", GameInfo.TeamMembers) + "\n\n" +
                 "<size=85%>Gracias por jugar. Cada misión que diseñan es un trade-off: no hay una única respuesta correcta.</size>" },
             new[] { "FUENTES Y CRÉDITOS",
-                GameInfo.Title + " — " + GameInfo.Event + ". Proyecto independiente: <b>no es un producto oficial de la NASA</b>.\n\n" +
+                GameInfo.Title + " — " + GameInfo.EventEs + ". Proyecto independiente: <b>no es un producto oficial de la NASA</b>.\n\n" +
                 "<b>Recursos del reto:</b> Design and Develop Science Missions (NASA Small Spacecraft Systems Virtual Institute), " +
                 "Concept Maturity Levels (JPL), CubeSat 101 (NASA CubeSat Launch Initiative), Mission Design Lab (NASA Goddard), GMAT y NASA Mission Viz.\n\n" +
                 "<b>Datos:</b> cada pieza indica su fuente y si es dato oficial, aproximado o estimación de juego (pasa el ratón por ella).\n\n" +

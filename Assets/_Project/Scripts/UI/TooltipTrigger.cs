@@ -12,7 +12,7 @@ namespace MissionDesign.UI
 
         private bool hovered;
 
-        public string Resolve() => Content != null ? Content() : staticText;
+        public string Resolve() => Content != null ? Content() : MissionDesign.Core.Loc.Static(staticText);
 
         public void OnPointerEnter(PointerEventData eventData)
         {

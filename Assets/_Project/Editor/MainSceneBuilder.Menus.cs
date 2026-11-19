@@ -24,10 +24,9 @@ namespace MissionDesign.Editor
             var mainGroup = main.gameObject.AddComponent<CanvasGroup>();
             var title = Text("Title", main, $"<b>{GameInfo.StartScreenTitle}</b>", 112, UiTheme.Text, TextAlignmentOptions.Center);
             Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(1600f, 120f));
-            var tagline = Text("Tagline", main, GameInfo.Tagline, 30, UiTheme.Accent, TextAlignmentOptions.Center);
+            var tagline = Text("Tagline", main, GameInfo.TaglineEs, 30, UiTheme.Accent, TextAlignmentOptions.Center);
             Place(tagline.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -295f), new Vector2(1600f, 44f));
-            var roleLine = Text("Roles", main,
-                "1 a 4 jugadores · Director de Misión · Ingeniero de Sistemas · Científico Principal · Ingeniero de Telecom y Lanzamiento",
+            var roleLine = Text("Roles", main, GameInfo.RolesLineEs,
                 18, UiTheme.TextDim, TextAlignmentOptions.Center);
             Place(roleLine.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -345f), new Vector2(1600f, 30f));
 
@@ -43,10 +42,10 @@ namespace MissionDesign.Editor
             var options = MakeButton("OptionsButton", column, "Opciones", UiTheme.AccentDim, 22, 0);
             var credits = MakeButton("CreditsButton", column, "Fuentes y créditos", UiTheme.AccentDim, 22, 0);
             var quit = MakeButton("QuitButton", column, "Salir", UiTheme.PanelLight, 22, 0);
-            var footer = Text("Footer", main, $"{GameInfo.Event} · Proyecto independiente, no es un producto oficial de la NASA · F1 ayuda · Esc pausa",
+            var footer = Text("Footer", main, GameInfo.FooterEs,
                 15, UiTheme.TextDim, TextAlignmentOptions.Center);
             Place(footer.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1600f, 26f));
-            var team = Text("TeamLine", main, $"<b>{GameInfo.TeamLine}</b>", 22, UiTheme.Accent, TextAlignmentOptions.Center);
+            var team = Text("TeamLine", main, $"<b>{GameInfo.TeamLineEs}</b>", 22, UiTheme.Accent, TextAlignmentOptions.Center);
             Place(team.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 76f), new Vector2(1600f, 30f));
 
             // ── Pausa ──

@@ -1,5 +1,6 @@
 using MissionDesign.Simulation;
 using TMPro;
+using MissionDesign.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -32,12 +33,12 @@ namespace MissionDesign.UI
         {
             switch (kind)
             {
-                case ResourceKind.Mass: return "MASA";
-                case ResourceKind.Power: return "ENERGÍA";
-                case ResourceKind.Budget: return "PRESUPUESTO";
-                case ResourceKind.Data: return "DATOS";
-                case ResourceKind.Comms: return "COMUNICACIONES";
-                case ResourceKind.Time: return "TIEMPO";
+                case ResourceKind.Mass: return Loc.L("MASA", "MASS");
+                case ResourceKind.Power: return Loc.L("ENERGÍA", "POWER");
+                case ResourceKind.Budget: return Loc.L("PRESUPUESTO", "BUDGET");
+                case ResourceKind.Data: return Loc.L("DATOS", "DATA");
+                case ResourceKind.Comms: return Loc.L("COMUNICACIONES", "COMMS");
+                case ResourceKind.Time: return Loc.L("TIEMPO", "SCHEDULE");
                 default: return kind.ToString();
             }
         }
@@ -55,11 +56,11 @@ namespace MissionDesign.UI
             switch (r.kind)
             {
                 case ResourceKind.Mass: return $"{r.value:N0} / {r.limit:N0} kg";
-                case ResourceKind.Power: return $"{r.value:N0} W pico / {r.limit:N0} W";
+                case ResourceKind.Power: return Loc.L($"{r.value:N0} W pico / {r.limit:N0} W", $"{r.value:N0} W peak / {r.limit:N0} W");
                 case ResourceKind.Budget: return $"${r.value:N0}M / ${r.limit:N0}M";
-                case ResourceKind.Data: return $"{r.value:N1} GB/día";
-                case ResourceKind.Comms: return $"{r.value:N1} GB/día";
-                case ResourceKind.Time: return $"{r.value:N0} / {r.limit:N0} meses";
+                case ResourceKind.Data: return $"{r.value:N1} {Loc.L("GB/día", "GB/day")}";
+                case ResourceKind.Comms: return $"{r.value:N1} {Loc.L("GB/día", "GB/day")}";
+                case ResourceKind.Time: return $"{r.value:N0} / {r.limit:N0} {Loc.L("meses", "months")}";
                 default: return $"{r.value:N1} {r.unit}";
             }
         }

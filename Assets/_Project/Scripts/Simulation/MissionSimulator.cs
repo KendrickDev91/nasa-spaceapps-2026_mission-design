@@ -41,15 +41,15 @@ namespace MissionDesign.Simulation
         public const float StorageDaysToBufferOutage = 2f;
 
         /// <summary>Hitos del ascenso del SLS Block 1 (infografía de la misión Artemis; tiempos desde el despegue).</summary>
-        public static readonly (string time, string text)[] SlsAscent =
+        public static (string time, string text)[] SlsAscent => new[]
         {
-            ("T+1:11", "Max Q: máxima presión aerodinámica (12,8 km)"),
-            ("T+2:09", "Separación de los propulsores sólidos (47,5 km)"),
-            ("T+3:18", "Expulsión del sistema de aborto de lanzamiento (87 km)"),
-            ("T+8:15", "Apagado y separación de la etapa central (162,5 km)"),
-            ("T+49 min", "La etapa superior (ICPS) eleva el perigeo"),
-            ("T+1 h 48 min", "La ICPS eleva el apogeo: órbita terrestre alta"),
-            ("T+3 h 24 min", "Orion se separa de la ICPS a 22 279 km")
+            ("T+1:11", Loc.L("Max Q: máxima presión aerodinámica (12,8 km)", "Max Q: maximum aerodynamic pressure (12.8 km)")),
+            ("T+2:09", Loc.L("Separación de los propulsores sólidos (47,5 km)", "Solid rocket booster separation (47.5 km)")),
+            ("T+3:18", Loc.L("Expulsión del sistema de aborto de lanzamiento (87 km)", "Launch abort system jettison (87 km)")),
+            ("T+8:15", Loc.L("Apagado y separación de la etapa central (162,5 km)", "Core stage cutoff and separation (162.5 km)")),
+            ("T+49 min", Loc.L("La etapa superior (ICPS) eleva el perigeo", "The upper stage (ICPS) raises the perigee")),
+            ("T+1 h 48 min", Loc.L("La ICPS eleva el apogeo: órbita terrestre alta", "The ICPS raises the apogee: high Earth orbit")),
+            ("T+3 h 24 min", Loc.L("Orion se separa de la ICPS a 22 279 km", "Orion separates from the ICPS at 22,279 km"))
         };
 
         public static MissionOutcomeReport Run(SpacecraftDesign d, IReadOnlyList<RandomEventSO> eventPool, SimulationSettings settings = null)
@@ -77,13 +77,15 @@ namespace MissionDesign.Simulation
             o.launchSucceeded = lv != null && (!settings.allowLaunchFailure || rng.NextDouble() < reliability);
             if (!o.launchSucceeded)
             {
-                Log(o, MissionPhase.Launch, 0, LogTone.Critical, $"Anomalía en el ascenso: {Name(lv)} no alcanzó la órbita.");
-                o.explanations.Add($"Fallo: el lanzador {Name(lv)} falló durante el ascenso (confiabilidad histórica {reliability:P0}). " +
-                                   "Ningún diseño elimina este riesgo; por eso se eligen lanzadores con historial y se contratan seguros.");
-                return Finish(o, MissionVerdict.Failure, "Pérdida en el lanzamiento", 0f, t);
+                Log(o, MissionPhase.Launch, 0, LogTone.Critical, Loc.L($"Anomalía en el ascenso: {Name(lv)} no alcanzó la órbita.", $"Ascent anomaly: {Name(lv)} did not reach orbit."));
+                o.explanations.Add(Loc.L($"Fallo: el lanzador {Name(lv)} falló durante el ascenso (confiabilidad histórica {reliability:P0}). " +
+                                         "Ningún diseño elimina este riesgo; por eso se eligen lanzadores con historial y se contratan seguros.",
+                                         $"Failure: the {Name(lv)} launcher failed during ascent (historical reliability {reliability:P0}). " +
+                                         "No design removes this risk; that is why proven launchers are chosen and insurance is bought."));
+                return Finish(o, MissionVerdict.Failure, Loc.L("Pérdida en el lanzamiento", "Lost at launch"), 0f, t);
             }
             Log(o, MissionPhase.Launch, 0, LogTone.Positive,
-                $"Despegue nominal de {Name(lv)}: {t.totalMassKg:N0} kg hacia {regime} (Δv {orbit?.requiredDeltaVKmS:F1} km/s, margen de carga {Margin(t):P0}).");
+                Loc.L($"Despegue nominal de {Name(lv)}: {t.totalMassKg:N0} kg hacia {regime} (Δv {orbit?.requiredDeltaVKmS:F1} km/s, margen de carga {Margin(t):P0}).", $"Nominal liftoff of {Name(lv)}: {t.totalMassKg:N0} kg to {regime} (Δv {orbit?.requiredDeltaVKmS:F1} km/s, payload margin {Margin(t):P0})."));
             bool flyby = orbit != null && orbit.regime == OrbitRegime.LunarFlyby;
             o.returnsToEarth = flyby;
             o.crewed = d.Scenario != null && d.Scenario.crewed;
@@ -95,31 +97,34 @@ namespace MissionDesign.Simulation
             o.orbitInsertionSucceeded = t.spacecraftDeltaVKmS >= t.requiredOnboardDeltaVKmS;
             if (!o.orbitInsertionSucceeded)
             {
-                Log(o, MissionPhase.OrbitInsertion, 1, LogTone.Critical, "Combustible agotado antes de completar la inserción.");
-                o.explanations.Add($"Fallo: para entrar en {regime} el motor del bus debía aportar {t.requiredOnboardDeltaVKmS:F2} km/s, " +
-                                   $"pero con {o.bus} solo alcanzó {t.spacecraftDeltaVKmS:F2} km/s.");
-                return Finish(o, MissionVerdict.Failure, "Inserción orbital fallida", 0f, t);
+                Log(o, MissionPhase.OrbitInsertion, 1, LogTone.Critical, Loc.L("Combustible agotado antes de completar la inserción.", "Propellant ran out before completing orbit insertion."));
+                o.explanations.Add(Loc.L($"Fallo: para entrar en {regime} el motor del bus debía aportar {t.requiredOnboardDeltaVKmS:F2} km/s, " +
+                                         $"pero con {o.bus} solo alcanzó {t.spacecraftDeltaVKmS:F2} km/s.",
+                                         $"Failure: to enter {regime} the bus engine had to provide {t.requiredOnboardDeltaVKmS:F2} km/s, " +
+                                         $"but with {o.bus} it only reached {t.spacecraftDeltaVKmS:F2} km/s."));
+                return Finish(o, MissionVerdict.Failure, Loc.L("Inserción orbital fallida", "Orbit insertion failed"), 0f, t);
             }
             Log(o, MissionPhase.OrbitInsertion, 1, LogTone.Positive, t.requiredOnboardDeltaVKmS > 0.1f
-                ? $"Inserción en {regime} completada: el motor aportó {t.requiredOnboardDeltaVKmS:F2} de {t.spacecraftDeltaVKmS:F2} km/s disponibles."
-                : $"Separación e inserción en {regime} completadas. Paneles desplegados.");
+                ? Loc.L($"Inserción en {regime} completada: el motor aportó {t.requiredOnboardDeltaVKmS:F2} de {t.spacecraftDeltaVKmS:F2} km/s disponibles.",
+                        $"Insertion into {regime} complete: the engine provided {t.requiredOnboardDeltaVKmS:F2} of {t.spacecraftDeltaVKmS:F2} km/s available.")
+                : Loc.L($"Separación e inserción en {regime} completadas. Paneles desplegados.", $"Separation and insertion into {regime} complete. Panels deployed."));
             if (freeReturn != null)
             {
                 Log(o, MissionPhase.OrbitInsertion, 0.5f, LogTone.Info,
-                    "Órbita terrestre alta: ~24 h de verificación de sistemas y pruebas de proximidad (como en Artemis II).");
+                    Loc.L("Órbita terrestre alta: ~24 h de verificación de sistemas y pruebas de proximidad (como en Artemis II).", "High Earth orbit: ~24 h of systems checkout and proximity operations (as on Artemis II)."));
                 Log(o, MissionPhase.OrbitInsertion, 1, LogTone.Positive,
-                    $"Inyección translunar (TLI): Δv {freeReturn.tliDeltaVKmS:F2} km/s → {freeReturn.injectionSpeedKmS:F2} km/s. Comienza la ida en retorno libre.");
+                    Loc.L($"Inyección translunar (TLI): Δv {freeReturn.tliDeltaVKmS:F2} km/s → {freeReturn.injectionSpeedKmS:F2} km/s. Comienza la ida en retorno libre.", $"Trans-lunar injection (TLI): Δv {freeReturn.tliDeltaVKmS:F2} km/s → {freeReturn.injectionSpeedKmS:F2} km/s. The free-return outbound leg begins."));
             }
 
             // ───── 3. OPERACIONES CIENTÍFICAS (con eventos) ─────
             Log(o, MissionPhase.ScienceOperations, 2, LogTone.Info,
-                $"Inicio de operaciones: {d.Instruments.Count} instrumento(s) generando {t.dataGeneratedGBPerDay:N1} GB/día.");
+                Loc.L($"Inicio de operaciones: {d.Instruments.Count} instrumento(s) generando {t.dataGeneratedGBPerDay:N1} GB/día.", $"Operations begin: {d.Instruments.Count} instrument(s) generating {t.dataGeneratedGBPerDay:N1} GB/day."));
             if (freeReturn != null)
             {
-                Log(o, MissionPhase.ScienceOperations, 1f, LogTone.Info, "Corrección de rumbo 1: encendido de pocos m/s para afinar la ruta.");
-                Log(o, MissionPhase.ScienceOperations, Mathf.Max(1.2f, freeReturn.flybyTimeDays - 1f), LogTone.Info, "Corrección de rumbo 2: ajuste final antes de la Luna.");
+                Log(o, MissionPhase.ScienceOperations, 1f, LogTone.Info, Loc.L("Corrección de rumbo 1: encendido de pocos m/s para afinar la ruta.", "Trajectory correction 1: a burn of a few m/s to fine-tune the path."));
+                Log(o, MissionPhase.ScienceOperations, Mathf.Max(1.2f, freeReturn.flybyTimeDays - 1f), LogTone.Info, Loc.L("Corrección de rumbo 2: ajuste final antes de la Luna.", "Trajectory correction 2: final trim before the Moon."));
                 Log(o, MissionPhase.ScienceOperations, freeReturn.flybyTimeDays, LogTone.Positive,
-                    $"Sobrevuelo lunar a {freeReturn.flybyAltitudeKm:N0} km sobre la cara oculta (día {freeReturn.flybyTimeDays:F1}): campaña fotográfica de la tripulación.");
+                    Loc.L($"Sobrevuelo lunar a {freeReturn.flybyAltitudeKm:N0} km sobre la cara oculta (día {freeReturn.flybyTimeDays:F1}): campaña fotográfica de la tripulación.", $"Lunar flyby {freeReturn.flybyAltitudeKm:N0} km above the far side (day {freeReturn.flybyTimeDays:F1}): the crew photo campaign."));
             }
 
             var selected = settings.forcedEvents ?? PickEvents(eventPool, orbit, rng, settings.minEvents, settings.maxEvents, d.GroundNetwork);
@@ -142,7 +147,7 @@ namespace MissionDesign.Simulation
 
                 if (radHardened)
                 {
-                    impact.Add($"{d.Computer.displayName} (endurecida contra radiación) corrigió el error sin reiniciar: sin efecto en la ciencia");
+                    impact.Add(Loc.L($"{d.Computer.displayName} (endurecida contra radiación) corrigió el error sin reiniciar: sin efecto en la ciencia", $"{d.Computer.displayName} (radiation-hardened) corrected the error without rebooting: no effect on science"));
                 }
                 else
                 {
@@ -151,7 +156,7 @@ namespace MissionDesign.Simulation
                     commsMult *= buffered ? 1f : evt.commsMultiplier;
                     powerLoss = 1f - (1f - powerLoss) * (1f - evt.permanentPowerLossFraction);
                     if (buffered)
-                        impact.Add($"la memoria a bordo ({t.onboardStorageGB:N0} GB ≈ {t.storageDays:N0} días de datos) guardó la ciencia hasta recuperar el enlace");
+                        impact.Add(Loc.L($"la memoria a bordo ({t.onboardStorageGB:N0} GB ≈ {t.storageDays:N0} días de datos) guardó la ciencia hasta recuperar el enlace", $"the onboard memory ({t.onboardStorageGB:N0} GB ≈ {t.storageDays:N0} days of data) kept the science until the link came back"));
 
                     if (evt.requiresSafeMode)
                     {
@@ -165,11 +170,11 @@ namespace MissionDesign.Simulation
                         {
                             o.survivedOperations = false;
                             lossDay = day;
-                            impact.Add($"la batería ({usable:N0} Wh útiles) no sostuvo {evt.safeModeHours:N0} h de modo seguro: se necesitaban {needWh:N0} Wh. Se perdió la nave");
+                            impact.Add(Loc.L($"la batería ({usable:N0} Wh útiles) no sostuvo {evt.safeModeHours:N0} h de modo seguro: se necesitaban {needWh:N0} Wh. Se perdió la nave", $"the battery ({usable:N0} Wh usable) could not sustain {evt.safeModeHours:N0} h of safe mode: {needWh:N0} Wh were needed. The spacecraft was lost"));
                         }
                         else
                         {
-                            impact.Add($"modo seguro de {evt.safeModeHours:N0} h superado ({needWh:N0} de {usable:N0} Wh de batería)");
+                            impact.Add(Loc.L($"modo seguro de {evt.safeModeHours:N0} h superado ({needWh:N0} de {usable:N0} Wh de batería)", $"{evt.safeModeHours:N0} h safe mode survived ({needWh:N0} of {usable:N0} Wh of battery)"));
                         }
                     }
 
@@ -180,20 +185,20 @@ namespace MissionDesign.Simulation
                         {
                             var victim = alive[rng.Next(alive.Count)];
                             instrumentFailureDay[victim] = day;
-                            failureCause[victim] = $"{evt.displayName} (día {day:N0})";
-                            impact.Add($"daño permanente en {victim.displayName}");
+                            failureCause[victim] = Loc.L($"{evt.displayName} (día {day:N0})", $"{evt.displayName} (day {day:N0})");
+                            impact.Add(Loc.L($"daño permanente en {victim.displayName}", $"permanent damage to {victim.displayName}"));
                         }
                         else
                         {
                             powerLoss = 1f - (1f - powerLoss) * 0.7f;
-                            impact.Add("daño en los paneles solares (−30% de potencia)");
+                            impact.Add(Loc.L("daño en los paneles solares (−30% de potencia)", "solar panel damage (−30% power)"));
                         }
                     }
 
                     impact.AddRange(DescribeMultipliers(evt, skipComms: buffered));
                 }
 
-                string text = impact.Count > 0 ? Capitalize(string.Join("; ", impact)) + "." : "Sin efectos medibles.";
+                string text = impact.Count > 0 ? Capitalize(string.Join("; ", impact)) + "." : Loc.L("Sin efectos medibles.", "No measurable effects.");
                 var phase = evt.affectedPhase == MissionPhase.DataTransmission ? MissionPhase.DataTransmission : MissionPhase.ScienceOperations;
                 bool positive = evt.isPositive || radHardened || buffered;
                 o.events.Add(new EventOutcome
@@ -237,8 +242,10 @@ namespace MissionDesign.Simulation
 
             // ───── 4. TRANSMISIÓN DE DATOS ─────
             Log(o, MissionPhase.DataTransmission, opsDays, o.dataReturnFraction >= 0.98f ? LogTone.Positive : LogTone.Warning,
-                $"{Name(d.Antenna)} vía {NetworkName(d)} entregó {o.downlinkGBPerDay:N1} GB/día frente a {o.dataGeneratedGBPerDay:N1} GB/día generados: " +
-                $"{o.dataReturnedTotalTB:N1} TB recibidos en tierra ({o.dataReturnFraction:P0}).");
+                Loc.L($"{Name(d.Antenna)} vía {NetworkName(d)} entregó {o.downlinkGBPerDay:N1} GB/día frente a {o.dataGeneratedGBPerDay:N1} GB/día generados: " +
+                      $"{o.dataReturnedTotalTB:N1} TB recibidos en tierra ({o.dataReturnFraction:P0}).",
+                      $"{Name(d.Antenna)} via {NetworkName(d)} delivered {o.downlinkGBPerDay:N1} GB/day against {o.dataGeneratedGBPerDay:N1} GB/day generated: " +
+                      $"{o.dataReturnedTotalTB:N1} TB received on the ground ({o.dataReturnFraction:P0})."));
 
             float linkFraction = o.dataReturnFraction;   // lo que bajó por enlace antes de recuperar memorias
 
@@ -246,7 +253,7 @@ namespace MissionDesign.Simulation
             if (flyby)
             {
                 Log(o, MissionPhase.ReturnAndRecovery, Mathf.Max(0f, opsDays - 0.3f), LogTone.Info,
-                    "Corrección de rumbo 3 y separación del módulo de servicio: solo la cápsula entra en la atmósfera.");
+                    Loc.L("Corrección de rumbo 3 y separación del módulo de servicio: solo la cápsula entra en la atmósfera.", "Trajectory correction 3 and service module separation: only the capsule enters the atmosphere."));
                 if (o.survivedOperations)
                 {
                     float generatedTB = o.dataGeneratedGBPerDay * opsDays / 1000f;
@@ -257,12 +264,14 @@ namespace MissionDesign.Simulation
                     o.dataReturnFraction = generatedTB > 0f ? Mathf.Clamp01(o.dataReturnedTotalTB / generatedTB) : 1f;
                     science = potential * sciMult * o.dataReturnFraction * powerFrac * timeFrac;
                     Log(o, MissionPhase.ReturnAndRecovery, opsDays, LogTone.Positive,
-                        $"Interfaz de reentrada a {FreeReturnTrajectory.EntryInterfaceKm:N0} km y amerizaje en el Pacífico (día {opsDays:F1}). " +
-                        $"Se recuperan {o.dataRecoveredTB:N2} TB de tarjetas SD y memoria a bordo.");
+                        Loc.L($"Interfaz de reentrada a {FreeReturnTrajectory.EntryInterfaceKm:N0} km y amerizaje en el Pacífico (día {opsDays:F1}). " +
+                              $"Se recuperan {o.dataRecoveredTB:N2} TB de tarjetas SD y memoria a bordo.",
+                              $"Entry interface at {FreeReturnTrajectory.EntryInterfaceKm:N0} km and splashdown in the Pacific (day {opsDays:F1}). " +
+                              $"{o.dataRecoveredTB:N2} TB are recovered from SD cards and onboard memory."));
                 }
                 else
                 {
-                    Log(o, MissionPhase.ReturnAndRecovery, opsDays, LogTone.Critical, "La cápsula no regresa: los datos guardados a bordo se pierden.");
+                    Log(o, MissionPhase.ReturnAndRecovery, opsDays, LogTone.Critical, Loc.L("La cápsula no regresa: los datos guardados a bordo se pierden.", "The capsule does not return: the data stored on board is lost."));
                 }
             }
 
@@ -272,10 +281,10 @@ namespace MissionDesign.Simulation
             float target = o.scienceTarget > 0f ? o.scienceTarget : Mathf.Max(1f, potential);
             MissionVerdict verdict;
             string title;
-            if (!o.survivedOperations) { verdict = MissionVerdict.Failure; title = o.crewed ? "Misión abortada: cápsula no recuperada" : "Nave perdida en operación"; }
-            else if (science >= target) { verdict = MissionVerdict.Success; title = "Objetivos científicos cumplidos"; }
-            else if (science >= target * PartialThreshold) { verdict = MissionVerdict.PartialSuccess; title = "Objetivos cumplidos parcialmente"; }
-            else { verdict = MissionVerdict.Failure; title = "Retorno científico insuficiente"; }
+            if (!o.survivedOperations) { verdict = MissionVerdict.Failure; title = o.crewed ? Loc.L("Misión abortada: cápsula no recuperada", "Mission aborted: capsule not recovered") : Loc.L("Nave perdida en operación", "Spacecraft lost in operation"); }
+            else if (science >= target) { verdict = MissionVerdict.Success; title = Loc.L("Objetivos científicos cumplidos", "Science goals achieved"); }
+            else if (science >= target * PartialThreshold) { verdict = MissionVerdict.PartialSuccess; title = Loc.L("Objetivos cumplidos parcialmente", "Goals partially achieved"); }
+            else { verdict = MissionVerdict.Failure; title = Loc.L("Retorno científico insuficiente", "Insufficient science return"); }
 
             Explain(o, d, t, verdict, science, target, powerFrac, genW, lifeFrac, failureCause);
             return Finish(o, verdict, title, science, t);
@@ -316,10 +325,10 @@ namespace MissionDesign.Simulation
 
         private static IEnumerable<string> DescribeMultipliers(RandomEventSO e, bool skipComms)
         {
-            if (!Mathf.Approximately(e.scienceMultiplier, 1f)) yield return $"ciencia ×{e.scienceMultiplier:0.##}";
-            if (!Mathf.Approximately(e.dataGenerationMultiplier, 1f)) yield return $"datos generados ×{e.dataGenerationMultiplier:0.##}";
-            if (!skipComms && !Mathf.Approximately(e.commsMultiplier, 1f)) yield return $"capacidad de enlace ×{e.commsMultiplier:0.##}";
-            if (e.permanentPowerLossFraction > 0f) yield return $"−{e.permanentPowerLossFraction:P0} de potencia solar permanente";
+            if (!Mathf.Approximately(e.scienceMultiplier, 1f)) yield return $"{Loc.L("ciencia", "science")} ×{e.scienceMultiplier:0.##}";
+            if (!Mathf.Approximately(e.dataGenerationMultiplier, 1f)) yield return $"{Loc.L("datos generados", "data generated")} ×{e.dataGenerationMultiplier:0.##}";
+            if (!skipComms && !Mathf.Approximately(e.commsMultiplier, 1f)) yield return $"{Loc.L("capacidad de enlace", "link capacity")} ×{e.commsMultiplier:0.##}";
+            if (e.permanentPowerLossFraction > 0f) yield return Loc.L($"−{e.permanentPowerLossFraction:P0} de potencia solar permanente", $"−{e.permanentPowerLossFraction:P0} permanent solar power");
         }
 
         // ───────────────────────────── Misión real parecida ─────────────────────────────
@@ -359,79 +368,101 @@ namespace MissionDesign.Simulation
         private static void Explain(MissionOutcomeReport o, SpacecraftDesign d, TelemetryReport t, MissionVerdict verdict,
             float science, float target, float powerFrac, float genW, float lifeFrac, Dictionary<InstrumentSO, string> failed)
         {
-            string prefix = verdict == MissionVerdict.Success ? "Atención" : verdict == MissionVerdict.PartialSuccess ? "Fallo parcial" : "Fallo";
+            string prefix = verdict == MissionVerdict.Success ? Loc.L("Atención", "Note") : verdict == MissionVerdict.PartialSuccess ? Loc.L("Fallo parcial", "Partial failure") : Loc.L("Fallo", "Failure");
             string regime = d.Orbit != null ? d.Orbit.regime.ToString() : "?";
 
             if (verdict == MissionVerdict.Success)
-                o.explanations.Add($"Éxito: se lograron {science:N0} puntos de ciencia de {target:N0} requeridos, con {o.dataReturnedTotalTB:N1} TB entregados a tierra.");
+                o.explanations.Add(Loc.L($"Éxito: se lograron {science:N0} puntos de ciencia de {target:N0} requeridos, con {o.dataReturnedTotalTB:N1} TB entregados a tierra.",
+                                         $"Success: {science:N0} science points achieved of {target:N0} required, with {o.dataReturnedTotalTB:N1} TB delivered to the ground."));
 
             if (o.dataReturnFraction < 0.98f)
             {
                 var top = d.Instruments.OrderByDescending(i => i.dataVolumeGBPerDay).FirstOrDefault();
                 string who = top != null && d.Instruments.Count > 1
-                    ? $"los instrumentos generaron {o.dataGeneratedGBPerDay:N0} GB/día ({top.displayName} aportó {top.dataVolumeGBPerDay:N0})"
-                    : $"{(top != null ? "el " + top.displayName : "la carga útil")} generó {o.dataGeneratedGBPerDay:N0} GB/día";
-                o.explanations.Add($"{prefix}: {who}, pero la antena {Name(d.Antenna)} en órbita {regime} solo transmitió " +
-                                   $"{o.downlinkGBPerDay:N0} GB/día. Se perdió el {1f - o.dataReturnFraction:P0} de los datos ({o.dataLostTotalTB:N1} TB).");
+                    ? Loc.L($"los instrumentos generaron {o.dataGeneratedGBPerDay:N0} GB/día ({top.displayName} aportó {top.dataVolumeGBPerDay:N0})",
+                            $"the instruments generated {o.dataGeneratedGBPerDay:N0} GB/day ({top.displayName} contributed {top.dataVolumeGBPerDay:N0})")
+                    : Loc.L($"{(top != null ? "el " + top.displayName : "la carga útil")} generó {o.dataGeneratedGBPerDay:N0} GB/día",
+                            $"{(top != null ? top.displayName : "the payload")} generated {o.dataGeneratedGBPerDay:N0} GB/day");
+                o.explanations.Add(Loc.L($"{prefix}: {who}, pero la antena {Name(d.Antenna)} en órbita {regime} solo transmitió " +
+                                         $"{o.downlinkGBPerDay:N0} GB/día. Se perdió el {1f - o.dataReturnFraction:P0} de los datos ({o.dataLostTotalTB:N1} TB).",
+                                         $"{prefix}: {who}, but the {Name(d.Antenna)} antenna in {regime} orbit only transmitted " +
+                                         $"{o.downlinkGBPerDay:N0} GB/day. {1f - o.dataReturnFraction:P0} of the data was lost ({o.dataLostTotalTB:N1} TB)."));
             }
             else if (o.survivedOperations && o.dataRecoveredTB <= 0f)
             {
-                o.explanations.Add($"Bien: el enlace alcanzó — {Name(d.Antenna)} vía {NetworkName(d)} entregó el {o.dataReturnFraction:P0} de los datos ({o.dataReturnedTotalTB:N1} TB).");
+                o.explanations.Add(Loc.L($"Bien: el enlace alcanzó — {Name(d.Antenna)} vía {NetworkName(d)} entregó el {o.dataReturnFraction:P0} de los datos ({o.dataReturnedTotalTB:N1} TB).",
+                                         $"Good: the link was enough — {Name(d.Antenna)} via {NetworkName(d)} delivered {o.dataReturnFraction:P0} of the data ({o.dataReturnedTotalTB:N1} TB)."));
             }
 
             if (o.dataRecoveredTB > 0f)
-                o.explanations.Add($"Bien: tras el amerizaje se recuperaron {o.dataRecoveredTB:N2} TB guardados a bordo que el enlace no alcanzó a enviar. " +
-                                   "Así ocurrió en Artemis II: la tripulación tomó ~10 000 fotos con las 32 cámaras de Orion y cámaras Nikon D5/Z9; " +
-                                   "parte se envió por enlace láser y el resto volvió en tarjetas SD.");
+                o.explanations.Add(Loc.L($"Bien: tras el amerizaje se recuperaron {o.dataRecoveredTB:N2} TB guardados a bordo que el enlace no alcanzó a enviar. " +
+                                         "Así ocurrió en Artemis II: la tripulación tomó ~10 000 fotos con las 32 cámaras de Orion y cámaras Nikon D5/Z9; " +
+                                         "parte se envió por enlace láser y el resto volvió en tarjetas SD.",
+                                         $"Good: after splashdown {o.dataRecoveredTB:N2} TB stored on board, which the link could not send, were recovered. " +
+                                         "That is what happened on Artemis II: the crew took ~10,000 photos with Orion's 32 cameras and Nikon D5/Z9 cameras; " +
+                                         "part was sent over the laser link and the rest came back on SD cards."));
 
             ExplainPhotos(o);
 
             if (powerFrac < 0.98f)
-                o.explanations.Add($"{prefix}: los paneles dieron {genW:N0} W de media (eclipse y degradación incluidos) frente a {t.peakLoadW:N0} W de consumo pico; " +
-                                   $"los instrumentos solo operaron el {powerFrac:P0} del tiempo.");
+                o.explanations.Add(Loc.L($"{prefix}: los paneles dieron {genW:N0} W de media (eclipse y degradación incluidos) frente a {t.peakLoadW:N0} W de consumo pico; " +
+                                         $"los instrumentos solo operaron el {powerFrac:P0} del tiempo.",
+                                         $"{prefix}: the panels gave {genW:N0} W on average (eclipse and degradation included) against a {t.peakLoadW:N0} W peak load; " +
+                                         $"the instruments only operated {powerFrac:P0} of the time."));
             else if (o.survivedOperations)
-                o.explanations.Add($"Bien: energía con margen — {genW:N0} W de media para {t.peakLoadW:N0} W de consumo pico.");
+                o.explanations.Add(Loc.L($"Bien: energía con margen — {genW:N0} W de media para {t.peakLoadW:N0} W de consumo pico.",
+                                         $"Good: power with margin — {genW:N0} W average for a {t.peakLoadW:N0} W peak load."));
 
             float massMargin = Margin(t);
             if (massMargin >= 0.1f)
-                o.explanations.Add($"Bien: margen de masa del {massMargin:P0} frente a la capacidad de {Name(d.LaunchVehicle)}.");
+                o.explanations.Add(Loc.L($"Bien: margen de masa del {massMargin:P0} frente a la capacidad de {Name(d.LaunchVehicle)}.",
+                                         $"Good: {massMargin:P0} mass margin against the capacity of {Name(d.LaunchVehicle)}."));
 
             var poorlyPointed = d.Instruments.Where(i => MissionTelemetry.PointingFactor(i, d.AttitudeControl) < 0.99f).ToList();
             foreach (var i in poorlyPointed)
-                o.explanations.Add($"{prefix}: {Name(d.AttitudeControl)} no apunta con la precisión que pide {i.displayName} " +
-                                   $"(±{i.requiredPointingDeg:0.###}°): obtuvo el {MissionTelemetry.PointingFactor(i, d.AttitudeControl):P0} de su ciencia.");
+                o.explanations.Add(Loc.L($"{prefix}: {Name(d.AttitudeControl)} no apunta con la precisión que pide {i.displayName} " +
+                                         $"(±{i.requiredPointingDeg:0.###}°): obtuvo el {MissionTelemetry.PointingFactor(i, d.AttitudeControl):P0} de su ciencia.",
+                                         $"{prefix}: {Name(d.AttitudeControl)} does not point as precisely as {i.displayName} needs " +
+                                         $"(±{i.requiredPointingDeg:0.###}°): it got {MissionTelemetry.PointingFactor(i, d.AttitudeControl):P0} of its science."));
 
             if (lifeFrac < 1f)
-                o.explanations.Add($"{prefix}: el bus está diseñado para {t.estimatedLifeMonths:N0} meses y la misión planificaba {t.plannedOperationsMonths:N0}.");
+                o.explanations.Add(Loc.L($"{prefix}: el bus está diseñado para {t.estimatedLifeMonths:N0} meses y la misión planificaba {t.plannedOperationsMonths:N0}.",
+                                         $"{prefix}: the bus is designed for {t.estimatedLifeMonths:N0} months and the mission planned {t.plannedOperationsMonths:N0}."));
 
             foreach (var kv in failed)
-                o.explanations.Add($"{prefix}: {kv.Key.displayName} quedó fuera de servicio por {kv.Value}; su ciencia se cortó a partir de ese día.");
+                o.explanations.Add(Loc.L($"{prefix}: {kv.Key.displayName} quedó fuera de servicio por {kv.Value}; su ciencia se cortó a partir de ese día.",
+                                         $"{prefix}: {kv.Key.displayName} went out of service due to {kv.Value}; its science stopped from that day."));
 
             foreach (var e in o.events.Where(e => e.positive))
-                o.explanations.Add($"A favor: {e.displayName} — {e.impact}");
+                o.explanations.Add(Loc.L($"A favor: {e.displayName} — {e.impact}", $"Plus: {e.displayName} — {e.impact}"));
             foreach (var e in o.events.Where(e => e.mitigated && !e.positive))
-                o.explanations.Add($"A favor: tu diseño resistió {e.displayName} — {e.impact}");
+                o.explanations.Add(Loc.L($"A favor: tu diseño resistió {e.displayName} — {e.impact}", $"Plus: your design withstood {e.displayName} — {e.impact}"));
 
             // Eventos negativos no mitigados: su coste también explica el resultado. Si solo recortaron
             // el enlace y aun así llegó todo, el margen de diseño los absorbió (y eso es mérito del equipo).
             if (o.survivedOperations)
                 foreach (var e in o.events.Where(e => !e.positive && !e.mitigated))
                     o.explanations.Add(e.commsOnly && o.dataReturnFraction >= 0.98f
-                        ? $"A favor: el margen del enlace absorbió {e.displayName} — aun con la capacidad recortada llegó el {o.dataReturnFraction:P0} de los datos."
-                        : $"En contra: {e.displayName} — {e.impact}");
+                        ? Loc.L($"A favor: el margen del enlace absorbió {e.displayName} — aun con la capacidad recortada llegó el {o.dataReturnFraction:P0} de los datos.",
+                                $"Plus: the link margin absorbed {e.displayName} — even with reduced capacity {o.dataReturnFraction:P0} of the data arrived.")
+                        : Loc.L($"En contra: {e.displayName} — {e.impact}", $"Minus: {e.displayName} — {e.impact}"));
 
             if (!o.survivedOperations)
             {
                 var fatal = o.events.LastOrDefault();
-                o.explanations.Add($"Fallo: {fatal.displayName} el día {fatal.missionDay:N0}. {fatal.impact} {fatal.mitigation}");
+                o.explanations.Add(Loc.L($"Fallo: {fatal.displayName} el día {fatal.missionDay:N0}. {fatal.impact} {fatal.mitigation}",
+                                         $"Failure: {fatal.displayName} on day {fatal.missionDay:N0}. {fatal.impact} {fatal.mitigation}"));
             }
 
             if (verdict != MissionVerdict.Success && o.survivedOperations)
-                o.explanations.Add($"Ciencia lograda {science:N0} de {target:N0} requerida ({science / Mathf.Max(1f, target):P0}).");
+                o.explanations.Add(Loc.L($"Ciencia lograda {science:N0} de {target:N0} requerida ({science / Mathf.Max(1f, target):P0}).",
+                                         $"Science achieved {science:N0} of {target:N0} required ({science / Mathf.Max(1f, target):P0})."));
 
             if (t.budgetLimitMUSD > 0f)
-                o.explanations.Add($"Programa: ${t.totalCostMUSD:N1} M de ${t.budgetLimitMUSD:N0} M " +
-                                   $"({(t.budgetLimitMUSD - t.totalCostMUSD) / t.budgetLimitMUSD:P0} de reserva) y {t.developmentMonths:N0} meses de desarrollo.");
+                o.explanations.Add(Loc.L($"Programa: ${t.totalCostMUSD:N1} M de ${t.budgetLimitMUSD:N0} M " +
+                                         $"({(t.budgetLimitMUSD - t.totalCostMUSD) / t.budgetLimitMUSD:P0} de reserva) y {t.developmentMonths:N0} meses de desarrollo.",
+                                         $"Program: ${t.totalCostMUSD:N1} M of ${t.budgetLimitMUSD:N0} M " +
+                                         $"({(t.budgetLimitMUSD - t.totalCostMUSD) / t.budgetLimitMUSD:P0} reserve) and {t.developmentMonths:N0} months of development."));
         }
 
         /// <summary>Reparte las explicaciones en las tarjetas "Lo que salió bien" / "Lo que falló".</summary>
@@ -443,7 +474,8 @@ namespace MissionDesign.Simulation
             foreach (var e in o.explanations)
             {
                 bool good = e.StartsWith("Éxito") || e.StartsWith("A favor") || e.StartsWith("Bien")
-                            || (e.StartsWith("Programa:") && reserve >= MissionTelemetry.BudgetReserveFraction);
+                            || e.StartsWith("Success") || e.StartsWith("Plus") || e.StartsWith("Good")
+                            || ((e.StartsWith("Programa:") || e.StartsWith("Program:")) && reserve >= MissionTelemetry.BudgetReserveFraction);
                 (good ? o.wentWell : o.wentWrong).Add(e);
             }
         }
@@ -453,7 +485,8 @@ namespace MissionDesign.Simulation
         {
             o.collaborationScore = Mathf.Clamp(score, 0, 10);
             o.collaborationNotes = notes;
-            o.explanations.Add($"{(o.collaborationScore >= 6 ? "Bien" : "Atención")}: trabajo en equipo {o.collaborationScore}/10 — {notes}.");
+            o.explanations.Add(Loc.L($"{(o.collaborationScore >= 6 ? "Bien" : "Atención")}: trabajo en equipo {o.collaborationScore}/10 — {notes}.",
+                                     $"{(o.collaborationScore >= 6 ? "Good" : "Note")}: teamwork {o.collaborationScore}/10 — {notes}."));
             Classify(o);
         }
 
@@ -468,8 +501,8 @@ namespace MissionDesign.Simulation
             seed = seed,
             difficulty = d.Difficulty,
             scenarioId = d.Scenario != null ? d.Scenario.scenarioId : string.Empty,
-            scenarioName = d.Scenario != null ? d.Scenario.displayName : "(sin escenario)",
-            orbit = d.Orbit != null ? d.Orbit.displayName : "(sin órbita)",
+            scenarioName = d.Scenario != null ? d.Scenario.displayName : Loc.L("(sin escenario)", "(no scenario)"),
+            orbit = d.Orbit != null ? d.Orbit.displayName : Loc.L("(sin órbita)", "(no orbit)"),
             launchVehicle = Name(d.LaunchVehicle),
             bus = Name(d.Bus),
             solarArray = Name(d.SolarArray),
@@ -522,9 +555,9 @@ namespace MissionDesign.Simulation
         private static float Margin(TelemetryReport t) =>
             t.launchCapacityKg > 0f ? (t.launchCapacityKg - t.totalMassKg) / t.launchCapacityKg : 0f;
 
-        private static string Name(LaunchVehicleSO lv) => lv != null ? lv.displayName : "(sin lanzador)";
-        private static string Name(SpacecraftComponentSO c) => c != null ? c.displayName : "(ninguno)";
-        private static string NetworkName(SpacecraftDesign d) => d.GroundNetwork != null ? d.GroundNetwork.displayName : "(sin red terrena)";
+        private static string Name(LaunchVehicleSO lv) => lv != null ? lv.displayName : Loc.L("(sin lanzador)", "(no launcher)");
+        private static string Name(SpacecraftComponentSO c) => c != null ? c.displayName : Loc.L("(ninguno)", "(none)");
+        private static string NetworkName(SpacecraftDesign d) => d.GroundNetwork != null ? d.GroundNetwork.displayName : Loc.L("(sin red terrena)", "(no ground network)");
 
         private static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s.Substring(1);
 
@@ -542,7 +575,7 @@ namespace MissionDesign.Simulation
             bool lunarTarget = orbit != null && (orbit.regime == OrbitRegime.Lunar || flyby);
             bool inSpace = o.launchSucceeded && o.orbitInsertionSucceeded;
             o.reachedMoon = lunarTarget && inSpace;
-            o.photoTarget = lunarTarget ? "Luna" : "Tierra";
+            o.photoTarget = lunarTarget ? Loc.L("Luna", "Moon") : Loc.L("Tierra", "Earth");
             o.photosTaken = o.photosTransmitted = o.photosRecovered = o.photoShots = o.photoShotsAvailable = 0;
             // En órbita terrestre las cámaras fotografían la Tierra; en destino lunar, la Luna.
             if (cams.Count == 0 || !inSpace) return;
@@ -564,16 +597,21 @@ namespace MissionDesign.Simulation
             string cams = string.Join(", ", o.cameras);
             if (o.photosTaken <= 0)
             {
-                o.explanations.Add($"Falló: las cámaras ({cams}) no tomaron fotografías porque la nave no llegó a su órbita.");
+                o.explanations.Add(Loc.L($"Falló: las cámaras ({cams}) no tomaron fotografías porque la nave no llegó a su órbita.",
+                                         $"Failed: the cameras ({cams}) took no photos because the spacecraft did not reach its orbit."));
                 return;
             }
-            string recovered = o.photosRecovered > 0 ? $" y {o.photosRecovered:N0} en tarjetas SD" : string.Empty;
-            string target = o.reachedMoon ? "de la Luna" : "de la Tierra desde órbita";
-            o.explanations.Add($"Bien: las cámaras tomaron ~{o.photosTaken:N0} fotos {target} ({o.photosTransmitted:N0} por el enlace{recovered}). " +
-                               $"Cámaras: {cams}. Revísalas en el «Informe de la exploración»." +
-                               (o.reachedMoon ? string.Empty : " Para fotografiar la Luna elige un destino lunar."));
+            string recovered = o.photosRecovered > 0 ? Loc.L($" y {o.photosRecovered:N0} en tarjetas SD", $" and {o.photosRecovered:N0} on SD cards") : string.Empty;
+            string target = o.reachedMoon ? Loc.L("de la Luna", "of the Moon") : Loc.L("de la Tierra desde órbita", "of Earth from orbit");
+            o.explanations.Add(Loc.L($"Bien: las cámaras tomaron ~{o.photosTaken:N0} fotos {target} ({o.photosTransmitted:N0} por el enlace{recovered}). " +
+                                     $"Cámaras: {cams}. Revísalas en el «Informe de la exploración»." +
+                                     (o.reachedMoon ? string.Empty : " Para fotografiar la Luna elige un destino lunar."),
+                                     $"Good: the cameras took ~{o.photosTaken:N0} photos {target} ({o.photosTransmitted:N0} over the link{recovered}). " +
+                                     $"Cameras: {cams}. See them in the \"Exploration report\"." +
+                                     (o.reachedMoon ? string.Empty : " To photograph the Moon, choose a lunar destination.")));
             if (o.photoShotsAvailable < o.photoShots)
-                o.explanations.Add($"Falló: se perdieron fotografías guardadas a bordo; solo llegaron a tierra las transmitidas ({o.photosTransmitted:N0}).");
+                o.explanations.Add(Loc.L($"Falló: se perdieron fotografías guardadas a bordo; solo llegaron a tierra las transmitidas ({o.photosTransmitted:N0}).",
+                                     $"Failed: photos stored on board were lost; only the transmitted ones reached the ground ({o.photosTransmitted:N0})."));
         }
     }
 }

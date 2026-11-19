@@ -189,13 +189,14 @@ namespace MissionDesign.Simulation
         private static void BuildReadings(TelemetryReport r, SpacecraftDesign d)
         {
             string orbitName = d.Orbit != null ? d.Orbit.regime.ToString() : "—";
-            string lvName = d.LaunchVehicle != null ? d.LaunchVehicle.displayName : "sin cohete";
+            string lvName = d.LaunchVehicle != null ? d.LaunchVehicle.displayName : Loc.L("sin cohete", "no rocket");
 
             // 1. Masa
             var mass = new ResourceReading
             {
                 kind = ResourceKind.Mass, value = r.totalMassKg, limit = r.launchCapacityKg, unit = "kg",
-                summary = $"{r.totalMassKg:N0} kg ({r.massWithMarginKg:N0} kg con margen {MassGrowthAllowance:P0}) / capacidad {lvName} a {orbitName}: {r.launchCapacityKg:N0} kg"
+                summary = Loc.L($"{r.totalMassKg:N0} kg ({r.massWithMarginKg:N0} kg con margen {MassGrowthAllowance:P0}) / capacidad {lvName} a {orbitName}: {r.launchCapacityKg:N0} kg",
+                                $"{r.totalMassKg:N0} kg ({r.massWithMarginKg:N0} kg with {MassGrowthAllowance:P0} margin) / {lvName} capacity to {orbitName}: {r.launchCapacityKg:N0} kg")
             };
             if (d.LaunchVehicle != null && d.Orbit != null && (r.launchCapacityKg <= 0f || r.totalMassKg > r.launchCapacityKg))
                 mass.state = ResourceState.Critical;
@@ -207,22 +208,26 @@ namespace MissionDesign.Simulation
             var power = new ResourceReading
             {
                 kind = ResourceKind.Power, value = r.peakLoadW, limit = r.powerGeneratedAvgW, unit = "W",
-                summary = $"Consumo pico {r.peakLoadW:N0} W / generación media {r.powerGeneratedAvgW:N0} W (balance {r.powerBalanceW:+#,0;-#,0;0} W, EOL {r.powerGeneratedEolW:N0} W)"
+                summary = Loc.L($"Consumo pico {r.peakLoadW:N0} W / generación media {r.powerGeneratedAvgW:N0} W (balance {r.powerBalanceW:+#,0;-#,0;0} W, EOL {r.powerGeneratedEolW:N0} W)",
+                                $"Peak load {r.peakLoadW:N0} W / average generation {r.powerGeneratedAvgW:N0} W (balance {r.powerBalanceW:+#,0;-#,0;0} W, EOL {r.powerGeneratedEolW:N0} W)")
             };
             if (r.powerBalanceW < 0f)
             {
                 power.state = ResourceState.Critical;
-                r.alerts.Add($"DÉFICIT ENERGÉTICO: faltan {-r.powerBalanceW:N0} W. Los instrumentos solo podrán operar el {r.powerAvailabilityFraction:P0} del tiempo.");
+                r.alerts.Add(Loc.L($"DÉFICIT ENERGÉTICO: faltan {-r.powerBalanceW:N0} W. Los instrumentos solo podrán operar el {r.powerAvailabilityFraction:P0} del tiempo.",
+                                  $"POWER DEFICIT: {-r.powerBalanceW:N0} W short. The instruments can only operate {r.powerAvailabilityFraction:P0} of the time."));
             }
             else if (d.Battery != null && r.eclipseEnergyRequiredWh > r.batteryUsableWh)
             {
                 power.state = ResourceState.Warning;
-                r.alerts.Add($"Batería insuficiente para el eclipse: se necesitan {r.eclipseEnergyRequiredWh:N0} Wh y hay {r.batteryUsableWh:N0} Wh útiles.");
+                r.alerts.Add(Loc.L($"Batería insuficiente para el eclipse: se necesitan {r.eclipseEnergyRequiredWh:N0} Wh y hay {r.batteryUsableWh:N0} Wh útiles.",
+                                  $"Battery too small for eclipse: {r.eclipseEnergyRequiredWh:N0} Wh needed and only {r.batteryUsableWh:N0} Wh usable."));
             }
             else if (r.powerGeneratedEolW < r.peakLoadW)
             {
                 power.state = ResourceState.Warning;
-                r.alerts.Add($"Al final de vida los paneles degradados darán {r.powerGeneratedEolW:N0} W, menos que el consumo pico ({r.peakLoadW:N0} W).");
+                r.alerts.Add(Loc.L($"Al final de vida los paneles degradados darán {r.powerGeneratedEolW:N0} W, menos que el consumo pico ({r.peakLoadW:N0} W).",
+                                  $"At end of life the degraded panels will give {r.powerGeneratedEolW:N0} W, less than the peak load ({r.peakLoadW:N0} W)."));
             }
             r.resources.Add(power);
 
@@ -230,7 +235,8 @@ namespace MissionDesign.Simulation
             var budget = new ResourceReading
             {
                 kind = ResourceKind.Budget, value = r.totalCostMUSD, limit = r.budgetLimitMUSD, unit = "$M",
-                summary = $"${r.totalCostMUSD:N1} M (hardware {r.hardwareCostMUSD:N1} + lanzamiento {r.launchCostMUSD:N1} + operaciones {r.operationsCostMUSD:N1}) / límite ${r.budgetLimitMUSD:N0} M"
+                summary = Loc.L($"${r.totalCostMUSD:N1} M (hardware {r.hardwareCostMUSD:N1} + lanzamiento {r.launchCostMUSD:N1} + operaciones {r.operationsCostMUSD:N1}) / límite ${r.budgetLimitMUSD:N0} M",
+                                $"${r.totalCostMUSD:N1} M (hardware {r.hardwareCostMUSD:N1} + launch {r.launchCostMUSD:N1} + operations {r.operationsCostMUSD:N1}) / limit ${r.budgetLimitMUSD:N0} M")
             };
             if (r.budgetLimitMUSD > 0f)
             {
@@ -243,21 +249,25 @@ namespace MissionDesign.Simulation
             var data = new ResourceReading
             {
                 kind = ResourceKind.Data, value = r.dataGeneratedGBPerDay, limit = r.downlinkCapacityGBPerDay, unit = "GB/día",
-                summary = $"Generados {r.dataGeneratedGBPerDay:N1} GB/día; se pierden {r.dataLostGBPerDay:N1} GB/día"
+                summary = Loc.L($"Generados {r.dataGeneratedGBPerDay:N1} GB/día; se pierden {r.dataLostGBPerDay:N1} GB/día",
+                                $"Generated {r.dataGeneratedGBPerDay:N1} GB/day; {r.dataLostGBPerDay:N1} GB/day lost")
             };
             // 5. Comunicaciones
-            string band = d.Antenna != null ? d.Antenna.displayName : "sin antena";
-            string net = d.GroundNetwork != null ? d.GroundNetwork.displayName : "sin red terrena";
+            string band = d.Antenna != null ? d.Antenna.displayName : Loc.L("sin antena", "no antenna");
+            string net = d.GroundNetwork != null ? d.GroundNetwork.displayName : Loc.L("sin red terrena", "no ground network");
             var comms = new ResourceReading
             {
                 kind = ResourceKind.Comms, value = r.downlinkCapacityGBPerDay, limit = r.dataGeneratedGBPerDay, unit = "GB/día",
-                summary = $"{band} + {net} en {orbitName}: {r.downlinkRateMbps:N2} Mbps × {r.contactHoursPerDay:N1} h/día = {r.downlinkCapacityGBPerDay:N1} GB/día"
+                summary = Loc.L($"{band} + {net} en {orbitName}: {r.downlinkRateMbps:N2} Mbps × {r.contactHoursPerDay:N1} h/día = {r.downlinkCapacityGBPerDay:N1} GB/día",
+                                $"{band} + {net} in {orbitName}: {r.downlinkRateMbps:N2} Mbps × {r.contactHoursPerDay:N1} h/day = {r.downlinkCapacityGBPerDay:N1} GB/day")
             };
             if (r.dataLostGBPerDay > 0f)
             {
                 data.state = comms.state = ResourceState.Critical;
-                r.alerts.Add($"Pérdida de ciencia: los instrumentos generan {r.dataGeneratedGBPerDay:N1} GB/día, pero {band} en {orbitName} " +
-                             $"solo transmite {r.downlinkCapacityGBPerDay:N1} GB/día ({r.dataReturnFraction:P0} de retorno).");
+                r.alerts.Add(Loc.L($"Pérdida de ciencia: los instrumentos generan {r.dataGeneratedGBPerDay:N1} GB/día, pero {band} en {orbitName} " +
+                                   $"solo transmite {r.downlinkCapacityGBPerDay:N1} GB/día ({r.dataReturnFraction:P0} de retorno).",
+                                   $"Science loss: the instruments generate {r.dataGeneratedGBPerDay:N1} GB/day, but {band} in {orbitName} " +
+                                   $"only transmits {r.downlinkCapacityGBPerDay:N1} GB/day ({r.dataReturnFraction:P0} returned)."));
             }
             else if (r.dataGeneratedGBPerDay > 0.8f * r.downlinkCapacityGBPerDay)
             {
@@ -270,14 +280,16 @@ namespace MissionDesign.Simulation
             var time = new ResourceReading
             {
                 kind = ResourceKind.Time, value = r.developmentMonths, limit = r.maxDevelopmentMonths, unit = "meses",
-                summary = $"Desarrollo {r.developmentMonths:N0} / {r.maxDevelopmentMonths:N0} meses; vida útil {r.estimatedLifeMonths:N0} meses (plan {r.plannedOperationsMonths:N0})"
+                summary = Loc.L($"Desarrollo {r.developmentMonths:N0} / {r.maxDevelopmentMonths:N0} meses; vida útil {r.estimatedLifeMonths:N0} meses (plan {r.plannedOperationsMonths:N0})",
+                                $"Development {r.developmentMonths:N0} / {r.maxDevelopmentMonths:N0} months; design life {r.estimatedLifeMonths:N0} months (plan {r.plannedOperationsMonths:N0})")
             };
             if (r.maxDevelopmentMonths > 0f && r.developmentMonths > r.maxDevelopmentMonths)
                 time.state = ResourceState.Critical;
             else if (r.estimatedLifeMonths > 0f && r.estimatedLifeMonths < r.plannedOperationsMonths)
             {
                 time.state = ResourceState.Warning;
-                r.alerts.Add($"La vida de diseño del bus ({r.estimatedLifeMonths:N0} meses) es menor que la misión planificada ({r.plannedOperationsMonths:N0}).");
+                r.alerts.Add(Loc.L($"La vida de diseño del bus ({r.estimatedLifeMonths:N0} meses) es menor que la misión planificada ({r.plannedOperationsMonths:N0}).",
+                                  $"The bus design life ({r.estimatedLifeMonths:N0} months) is shorter than the planned mission ({r.plannedOperationsMonths:N0})."));
             }
             r.resources.Add(time);
         }

@@ -279,10 +279,10 @@ namespace MissionDesign.UI.Visual3D
                 decorations.Add(number);
                 badges.Add(number.transform);
 
-                AddLegendLine(LegendRow(m.number), $"<b>{m.number}</b>  {m.title}", ida ? new Color(0.88f, 0.84f, 1f) : new Color(1f, 0.88f, 0.66f), null);
+                AddLegendLine(LegendRow(m.number), $"<b>{m.number}</b>  {m.Title}", ida ? new Color(0.88f, 0.84f, 1f) : new Color(1f, 0.88f, 0.66f), null);
             }
-            AddLegendLine(LegendRow(9) - 1.5f, "Ida", idaColor, outboundMaterial);
-            AddLegendLine(LegendRow(10) - 1.5f, "Vuelta", vueltaColor, returnMaterial);
+            AddLegendLine(LegendRow(9) - 1.5f, Loc.L("Ida", "Outbound"), idaColor, outboundMaterial);
+            AddLegendLine(LegendRow(10) - 1.5f, Loc.L("Vuelta", "Return"), vueltaColor, returnMaterial);
 
             BuildCraft();
             if (marker != null)
@@ -644,23 +644,23 @@ namespace MissionDesign.UI.Visual3D
             {
                 switch (p)
                 {
-                    case MissionPhase.Launch: return "Despegue, órbita baja y órbita terrestre alta (~1 día de pruebas)";
-                    case MissionPhase.OrbitInsertion: return "El motor principal impulsa la nave hacia la Luna (TLI) · ida en morado";
-                    case MissionPhase.ScienceOperations: return "Correcciones de rumbo y sobrevuelo por la cara oculta";
-                    case MissionPhase.DataTransmission: return "Retorno libre · vuelta en naranja · enlace láser";
-                    case MissionPhase.ReturnAndRecovery: return "Reentrada y amerizaje · recuperación de tarjetas SD";
-                    default: return "Trayectoria de retorno libre calculada (CR3BP) · no a escala";
+                    case MissionPhase.Launch: return Loc.L("Despegue, órbita baja y órbita terrestre alta (~1 día de pruebas)", "Liftoff, low orbit and high Earth orbit (~1 day of tests)");
+                    case MissionPhase.OrbitInsertion: return Loc.L("El motor principal impulsa la nave hacia la Luna (TLI) · ida en morado", "The main engine sends the spacecraft to the Moon (TLI) · outbound in purple");
+                    case MissionPhase.ScienceOperations: return Loc.L("Correcciones de rumbo y sobrevuelo por la cara oculta", "Trajectory corrections and flyby over the far side");
+                    case MissionPhase.DataTransmission: return Loc.L("Retorno libre · vuelta en naranja · enlace láser", "Free return · return leg in orange · laser link");
+                    case MissionPhase.ReturnAndRecovery: return Loc.L("Reentrada y amerizaje · recuperación de tarjetas SD", "Reentry and splashdown · SD card recovery");
+                    default: return Loc.L("Trayectoria de retorno libre calculada (CR3BP) · no a escala", "Computed free-return trajectory (CR3BP) · not to scale");
                 }
             }
             bool lunar = regime == OrbitRegime.Lunar;
             switch (p)
             {
-                case MissionPhase.Launch: return "Ascenso a la órbita de estacionamiento (~200 km)";
+                case MissionPhase.Launch: return Loc.L("Ascenso a la órbita de estacionamiento (~200 km)", "Ascent to the parking orbit (~200 km)");
                 case MissionPhase.OrbitInsertion:
-                    return lunar ? "Inyección translunar (TLI) y crucero hacia la Luna" : $"Transferencia de Hohmann hacia {regime}";
-                case MissionPhase.ScienceOperations: return lunar ? "Órbita lunar: operaciones científicas" : $"Órbita {regime}: operaciones científicas";
-                case MissionPhase.DataTransmission: return "Enlace de bajada de datos con la red terrena";
-                default: return lunar ? "Distancia Tierra-Luna no a escala" : string.Empty;
+                    return lunar ? Loc.L("Inyección translunar (TLI) y crucero hacia la Luna", "Trans-lunar injection (TLI) and cruise to the Moon") : Loc.L($"Transferencia de Hohmann hacia {regime}", $"Hohmann transfer to {regime}");
+                case MissionPhase.ScienceOperations: return lunar ? Loc.L("Órbita lunar: operaciones científicas", "Lunar orbit: science operations") : Loc.L($"Órbita {regime}: operaciones científicas", $"{regime} orbit: science operations");
+                case MissionPhase.DataTransmission: return Loc.L("Enlace de bajada de datos con la red terrena", "Data downlink to the ground network");
+                default: return lunar ? Loc.L("Distancia Tierra-Luna no a escala", "Earth-Moon distance not to scale") : string.Empty;
             }
         }
 

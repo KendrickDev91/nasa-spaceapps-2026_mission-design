@@ -45,7 +45,7 @@ namespace MissionDesign.UI.Visual3D
             Set(1, $"FL {utc.AddHours(-5):HH:mm:ss}");
             Set(2, $"MET {Met()}");
             Set(3, Countdown());
-            Set(4, orbit != null && orbit.ShowsFreeReturn && launchTime > 0f ? $"LUNA {orbit.DistanceMoonKm / 1000f:N0} Mm" : "LUNA 384 Mm");
+            Set(4, orbit != null && orbit.ShowsFreeReturn && launchTime > 0f ? $"{Loc.L("LUNA", "MOON")} {orbit.DistanceMoonKm / 1000f:N0} Mm" : $"{Loc.L("LUNA", "MOON")} 384 Mm");
             string[] dsn = { "GOLDSTONE", "MADRID", "CANBERRA" };
             Set(5, $"DSN {dsn[(utc.Hour / 8) % 3]}");
         }

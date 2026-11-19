@@ -36,7 +36,7 @@ namespace MissionDesign.Simulation
 
         public static LeaderboardEntry From(MissionOutcomeReport o, string team) => new LeaderboardEntry
         {
-            team = string.IsNullOrWhiteSpace(team) ? "Equipo" : team.Trim(),
+            team = string.IsNullOrWhiteSpace(team) ? MissionDesign.Core.Loc.L("Equipo", "Team") : team.Trim(),
             scenarioId = o.scenarioId,
             scenarioName = o.scenarioName,
             difficulty = o.difficulty,

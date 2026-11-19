@@ -21,6 +21,11 @@ namespace MissionDesign.Simulation
         public int number;
         public string title;
         public string detail;
+        public string titleEn;
+        public string detailEn;
+        /// <summary>Título en el idioma actual (la trayectoria se calcula una sola vez y guarda ambos).</summary>
+        public string Title => MissionDesign.Core.Loc.L(title, titleEn);
+        public string Detail => MissionDesign.Core.Loc.L(detail, detailEn);
         public float tDays;
         public float xKm;
         public float yKm;
@@ -370,22 +375,31 @@ namespace MissionDesign.Simulation
                 return best;
             }
 
-            void Add(int n, string title, string detail, TrajectorySample p) =>
-                s.milestones.Add(new TrajectoryMilestone { number = n, title = title, detail = detail, tDays = p.tDays, xKm = p.xKm, yKm = p.yKm });
+            void Add(int n, string title, string detail, TrajectorySample p, string titleEn, string detailEn) =>
+                s.milestones.Add(new TrajectoryMilestone { number = n, title = title, detail = detail, titleEn = titleEn, detailEn = detailEn,
+                                                           tDays = p.tDays, xKm = p.xKm, yKm = p.yKm });
 
             var pre = s.preTliSamples.Count > 0 ? s.preTliSamples : s.samples;
             var last = s.samples[s.samples.Count - 1];
             float heoStart = pre.Count > 41 ? pre[40].tDays : s.launchDays;
-            Add(1, "Despegue: Florida", "El cohete SLS despega y deja la nave en una órbita baja de estacionamiento", pre[0]);
-            Add(2, "Hacia la órbita alta", $"La etapa superior eleva el apogeo a ~{s.highOrbitApogeeKm:N0} km (~1 día de pruebas)", At(pre, heoStart + 0.08f));
+            Add(1, "Despegue: Florida", "El cohete SLS despega y deja la nave en una órbita baja de estacionamiento", pre[0],
+                "Liftoff: Florida", "The SLS rocket lifts off and leaves the spacecraft in a low parking orbit");
+            Add(2, "Hacia la órbita alta", $"La etapa superior eleva el apogeo a ~{s.highOrbitApogeeKm:N0} km (~1 día de pruebas)", At(pre, heoStart + 0.08f),
+                "To high Earth orbit", $"The upper stage raises the apogee to ~{s.highOrbitApogeeKm:N0} km (~1 day of tests)");
             // Como en el diagrama de la ESA, el 3 queda sobre la órbita alta (Orion se separa ~3 h 24 min tras el despegue
             // y pasa el resto de esa vuelta de ~1 día haciendo pruebas de proximidad).
-            Add(3, "Se separa del lanzador", "Orion se separa de la etapa superior y practica maniobras de proximidad", At(pre, heoStart + 0.4f));
-            Add(4, "Motor rumbo a la Luna (TLI)", $"El motor principal se enciende e impulsa la cápsula a la Luna: Δv ≈ {s.tliDeltaVKmS:F2} km/s", s.samples[0]);
-            Add(5, "Sobrevuelo lunar", $"{s.flybyAltitudeKm:N0} km sobre la cara oculta, día {s.flybyTimeDays:F1}", At(s.samples, s.flybyTimeDays));
-            Add(6, "Regreso a la Tierra", "Retorno libre: la gravedad lunar devuelve la nave sin encender el motor", At(s.samples, (s.flybyTimeDays + s.totalDays) * 0.55f));
-            Add(7, "El módulo de tripulación se separa", "Se suelta el módulo de servicio; solo la cápsula entra en la atmósfera", At(s.samples, s.totalDays - 0.15f));
-            Add(8, "Amerizaje: océano Pacífico", $"Reentrada a {EntryInterfaceKm:N0} km y paracaídas; día {s.totalDays:F1}", last);
+            Add(3, "Se separa del lanzador", "Orion se separa de la etapa superior y practica maniobras de proximidad", At(pre, heoStart + 0.4f),
+                "Separates from the launcher", "Orion separates from the upper stage and practices proximity maneuvers");
+            Add(4, "Motor rumbo a la Luna (TLI)", $"El motor principal se enciende e impulsa la cápsula a la Luna: Δv ≈ {s.tliDeltaVKmS:F2} km/s", s.samples[0],
+                "Burn toward the Moon (TLI)", $"The main engine fires and sends the capsule to the Moon: Δv ≈ {s.tliDeltaVKmS:F2} km/s");
+            Add(5, "Sobrevuelo lunar", $"{s.flybyAltitudeKm:N0} km sobre la cara oculta, día {s.flybyTimeDays:F1}", At(s.samples, s.flybyTimeDays),
+                "Lunar flyby", $"{s.flybyAltitudeKm:N0} km above the far side, day {s.flybyTimeDays:F1}");
+            Add(6, "Regreso a la Tierra", "Retorno libre: la gravedad lunar devuelve la nave sin encender el motor", At(s.samples, (s.flybyTimeDays + s.totalDays) * 0.55f),
+                "Return to Earth", "Free return: lunar gravity sends the spacecraft back without firing the engine");
+            Add(7, "El módulo de tripulación se separa", "Se suelta el módulo de servicio; solo la cápsula entra en la atmósfera", At(s.samples, s.totalDays - 0.15f),
+                "Crew module separates", "The service module is released; only the capsule enters the atmosphere");
+            Add(8, "Amerizaje: océano Pacífico", $"Reentrada a {EntryInterfaceKm:N0} km y paracaídas; día {s.totalDays:F1}", last,
+                "Splashdown: Pacific Ocean", $"Reentry at {EntryInterfaceKm:N0} km and parachutes; day {s.totalDays:F1}");
         }
     }
 }

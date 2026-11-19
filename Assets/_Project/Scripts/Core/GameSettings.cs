@@ -32,9 +32,9 @@ namespace MissionDesign.Core
 
         public static string DisplayModeLabel(FullScreenMode m) => m switch
         {
-            FullScreenMode.ExclusiveFullScreen => "Pantalla completa",
-            FullScreenMode.FullScreenWindow => "Ventana sin bordes",
-            _ => "Ventana"
+            FullScreenMode.ExclusiveFullScreen => Loc.L("Pantalla completa", "Fullscreen"),
+            FullScreenMode.FullScreenWindow => Loc.L("Ventana sin bordes", "Borderless window"),
+            _ => Loc.L("Ventana", "Windowed")
         };
 
         /// <summary>Resoluciones de la pantalla sin duplicados por frecuencia, de menor a mayor.</summary>

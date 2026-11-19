@@ -54,8 +54,8 @@ namespace MissionDesign.UI
                     label.color = isActive ? Color.white : UiTheme.TextDim;
                 }
             }
-            if (playersText != null) playersText.text = $"{roles.PlayerCount} jugador{(roles.PlayerCount > 1 ? "es" : "")}";
-            if (turnText != null) turnText.text = $"Turno: <b>{roles.PlayerName(player)}</b>";
+            if (playersText != null) playersText.text = Loc.L($"{roles.PlayerCount} jugador{(roles.PlayerCount > 1 ? "es" : "")}", $"{roles.PlayerCount} player{(roles.PlayerCount > 1 ? "s" : "")}");
+            if (turnText != null) turnText.text = $"{Loc.L("Turno", "Turn")}: <b>{roles.PlayerName(player)}</b>";
         }
     }
 }

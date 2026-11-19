@@ -139,47 +139,49 @@ namespace MissionDesign.Simulation
         public string ToJson() => JsonUtility.ToJson(this, true);
 
         public static string VerdictLabel(MissionVerdict v) =>
-            v == MissionVerdict.Success ? "ÉXITO" : v == MissionVerdict.PartialSuccess ? "ÉXITO PARCIAL" : "FALLO";
+            v == MissionVerdict.Success ? Loc.L("ÉXITO", "SUCCESS") : v == MissionVerdict.PartialSuccess ? Loc.L("ÉXITO PARCIAL", "PARTIAL SUCCESS") : Loc.L("FALLO", "FAILURE");
 
         public string ToText()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"=== REPORTE DE MISIÓN — {GameInfo.Title} ({GameInfo.Event}) ===");
-            sb.AppendLine($"Generado (UTC): {generatedAtUtc}   Semilla: {seed}   Dificultad: {difficulty}");
-            sb.AppendLine($"Escenario: {scenarioName} ({scenarioId})");
-            sb.AppendLine($"Órbita: {orbit}   Lanzador: {launchVehicle}   Red terrena: {groundNetwork}");
-            sb.AppendLine($"Bus: {bus}   Paneles: {solarArray}   Batería: {battery}   Antena: {antenna}");
+            sb.AppendLine($"=== {Loc.L("REPORTE DE MISIÓN", "MISSION REPORT")} — {GameInfo.Title} ({GameInfo.Event}) ===");
+            sb.AppendLine(Loc.L($"Generado (UTC): {generatedAtUtc}   Semilla: {seed}   Dificultad: {difficulty}", $"Generated (UTC): {generatedAtUtc}   Seed: {seed}   Difficulty: {difficulty}"));
+            sb.AppendLine($"{Loc.L("Escenario", "Scenario")}: {scenarioName} ({scenarioId})");
+            sb.AppendLine(Loc.L($"Órbita: {orbit}   Lanzador: {launchVehicle}   Red terrena: {groundNetwork}", $"Orbit: {orbit}   Launcher: {launchVehicle}   Ground network: {groundNetwork}"));
+            sb.AppendLine(Loc.L($"Bus: {bus}   Paneles: {solarArray}   Batería: {battery}   Antena: {antenna}", $"Bus: {bus}   Panels: {solarArray}   Battery: {battery}   Antenna: {antenna}"));
             if (difficulty == DifficultyLevel.Advanced)
-                sb.AppendLine($"Computadora: {computer}   Control de orientación: {attitudeControl}");
-            sb.AppendLine($"Instrumentos: {string.Join(", ", instruments)}");
+                sb.AppendLine(Loc.L($"Computadora: {computer}   Control de orientación: {attitudeControl}", $"Computer: {computer}   Attitude control: {attitudeControl}"));
+            sb.AppendLine($"{Loc.L("Instrumentos", "Instruments")}: {string.Join(", ", instruments)}");
             sb.AppendLine();
-            sb.AppendLine($"VEREDICTO: {VerdictLabel(verdict)} — {verdictTitle}   Puntuación: {score}/100 (rango {rank})");
-            if (!string.IsNullOrEmpty(similarMission)) sb.AppendLine($"Tu misión se parece a: {similarMission} — {similarMissionDescription}");
-            sb.AppendLine($"Ciencia lograda: {scienceAchieved:N0} / {scienceTarget:N0} requerida");
-            sb.AppendLine($"Datos: {dataGeneratedGBPerDay:N1} GB/día generados, {downlinkGBPerDay:N1} GB/día de enlace " +
-                          $"({dataReturnFraction:P0} de retorno) → {dataReturnedTotalTB:N1} TB recibidos, {dataLostTotalTB:N1} TB perdidos");
-            sb.AppendLine($"Operación: {achievedOperationsDays:N0} de {plannedOperationsDays:N0} días · energía disponible {powerAvailabilityFraction:P0}");
-            sb.AppendLine($"Programa: ${totalCostMUSD:N1} M de ${budgetLimitMUSD:N0} M · desarrollo {developmentMonths:N0} meses");
+            sb.AppendLine(Loc.L($"VEREDICTO: {VerdictLabel(verdict)} — {verdictTitle}   Puntuación: {score}/100 (rango {rank})", $"VERDICT: {VerdictLabel(verdict)} — {verdictTitle}   Score: {score}/100 (rank {rank})"));
+            if (!string.IsNullOrEmpty(similarMission)) sb.AppendLine($"{Loc.L("Tu misión se parece a", "Your mission resembles")}: {similarMission} — {similarMissionDescription}");
+            sb.AppendLine(Loc.L($"Ciencia lograda: {scienceAchieved:N0} / {scienceTarget:N0} requerida", $"Science achieved: {scienceAchieved:N0} / {scienceTarget:N0} required"));
+            sb.AppendLine(Loc.L($"Datos: {dataGeneratedGBPerDay:N1} GB/día generados, {downlinkGBPerDay:N1} GB/día de enlace " +
+                                $"({dataReturnFraction:P0} de retorno) → {dataReturnedTotalTB:N1} TB recibidos, {dataLostTotalTB:N1} TB perdidos",
+                                $"Data: {dataGeneratedGBPerDay:N1} GB/day generated, {downlinkGBPerDay:N1} GB/day of link " +
+                                $"({dataReturnFraction:P0} returned) → {dataReturnedTotalTB:N1} TB received, {dataLostTotalTB:N1} TB lost"));
+            sb.AppendLine(Loc.L($"Operación: {achievedOperationsDays:N0} de {plannedOperationsDays:N0} días · energía disponible {powerAvailabilityFraction:P0}", $"Operations: {achievedOperationsDays:N0} of {plannedOperationsDays:N0} days · power available {powerAvailabilityFraction:P0}"));
+            sb.AppendLine(Loc.L($"Programa: ${totalCostMUSD:N1} M de ${budgetLimitMUSD:N0} M · desarrollo {developmentMonths:N0} meses", $"Program: ${totalCostMUSD:N1} M of ${budgetLimitMUSD:N0} M · development {developmentMonths:N0} months"));
             sb.AppendLine();
-            sb.AppendLine("LO QUE SALIÓ BIEN:");
+            sb.AppendLine(Loc.L("LO QUE SALIÓ BIEN:", "WHAT WENT WELL:"));
             foreach (var e in wentWell) sb.AppendLine($" + {e}");
-            sb.AppendLine("LO QUE FALLÓ:");
+            sb.AppendLine(Loc.L("LO QUE FALLÓ:", "WHAT WENT WRONG:"));
             foreach (var e in wentWrong) sb.AppendLine($" - {e}");
             sb.AppendLine();
-            sb.AppendLine("POR QUÉ (todas las explicaciones):");
+            sb.AppendLine(Loc.L("POR QUÉ (todas las explicaciones):", "WHY (all explanations):"));
             foreach (var e in explanations) sb.AppendLine($" · {e}");
             sb.AppendLine();
-            sb.AppendLine("EVENTOS:");
-            if (events.Count == 0) sb.AppendLine(" - (ninguno)");
+            sb.AppendLine(Loc.L("EVENTOS:", "EVENTS:"));
+            if (events.Count == 0) sb.AppendLine(Loc.L(" - (ninguno)", " - (none)"));
             foreach (var e in events)
             {
-                sb.AppendLine($" - Día {e.missionDay:N0} · {e.displayName}: {e.impact}");
-                if (!string.IsNullOrEmpty(e.mitigation)) sb.AppendLine($"     Mitigación: {e.mitigation}");
-                if (!string.IsNullOrEmpty(e.educationalFact)) sb.AppendLine($"     Dato: {e.educationalFact}");
+                sb.AppendLine($" - {Loc.L("Día", "Day")} {e.missionDay:N0} · {e.displayName}: {e.impact}");
+                if (!string.IsNullOrEmpty(e.mitigation)) sb.AppendLine($"     {Loc.L("Mitigación", "Mitigation")}: {e.mitigation}");
+                if (!string.IsNullOrEmpty(e.educationalFact)) sb.AppendLine($"     {Loc.L("Dato", "Fact")}: {e.educationalFact}");
             }
             sb.AppendLine();
-            sb.AppendLine("CRONOLOGÍA:");
-            foreach (var t in timeline) sb.AppendLine($" [{t.phase}] día {t.missionDay:N0}: {t.message}");
+            sb.AppendLine(Loc.L("CRONOLOGÍA:", "TIMELINE:"));
+            foreach (var t in timeline) sb.AppendLine($" [{t.phase}] {Loc.L("día", "day")} {t.missionDay:N0}: {t.message}");
             return sb.ToString();
         }
     }

@@ -522,7 +522,7 @@ namespace MissionDesign.Editor
             var bar = Panel("TopBar", root, UiTheme.Panel);
             Place(bar, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), Vector2.zero, new Vector2(0, 96));
 
-            var title = Text("Title", bar, $"<b>{GameInfo.Title}</b>\n<size=60%><color=#9FB3D1>{GameInfo.Tagline}</color></size>", 30, UiTheme.Text, TextAlignmentOptions.MidlineLeft);
+            var title = Text("Title", bar, GameInfo.TopBarEs, 30, UiTheme.Text, TextAlignmentOptions.MidlineLeft);
             Place(title.rectTransform, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 0.5f), new Vector2(24, 0), new Vector2(420, 0));
 
             var row = NewRect("RoleTabs", bar);

@@ -1,3 +1,4 @@
+using MissionDesign.Core;
 using UnityEngine;
 
 namespace MissionDesign.Exploration
@@ -45,8 +46,8 @@ namespace MissionDesign.Exploration
         public string PromptFor(Transform caller)
         {
             if (caller != null && IsOnPlatform(caller.position))
-                return AtTop ? "Bajar en el ascensor a la losa" : "Subir en el ascensor al brazo de acceso (75 m)";
-            return "Llamar al ascensor";
+                return AtTop ? Loc.L("Bajar en el ascensor a la losa", "Take the elevator down to the pad") : Loc.L("Subir en el ascensor al brazo de acceso (75 m)", "Take the elevator up to the access arm (75 m)");
+            return Loc.L("Llamar al ascensor", "Call the elevator");
         }
 
         public bool IsOnPlatform(Vector3 p)

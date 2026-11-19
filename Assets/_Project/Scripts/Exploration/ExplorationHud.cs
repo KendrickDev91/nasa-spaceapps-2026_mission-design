@@ -75,7 +75,8 @@ namespace MissionDesign.Exploration
         public bool IsBlocking => Visible(infoPanel) || Visible(pauseMenu) || MissionDesign.UI.OptionsMenu.IsOpen;
         public int PageCount => pages?.Length ?? 0;
         public string CurrentTitle => infoTitle != null ? infoTitle.text : string.Empty;
-        public string CurrentZone => zoneText != null ? zoneText.text : string.Empty;
+        /// <summary>Zona actual con su nombre original (español): la lógica de vestuario y las pruebas la usan así.</summary>
+        public string CurrentZone { get; private set; } = string.Empty;
         public Transform[] TravelPoints => travelPoints;
         /// <summary>Bloqueo de entrada durante una animación (p. ej. sentarse en la consola).</summary>
         public bool CutsceneLock { get; set; }
@@ -94,7 +95,7 @@ namespace MissionDesign.Exploration
             Hook(resumeButton, () => Show(pauseMenu, false));
             Hook(designButton, () => SceneFlow.OpenMissionDesign());
             Hook(plansButton, () => { Show(pauseMenu, false); OpenPlans(); });
-            Hook(controlsButton, () => { Show(pauseMenu, false); OpenInfo(new[] { new[] { "CONTROLES", SpaceCenterContent.Controls } }); });
+            Hook(controlsButton, () => { Show(pauseMenu, false); OpenInfo(new[] { new[] { Loc.L("CONTROLES", "CONTROLS"), SpaceCenterContent.Controls } }); });
             Hook(quitButton, () => SceneFlow.OpenMissionDesign(false));
             Hook(optionsButton, MissionDesign.UI.OptionsMenu.Open);
             if (travelButtons != null)
@@ -148,13 +149,14 @@ namespace MissionDesign.Exploration
             UpdateMap();
             Show(promptGroup, current != null);
             if (current != null && promptText != null)
-                promptText.text = $"<b>[E]</b>  {(current.kind == InteractionKind.Elevator && current.elevator != null && player != null ? current.elevator.PromptFor(player.transform) : current.prompt)}";
+                promptText.text = $"<b>[E]</b>  {(current.kind == InteractionKind.Elevator && current.elevator != null && player != null ? current.elevator.PromptFor(player.transform) : Loc.Static(current.prompt))}";
             if (current != null && kb != null && kb.eKey.wasPressedThisFrame) Interact(current);
 
             if (zoneText != null && player != null)
             {
                 string zone = ZoneAt(player.transform.position);
-                zoneText.text = zone;
+                CurrentZone = zone;
+                zoneText.text = Loc.Static(zone);
                 UpdateOutfit(zone);
             }
         }
@@ -177,10 +179,10 @@ namespace MissionDesign.Exploration
             playerOutfit.Set(next);
             ShowToast(next switch
             {
-                Outfit.CleanRoom => "Equipo: traje de sala limpia (mono, capucha y mascarilla · ISO 14644)",
-                Outfit.AssemblyEngineer => "Equipo: casco de seguridad para la nave de ensamblaje",
-                Outfit.Astronaut => "Equipo: traje de lanzamiento y entrada de la tripulación",
-                _ => "Equipo: ropa de ingeniero aeroespacial"
+                Outfit.CleanRoom => Loc.L("Equipo: traje de sala limpia (mono, capucha y mascarilla · ISO 14644)", "Gear: clean-room suit (coverall, hood and mask · ISO 14644)"),
+                Outfit.AssemblyEngineer => Loc.L("Equipo: casco de seguridad para la nave de ensamblaje", "Gear: hard hat for the assembly hall"),
+                Outfit.Astronaut => Loc.L("Equipo: traje de lanzamiento y entrada de la tripulación", "Gear: crew launch and entry suit"),
+                _ => Loc.L("Equipo: ropa de ingeniero aeroespacial", "Gear: aerospace engineer clothes")
             });
         }
 

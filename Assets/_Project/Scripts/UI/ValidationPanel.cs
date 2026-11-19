@@ -74,7 +74,7 @@ namespace MissionDesign.UI
         public void Approve()
         {
             roles.ApproveAsActivePlayer();
-            SetMessage($"{roles.PlayerName(roles.PlayerForRole(roles.ActiveRole))} aprobó el diseño.");
+            SetMessage($"{roles.PlayerName(roles.PlayerForRole(roles.ActiveRole))} {Loc.L("aprobó el diseño.", "approved the design.")}");
         }
 
         public void Launch()
@@ -88,7 +88,7 @@ namespace MissionDesign.UI
         private void OnPhaseChanged(MissionPhase phase)
         {
             if (statusText != null && phase != MissionPhase.Design)
-                statusText.text = $"<color={UiTheme.Hex(UiTheme.Accent)}>FASE: {phase.ToString().ToUpperInvariant()}</color>";
+                statusText.text = $"<color={UiTheme.Hex(UiTheme.Accent)}>{Loc.L("FASE", "PHASE")}: {phase.ToString().ToUpperInvariant()}</color>";
             RefreshConsensus();
         }
 
@@ -101,8 +101,10 @@ namespace MissionDesign.UI
             if (statusText != null)
             {
                 statusText.text = v.canLaunch
-                    ? $"<color={UiTheme.Hex(UiTheme.Ok)}>LISTO PARA LANZAR</color>  <size=70%>{warnings} advertencia(s) · Δv {v.requiredDeltaVKmS:F1} km/s · margen {v.capacityMarginFraction:P0}</size>"
-                    : $"<color={UiTheme.Hex(UiTheme.Critical)}>LANZAMIENTO BLOQUEADO</color>  <size=70%>{blocking} conflicto(s) · {warnings} advertencia(s)</size>";
+                    ? Loc.L($"<color={UiTheme.Hex(UiTheme.Ok)}>LISTO PARA LANZAR</color>  <size=70%>{warnings} advertencia(s) · Δv {v.requiredDeltaVKmS:F1} km/s · margen {v.capacityMarginFraction:P0}</size>",
+                            $"<color={UiTheme.Hex(UiTheme.Ok)}>READY TO LAUNCH</color>  <size=70%>{warnings} warning(s) · Δv {v.requiredDeltaVKmS:F1} km/s · margin {v.capacityMarginFraction:P0}</size>")
+                    : Loc.L($"<color={UiTheme.Hex(UiTheme.Critical)}>LANZAMIENTO BLOQUEADO</color>  <size=70%>{blocking} conflicto(s) · {warnings} advertencia(s)</size>",
+                            $"<color={UiTheme.Hex(UiTheme.Critical)}>LAUNCH BLOCKED</color>  <size=70%>{blocking} conflict(s) · {warnings} warning(s)</size>");
             }
 
             if (issuesText != null)
@@ -115,8 +117,8 @@ namespace MissionDesign.UI
                                   $"<size=85%><color={UiTheme.Hex(UiTheme.TextDim)}>{issue.explanation}</color></size>");
                 }
                 int hidden = v.issues.Count - maxIssues;
-                if (hidden > 0) sb.Append($"<size=80%>… y {hidden} más</size>");
-                issuesText.text = v.issues.Count == 0 ? "Sin conflictos: el diseño es consistente." : sb.ToString();
+                if (hidden > 0) sb.Append(Loc.L($"<size=80%>… y {hidden} más</size>", $"<size=80%>… and {hidden} more</size>"));
+                issuesText.text = v.issues.Count == 0 ? Loc.L("Sin conflictos: el diseño es consistente.", "No conflicts: the design is consistent.") : sb.ToString();
             }
 
             RefreshConsensus();
@@ -129,7 +131,7 @@ namespace MissionDesign.UI
             if (consensusChips != null && consensusChips.Length > 0)
             {
                 if (consensusText != null)
-                    consensusText.text = $"CONSENSO DEL EQUIPO  <color={UiTheme.Hex(approvedCount == all.Length ? UiTheme.Ok : UiTheme.TextDim)}>{approvedCount}/{all.Length}</color>";
+                    consensusText.text = $"{Loc.L("CONSENSO DEL EQUIPO", "TEAM CONSENSUS")}  <color={UiTheme.Hex(approvedCount == all.Length ? UiTheme.Ok : UiTheme.TextDim)}>{approvedCount}/{all.Length}</color>";
                 if (chipWasApproved.Length != consensusChips.Length) chipWasApproved = new bool[consensusChips.Length];
                 for (int i = 0; i < consensusChips.Length && i < all.Length; i++)
                 {
@@ -154,7 +156,7 @@ namespace MissionDesign.UI
                     roles.IsApproved(r)
                         ? $"<color={UiTheme.Hex(UiTheme.Ok)}>[OK] {UiTheme.RoleShort(r)}</color>"
                         : $"<color={UiTheme.Hex(UiTheme.TextDim)}>[  ] {UiTheme.RoleShort(r)}</color>");
-                consensusText.text = $"<size=80%><color={UiTheme.Hex(UiTheme.TextDim)}>CONSENSO DEL EQUIPO</color></size>\n" + string.Join("  ", parts);
+                consensusText.text = $"<size=80%><color={UiTheme.Hex(UiTheme.TextDim)}>{Loc.L("CONSENSO DEL EQUIPO", "TEAM CONSENSUS")}</color></size>\n" + string.Join("  ", parts);
             }
 
             bool designPhase = manager.Phase == MissionPhase.Design;

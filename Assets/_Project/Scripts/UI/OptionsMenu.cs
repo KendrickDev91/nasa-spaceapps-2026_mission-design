@@ -63,17 +63,25 @@ namespace MissionDesign.UI
             dim.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.75f);
 
             var card = Rect("Card", dim);
-            Place(card, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(940f, 860f));
+            Place(card, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(940f, 980f));
             card.gameObject.AddComponent<Image>().color = new Color(0.04f, 0.06f, 0.11f, 1f);
 
-            var title = Label("Title", card, "<b>OPCIONES</b>", 36, UiTheme.Accent, TextAlignmentOptions.Center);
+            var title = Label("Title", card, Loc.L("<b>OPCIONES</b>", "<b>OPTIONS</b>"), 36, UiTheme.Accent, TextAlignmentOptions.Center);
             Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -50f), new Vector2(800f, 50f));
 
             resolutions = GameSettings.AvailableResolutions();
             float y = -120f;
 
-            Section(card, "VÍDEO", ref y);
-            Stepper(card, "Modo de pantalla", ref y,
+            Section(card, Loc.L("IDIOMA", "LANGUAGE"), ref y);
+            Stepper(card, "Idioma / Language", ref y,
+                () => Loc.LanguageName(Loc.Current),
+                _ =>
+                {
+                    GameSettings.Save();
+                    Loc.SetLanguage(Loc.English ? GameLanguage.Spanish : GameLanguage.English);
+                });
+            Section(card, Loc.L("VÍDEO", "VIDEO"), ref y);
+            Stepper(card, Loc.L("Modo de pantalla", "Display mode"), ref y,
                 () => GameSettings.DisplayModeLabel(GameSettings.DisplayMode),
                 d =>
                 {
@@ -81,7 +89,7 @@ namespace MissionDesign.UI
                     i = (Math.Max(0, i) + d + GameSettings.DisplayModes.Length) % GameSettings.DisplayModes.Length;
                     GameSettings.SetDisplay(GameSettings.DisplayModes[i], CurrentResolution());
                 });
-            Stepper(card, "Resolución", ref y,
+            Stepper(card, Loc.L("Resolución", "Resolution"), ref y,
                 () => { var r = CurrentResolution(); return $"{r.x} × {r.y}"; },
                 d =>
                 {
@@ -89,28 +97,28 @@ namespace MissionDesign.UI
                     i = Mathf.Clamp((i < 0 ? resolutions.Count - 1 : i) + d, 0, resolutions.Count - 1);
                     GameSettings.SetDisplay(GameSettings.DisplayMode, resolutions[i]);
                 });
-            Stepper(card, "Calidad gráfica", ref y,
+            Stepper(card, Loc.L("Calidad gráfica", "Graphics quality"), ref y,
                 () => QualityName(QualitySettings.GetQualityLevel()),
                 d => GameSettings.SetQuality(Mathf.Clamp(QualitySettings.GetQualityLevel() + d, 0, QualitySettings.names.Length - 1)));
-            Stepper(card, "Sincronización vertical (VSync)", ref y,
-                () => GameSettings.VSync ? "Activada" : "Desactivada",
+            Stepper(card, Loc.L("Sincronización vertical (VSync)", "Vertical sync (VSync)"), ref y,
+                () => GameSettings.VSync ? Loc.L("Activada", "On") : Loc.L("Desactivada", "Off"),
                 _ => GameSettings.SetVSync(!GameSettings.VSync));
 
             Section(card, "AUDIO", ref y);
-            SliderRow(card, "Volumen general", ref y, 0f, 1f, () => GameSettings.MasterVolume, GameSettings.SetMasterVolume, v => $"{v:P0}");
-            SliderRow(card, "Efectos de sonido", ref y, 0f, 1f, () => GameSettings.SfxVolume, GameSettings.SetSfxVolume, v => $"{v:P0}");
+            SliderRow(card, Loc.L("Volumen general", "Master volume"), ref y, 0f, 1f, () => GameSettings.MasterVolume, GameSettings.SetMasterVolume, v => $"{v:P0}");
+            SliderRow(card, Loc.L("Efectos de sonido", "Sound effects"), ref y, 0f, 1f, () => GameSettings.SfxVolume, GameSettings.SetSfxVolume, v => $"{v:P0}");
 
-            Section(card, "CONTROLES (centro espacial)", ref y);
-            SliderRow(card, "Sensibilidad del ratón", ref y, 0.2f, 3f, () => GameSettings.MouseSensitivity, GameSettings.SetMouseSensitivity, v => $"×{v:0.0}");
-            Stepper(card, "Invertir eje vertical", ref y,
-                () => GameSettings.InvertY ? "Sí" : "No",
+            Section(card, Loc.L("CONTROLES (centro espacial)", "CONTROLS (space center)"), ref y);
+            SliderRow(card, Loc.L("Sensibilidad del ratón", "Mouse sensitivity"), ref y, 0.2f, 3f, () => GameSettings.MouseSensitivity, GameSettings.SetMouseSensitivity, v => $"×{v:0.0}");
+            Stepper(card, Loc.L("Invertir eje vertical", "Invert vertical axis"), ref y,
+                () => GameSettings.InvertY ? Loc.L("Sí", "Yes") : "No",
                 _ => GameSettings.SetInvertY(!GameSettings.InvertY));
 
-            var note = Label("Note", card, "Los cambios se aplican y se guardan al instante.", 17, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft);
+            var note = Label("Note", card, Loc.L("Los cambios se aplican y se guardan al instante.", "Changes are applied and saved instantly."), 17, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft);
             Place(note.rectTransform, new Vector2(0f, 0f), new Vector2(48f, 52f), new Vector2(460f, 40f), new Vector2(0f, 0.5f));
-            var reset = MakeButton(card, "Restablecer", UiTheme.PanelLight, () => { GameSettings.ResetToDefaults(); Refresh(); });
+            var reset = MakeButton(card, Loc.L("Restablecer", "Reset"), UiTheme.PanelLight, () => { GameSettings.ResetToDefaults(); Refresh(); });
             Place((RectTransform)reset.transform, new Vector2(1f, 0f), new Vector2(-250f, 52f), new Vector2(190f, 54f), new Vector2(1f, 0.5f));
-            var close = MakeButton(card, "<b>Cerrar</b>", UiTheme.Accent, Close);
+            var close = MakeButton(card, Loc.L("<b>Cerrar</b>", "<b>Close</b>"), UiTheme.Accent, Close);
             Place((RectTransform)close.transform, new Vector2(1f, 0f), new Vector2(-44f, 52f), new Vector2(190f, 54f), new Vector2(1f, 0.5f));
         }
 
@@ -124,8 +132,8 @@ namespace MissionDesign.UI
             string n = level >= 0 && level < QualitySettings.names.Length ? QualitySettings.names[level] : "?";
             return n switch
             {
-                "Very Low" => "Muy baja", "Low" => "Baja", "Medium" => "Media", "High" => "Alta",
-                "Very High" => "Muy alta", "Ultra" => "Ultra", _ => n
+                "Very Low" => Loc.L("Muy baja", "Very low"), "Low" => Loc.L("Baja", "Low"), "Medium" => Loc.L("Media", "Medium"),
+                "High" => Loc.L("Alta", "High"), "Very High" => Loc.L("Muy alta", "Very high"), "Ultra" => "Ultra", _ => n
             };
         }
 

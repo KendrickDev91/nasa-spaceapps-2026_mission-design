@@ -72,8 +72,8 @@ namespace MissionDesign.UI
             if (verdictText != null) verdictText.text = $"<color={UiTheme.Hex(verdictColor)}>{MissionOutcomeReport.VerdictLabel(o.verdict)}</color>";
             if (titleText != null) titleText.text = o.verdictTitle;
 
-            if (wentWellText != null) wentWellText.text = Bullets(o.wentWell, "Nada destacable esta vez: revisa la tarjeta de fallos.");
-            if (wentWrongText != null) wentWrongText.text = Bullets(o.wentWrong, "¡Nada falló! Diseño sólido.");
+            if (wentWellText != null) wentWellText.text = Bullets(o.wentWell, Loc.L("Nada destacable esta vez: revisa la tarjeta de fallos.", "Nothing notable this time: check the failures card."));
+            if (wentWrongText != null) wentWrongText.text = Bullets(o.wentWrong, Loc.L("¡Nada falló! Diseño sólido.", "Nothing failed! Solid design."));
 
             Color rankColor = RankColor(o.rank);
             if (rankText != null) rankText.text = $"<color={UiTheme.Hex(rankColor)}>{o.rank}</color>";
@@ -82,7 +82,7 @@ namespace MissionDesign.UI
             if (similarText != null)
                 similarText.text = string.IsNullOrEmpty(o.similarMission)
                     ? string.Empty
-                    : $"<color={UiTheme.Hex(UiTheme.TextDim)}>Tu misión se parece a</color>  <b>{o.similarMission}</b>\n" +
+                    : $"<color={UiTheme.Hex(UiTheme.TextDim)}>{Loc.L("Tu misión se parece a", "Your mission resembles")}</color>  <b>{o.similarMission}</b>\n" +
                       $"<size=88%>{Trim(o.similarMissionDescription, 120)}</size>";
 
             // Barras: ciencia, datos, energía, presupuesto usado y trabajo en equipo.
@@ -92,11 +92,11 @@ namespace MissionDesign.UI
                                  Mathf.Clamp01(budget), Mathf.Clamp01(o.collaborationScore / 10f) };
             string[] values =
             {
-                $"{o.scienceAchieved:N0} de {o.scienceTarget:N0} ({science:P0})",
+                $"{o.scienceAchieved:N0} {Loc.L("de", "of")} {o.scienceTarget:N0} ({science:P0})",
                 $"{o.dataReturnedTotalTB:N1} TB ({o.dataReturnFraction:P0})",
                 $"{o.powerAvailabilityFraction:P0}",
-                o.budgetLimitMUSD > 0f ? $"${o.totalCostMUSD:N0}M de ${o.budgetLimitMUSD:N0}M" : "sin límite",
-                $"{o.collaborationScore} de 10"
+                o.budgetLimitMUSD > 0f ? $"${o.totalCostMUSD:N0}M {Loc.L("de", "of")} ${o.budgetLimitMUSD:N0}M" : Loc.L("sin límite", "no limit"),
+                $"{o.collaborationScore} {Loc.L("de", "of")} 10"
             };
             Color[] colors = { science >= 1f ? UiTheme.Ok : science >= 0.6f ? UiTheme.Warning : UiTheme.Critical,
                                o.dataReturnFraction >= 0.9f ? UiTheme.Ok : UiTheme.Warning,
@@ -114,12 +114,12 @@ namespace MissionDesign.UI
             if (leaderboardText != null)
             {
                 var top = Leaderboard.Top(o.scenarioId, 3);
-                var sb = new StringBuilder($"<color={UiTheme.Hex(UiTheme.TextDim)}>RANKING DEL ESCENARIO</color>\n");
+                var sb = new StringBuilder($"<color={UiTheme.Hex(UiTheme.TextDim)}>{Loc.L("RANKING DEL ESCENARIO", "SCENARIO LEADERBOARD")}</color>\n");
                 for (int i = 0; i < top.Count; i++)
                 {
                     var e = top[i];
                     bool mine = e.seed == o.seed && e.dateUtc == o.generatedAtUtc;
-                    string line = $"{i + 1}. {Trim(e.team, 18)}<pos=55%>{e.rank} · {e.score}<pos=80%>equipo {e.collaboration}";
+                    string line = $"{i + 1}. {Trim(e.team == "Equipo 1" ? Loc.L("Equipo 1", "Team 1") : e.team, 18)}<pos=55%>{e.rank} · {e.score}<pos=80%>{Loc.L("equipo", "team")} {e.collaboration}";
                     sb.AppendLine(mine ? $"<color={UiTheme.Hex(UiTheme.Ok)}><b>{line}</b></color>" : line);
                 }
                 leaderboardText.text = sb.ToString();
@@ -127,14 +127,14 @@ namespace MissionDesign.UI
 
             if (exportText != null)
                 exportText.text = string.IsNullOrEmpty(manager.LastReportPath)
-                    ? "Reporte no exportado."
-                    : $"Reporte completo (el «por qué» detallado): {Path.GetFileName(manager.LastReportPath)}";
+                    ? Loc.L("Reporte no exportado.", "Report not exported.")
+                    : $"{Loc.L("Reporte completo (el «por qué» detallado)", "Full report (the detailed \"why\")")}: {Path.GetFileName(manager.LastReportPath)}";
 
             if (explorationButton != null)
             {
                 var label = explorationButton.GetComponentInChildren<TMP_Text>();
                 if (label != null)
-                    label.text = o.photoShotsAvailable > 0 ? $"<b>Informe de la exploración</b> · {o.photoShotsAvailable} fotos" : "Informe de la exploración";
+                    label.text = o.photoShotsAvailable > 0 ? Loc.L($"<b>Informe de la exploración</b> · {o.photoShotsAvailable} fotos", $"<b>Exploration report</b> · {o.photoShotsAvailable} photos") : Loc.L("Informe de la exploración", "Exploration report");
             }
 
             if (reveal != null) StopCoroutine(reveal);
@@ -149,7 +149,7 @@ namespace MissionDesign.UI
             var sb = new StringBuilder();
             foreach (var line in lines.Take(maxBulletsPerCard)) sb.AppendLine($"•  {Short(line)}");
             if (lines.Count > maxBulletsPerCard)
-                sb.Append($"<size=80%><color={UiTheme.Hex(UiTheme.TextDim)}>+{lines.Count - maxBulletsPerCard} más en el reporte</color></size>");
+                sb.Append($"<size=80%><color={UiTheme.Hex(UiTheme.TextDim)}>+{lines.Count - maxBulletsPerCard} {Loc.L("más en el reporte", "more in the report")}</color></size>");
             return sb.ToString().TrimEnd();
         }
 

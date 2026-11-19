@@ -79,50 +79,50 @@ namespace MissionDesign.UI.Visual3D
         private string Idle()
         {
             var d = manager.Design;
-            return "<b><color=#3FA0FF>CONTROL DE MISIÓN</color></b>\n" +
-                   $"Misión: {(d.Scenario != null ? d.Scenario.displayName : "—")}\n" +
-                   $"Órbita: {(d.Orbit != null ? d.Orbit.displayName : "—")}\n" +
-                   $"Cohete: {(d.LaunchVehicle != null ? d.LaunchVehicle.displayName : "—")}\n" +
-                   $"Instrumentos: {d.Instruments.Count}\n" +
-                   $"Estado: {(manager.CurrentValidation != null && manager.CurrentValidation.canLaunch ? "<color=#4CD975>LISTO PARA LANZAR</color>" : "<color=#FFC233>EN DISEÑO</color>")}";
+            return $"<b><color=#3FA0FF>{Loc.L("CONTROL DE MISIÓN", "MISSION CONTROL")}</color></b>\n" +
+                   $"{Loc.L("Misión", "Mission")}: {(d.Scenario != null ? d.Scenario.displayName : "—")}\n" +
+                   $"{Loc.L("Órbita", "Orbit")}: {(d.Orbit != null ? d.Orbit.displayName : "—")}\n" +
+                   $"{Loc.L("Cohete", "Rocket")}: {(d.LaunchVehicle != null ? d.LaunchVehicle.displayName : "—")}\n" +
+                   $"{Loc.L("Instrumentos", "Instruments")}: {d.Instruments.Count}\n" +
+                   $"{Loc.L("Estado", "Status")}: {(manager.CurrentValidation != null && manager.CurrentValidation.canLaunch ? Loc.L("<color=#4CD975>LISTO PARA LANZAR</color>", "<color=#4CD975>READY TO LAUNCH</color>") : Loc.L("<color=#FFC233>EN DISEÑO</color>", "<color=#FFC233>IN DESIGN</color>"))}";
         }
 
         private string Checklist()
         {
             var v = manager.CurrentValidation;
             int blocking = v != null ? System.Linq.Enumerable.Count(v.Blocking) : 0;
-            return "<b><color=#3FA0FF>REVISIÓN DE VUELO</color></b>\n" +
-                   $"Problemas bloqueantes: {(blocking == 0 ? "<color=#4CD975>0</color>" : $"<color=#FF5A50>{blocking}</color>")}\n" +
-                   "Pendiente: aprobación del equipo\n" +
-                   "Ventana de lanzamiento: abierta";
+            return $"<b><color=#3FA0FF>{Loc.L("REVISIÓN DE VUELO", "FLIGHT READINESS")}</color></b>\n" +
+                   $"{Loc.L("Problemas bloqueantes", "Blocking issues")}: {(blocking == 0 ? "<color=#4CD975>0</color>" : $"<color=#FF5A50>{blocking}</color>")}\n" +
+                   Loc.L("Pendiente: aprobación del equipo\n", "Pending: team approval\n") +
+                   Loc.L("Ventana de lanzamiento: abierta", "Launch window: open");
         }
 
         private string Telemetry(MissionPhase phase, MissionOutcomeReport o)
         {
-            var sb = new StringBuilder("<b><color=#3FA0FF>TELEMETRÍA EN VIVO</color></b>\n");
-            sb.Append($"Fase: <b>{PhaseName(phase)}</b>\n");
+            var sb = new StringBuilder($"<b><color=#3FA0FF>{Loc.L("TELEMETRÍA EN VIVO", "LIVE TELEMETRY")}</color></b>\n");
+            sb.Append($"{Loc.L("Fase", "Phase")}: <b>{PhaseName(phase)}</b>\n");
             if (orbit != null && orbit.ShowsFreeReturn)
             {
-                sb.Append($"Día de misión: <b>{orbit.CurrentDay:F1}</b>\n");
-                sb.Append($"A la Tierra: <b>{orbit.DistanceEarthKm:N0} km</b>\n");
-                sb.Append($"A la Luna: <b>{orbit.DistanceMoonKm:N0} km</b>\n");
-                sb.Append($"Velocidad: <b>{orbit.SpeedKmS:F2} km/s</b>\n");
+                sb.Append($"{Loc.L("Día de misión", "Mission day")}: <b>{orbit.CurrentDay:F1}</b>\n");
+                sb.Append($"{Loc.L("A la Tierra", "To Earth")}: <b>{orbit.DistanceEarthKm:N0} km</b>\n");
+                sb.Append($"{Loc.L("A la Luna", "To the Moon")}: <b>{orbit.DistanceMoonKm:N0} km</b>\n");
+                sb.Append($"{Loc.L("Velocidad", "Speed")}: <b>{orbit.SpeedKmS:F2} km/s</b>\n");
             }
             else
             {
                 var orb = manager.Design.Orbit;
                 float alt = orb != null ? orb.altitudeKm : 400f;
                 float v = Mathf.Sqrt(EarthMu / (EarthRadiusKm + Mathf.Max(150f, alt)));
-                sb.Append($"Día de misión: <b>{progress * Mathf.Max(1f, o.plannedOperationsDays):F0}</b>\n");
-                sb.Append($"Altitud: <b>{alt:N0} km</b>\n");
-                sb.Append($"Velocidad orbital: <b>{v:F2} km/s</b>\n");
-                sb.Append($"Contactos con tierra: <b>{Mathf.RoundToInt(progress * 40f)}</b>\n");
+                sb.Append($"{Loc.L("Día de misión", "Mission day")}: <b>{progress * Mathf.Max(1f, o.plannedOperationsDays):F0}</b>\n");
+                sb.Append($"{Loc.L("Altitud", "Altitude")}: <b>{alt:N0} km</b>\n");
+                sb.Append($"{Loc.L("Velocidad orbital", "Orbital speed")}: <b>{v:F2} km/s</b>\n");
+                sb.Append($"{Loc.L("Contactos con tierra", "Ground contacts")}: <b>{Mathf.RoundToInt(progress * 40f)}</b>\n");
             }
             float tb = phase >= MissionPhase.DataTransmission ? o.dataReturnedTotalTB * Mathf.InverseLerp(0.55f, 1f, progress) : 0f;
-            sb.Append($"Datos recibidos: <b>{tb:N2} TB</b>  {Bar(tb / Mathf.Max(0.001f, o.dataReturnedTotalTB))}\n");
-            sb.Append($"Energía: <b>{o.powerAvailabilityFraction:P0}</b>  {Bar(o.powerAvailabilityFraction)}\n");
+            sb.Append($"{Loc.L("Datos recibidos", "Data received")}: <b>{tb:N2} TB</b>  {Bar(tb / Mathf.Max(0.001f, o.dataReturnedTotalTB))}\n");
+            sb.Append($"{Loc.L("Energía", "Power")}: <b>{o.powerAvailabilityFraction:P0}</b>  {Bar(o.powerAvailabilityFraction)}\n");
             int photos = studio != null ? studio.Photos.Count : 0;
-            sb.Append($"Fotos: <b>{photos}/{o.photoShots}</b>{(o.photosTaken > 0 ? $"  (~{o.photosTaken:N0} a bordo)" : "")}");
+            sb.Append($"{Loc.L("Fotos", "Photos")}: <b>{photos}/{o.photoShots}</b>{(o.photosTaken > 0 ? Loc.L($"  (~{o.photosTaken:N0} a bordo)", $"  (~{o.photosTaken:N0} on board)") : "")}");
             return sb.ToString();
         }
 
@@ -131,13 +131,13 @@ namespace MissionDesign.UI.Visual3D
             string Step(bool done, string label) => done ? $"<color=#4CD975>[OK]</color> {label}" : $"<color=#6F7F99>[··]</color> <color=#8FA0BA>{label}</color>";
             bool inSpace = phase >= MissionPhase.OrbitInsertion;
             var sb = new StringBuilder("<b><color=#3FA0FF>DESPLIEGUE DE LA NAVE</color></b>\n");
-            sb.AppendLine(Step(inSpace, "Separación del cohete"));
-            sb.AppendLine(Step(inSpace && (phase > MissionPhase.OrbitInsertion || progress > 0.3f), "Paneles solares desplegados"));
-            sb.AppendLine(Step(phase >= MissionPhase.ScienceOperations, "Antena apuntando a tierra"));
-            sb.AppendLine(Step(phase >= MissionPhase.ScienceOperations, o != null && o.photoShots > 0 ? "Cámaras e instrumentos activos" : "Instrumentos activos"));
-            sb.AppendLine(Step(phase >= MissionPhase.DataTransmission, "Enlace de bajada de datos"));
-            if (o != null && o.returnsToEarth) sb.AppendLine(Step(phase >= MissionPhase.ReturnAndRecovery, "Reentrada y amerizaje"));
-            sb.Append("<b><color=#3FA0FF>BITÁCORA</color></b>\n");
+            sb.AppendLine(Step(inSpace, Loc.L("Separación del cohete", "Rocket separation")));
+            sb.AppendLine(Step(inSpace && (phase > MissionPhase.OrbitInsertion || progress > 0.3f), Loc.L("Paneles solares desplegados", "Solar panels deployed")));
+            sb.AppendLine(Step(phase >= MissionPhase.ScienceOperations, Loc.L("Antena apuntando a tierra", "Antenna pointed at Earth")));
+            sb.AppendLine(Step(phase >= MissionPhase.ScienceOperations, o != null && o.photoShots > 0 ? Loc.L("Cámaras e instrumentos activos", "Cameras and instruments active") : Loc.L("Instrumentos activos", "Instruments active")));
+            sb.AppendLine(Step(phase >= MissionPhase.DataTransmission, Loc.L("Enlace de bajada de datos", "Data downlink")));
+            if (o != null && o.returnsToEarth) sb.AppendLine(Step(phase >= MissionPhase.ReturnAndRecovery, Loc.L("Reentrada y amerizaje", "Reentry and splashdown")));
+            sb.Append($"<b><color=#3FA0FF>{Loc.L("BITÁCORA", "LOG")}</color></b>\n");
             foreach (var line in log) sb.AppendLine(line);
             return sb.ToString();
         }
@@ -150,13 +150,13 @@ namespace MissionDesign.UI.Visual3D
 
         private static string PhaseName(MissionPhase p) => p switch
         {
-            MissionPhase.Launch => "LANZAMIENTO",
-            MissionPhase.OrbitInsertion => "INSERCIÓN",
-            MissionPhase.ScienceOperations => "OPERACIONES",
-            MissionPhase.DataTransmission => "TRANSMISIÓN",
-            MissionPhase.ReturnAndRecovery => "REGRESO",
-            MissionPhase.PostMission => "ANÁLISIS",
-            _ => "DISEÑO"
+            MissionPhase.Launch => Loc.L("LANZAMIENTO", "LAUNCH"),
+            MissionPhase.OrbitInsertion => Loc.L("INSERCIÓN", "INSERTION"),
+            MissionPhase.ScienceOperations => Loc.L("OPERACIONES", "OPERATIONS"),
+            MissionPhase.DataTransmission => Loc.L("TRANSMISIÓN", "DOWNLINK"),
+            MissionPhase.ReturnAndRecovery => Loc.L("REGRESO", "RETURN"),
+            MissionPhase.PostMission => Loc.L("ANÁLISIS", "ANALYSIS"),
+            _ => Loc.L("DISEÑO", "DESIGN")
         };
     }
 }

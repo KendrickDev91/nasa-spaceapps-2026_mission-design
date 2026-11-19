@@ -23,13 +23,13 @@ namespace MissionDesign.UI
         private Vector2 homeAnchorMin, homeAnchorMax, homePivot, homeOffsetMin, homeOffsetMax;
         private bool homeSaved;
 
-        private static readonly (MissionPhase phase, string label)[] Steps =
+        private static (MissionPhase phase, string label)[] Steps => new[]
         {
-            (MissionPhase.Launch, "LANZAMIENTO"),
-            (MissionPhase.OrbitInsertion, "INSERCIÓN"),
-            (MissionPhase.ScienceOperations, "CIENCIA"),
-            (MissionPhase.DataTransmission, "TRANSMISIÓN"),
-            (MissionPhase.ReturnAndRecovery, "REGRESO")
+            (MissionPhase.Launch, Loc.L("LANZAMIENTO", "LAUNCH")),
+            (MissionPhase.OrbitInsertion, Loc.L("INSERCIÓN", "ORBIT INSERTION")),
+            (MissionPhase.ScienceOperations, Loc.L("CIENCIA", "SCIENCE")),
+            (MissionPhase.DataTransmission, Loc.L("TRANSMISIÓN", "DOWNLINK")),
+            (MissionPhase.ReturnAndRecovery, Loc.L("REGRESO", "RETURN"))
         };
 
         private void Start()
@@ -112,7 +112,7 @@ namespace MissionDesign.UI
             Color c = entry.tone == LogTone.Critical ? UiTheme.Critical
                 : entry.tone == LogTone.Warning ? UiTheme.Warning
                 : entry.tone == LogTone.Positive ? UiTheme.Ok : UiTheme.Text;
-            lines.Add($"<color={UiTheme.Hex(UiTheme.TextDim)}>Día {entry.missionDay,4:N0}</color>  <color={UiTheme.Hex(c)}>{entry.message}</color>");
+            lines.Add($"<color={UiTheme.Hex(UiTheme.TextDim)}>{Loc.L("Día", "Day")} {entry.missionDay,4:N0}</color>  <color={UiTheme.Hex(c)}>{entry.message}</color>");
             while (lines.Count > maxLines) lines.RemoveAt(0);
             if (logText != null) logText.text = string.Join("\n", lines);
         }

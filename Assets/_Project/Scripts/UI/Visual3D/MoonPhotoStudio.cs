@@ -204,7 +204,7 @@ namespace MissionDesign.UI.Visual3D
             if (shots.Count == 0 || photoCamera == null) return null;
             var shot = shots[index % shots.Count];
             var o = runner != null ? runner.Current : null;
-            string cameraName = o != null && o.cameras != null && o.cameras.Length > 0 ? o.cameras[index % o.cameras.Length] : "Cámara de a bordo";
+            string cameraName = o != null && o.cameras != null && o.cameras.Length > 0 ? o.cameras[index % o.cameras.Length] : Loc.L("Cámara de a bordo", "Onboard camera");
 
             var tex = Render(shot);
             var photo = new Photo
@@ -232,21 +232,21 @@ namespace MissionDesign.UI.Visual3D
 
         private static List<Shot> MoonShots(Vector3 C, float R) => new List<Shot>
         {
-            new Shot { title = "Luna creciente sobre la cara oculta", lens = "35 mm", eye = C + new Vector3(0f, 0f, -3.4f * R), aim = C,
+            new Shot { title = Loc.L("Luna creciente sobre la cara oculta", "Crescent Moon over the far side"), lens = "35 mm", eye = C + new Vector3(0f, 0f, -3.4f * R), aim = C,
                        fov = 42f, sunFrom = new Vector3(1f, 0.1f, 0.35f) },
-            new Shot { title = "Terminador: cráteres en relieve", lens = "400 mm", eye = C + new Vector3(0.2f * R, 0.4f * R, -2.2f * R),
+            new Shot { title = Loc.L("Terminador: cráteres en relieve", "Terminator: craters in relief"), lens = "400 mm", eye = C + new Vector3(0.2f * R, 0.4f * R, -2.2f * R),
                        aim = C + R * new Vector3(0.29f, 0.3f, -0.91f).normalized, fov = 9f, sunFrom = new Vector3(1f, 0f, 0.3f) },
-            new Shot { title = "Puesta de la Tierra tras el limbo lunar", lens = "80–400 mm", eye = C + new Vector3(0f, 1.0f * R, -3f * R),
+            new Shot { title = Loc.L("Puesta de la Tierra tras el limbo lunar", "Earthset behind the lunar limb"), lens = "80–400 mm", eye = C + new Vector3(0f, 1.0f * R, -3f * R),
                        aim = C + new Vector3(0f, 1.25f * R, 8f * R), fov = 16f, sunFrom = new Vector3(1f, 0.25f, 0.5f),
                        earthAt = C + new Vector3(0f, 1.25f * R, 8f * R), earthRadius = 0.85f * R },
-            new Shot { title = "Cuenca de impacto en la cara oculta", lens = "Cámara externa", eye = C + new Vector3(-1.1f * R, 0.3f * R, -1.7f * R),
+            new Shot { title = Loc.L("Cuenca de impacto en la cara oculta", "Impact basin on the far side"), lens = Loc.L("Cámara externa", "External camera"), eye = C + new Vector3(-1.1f * R, 0.3f * R, -1.7f * R),
                        aim = C + R * new Vector3(-0.45f, 0.1f, -0.88f).normalized, fov = 24f, sunFrom = new Vector3(1f, 0.3f, -0.2f) },
-            new Shot { title = "Ala solar de Orion con la Luna", lens = "Cámara en el ala solar", orion = true, eye = C + new Vector3(-6f, 3f, -4.6f * R),
+            new Shot { title = Loc.L("Ala solar de Orion con la Luna", "Orion solar wing with the Moon"), lens = Loc.L("Cámara en el ala solar", "Solar wing camera"), orion = true, eye = C + new Vector3(-6f, 3f, -4.6f * R),
                        aim = C, fov = 55f, sunFrom = new Vector3(0.8f, 0.4f, -0.5f) },
-            new Shot { title = "Superficie a baja altura", lens = "Teleobjetivo", surface = true, fov = 50f },
-            new Shot { title = "La Luna casi llena durante la ida", lens = "80 mm", eye = C + new Vector3(0f, 0.2f * R, -3.8f * R), aim = C,
+            new Shot { title = Loc.L("Superficie a baja altura", "Surface at low altitude"), lens = Loc.L("Teleobjetivo", "Telephoto"), surface = true, fov = 50f },
+            new Shot { title = Loc.L("La Luna casi llena durante la ida", "Nearly full Moon on the way out"), lens = "80 mm", eye = C + new Vector3(0f, 0.2f * R, -3.8f * R), aim = C,
                        fov = 36f, sunFrom = new Vector3(0.25f, 0.15f, -1f) },
-            new Shot { title = "La Tierra y la Luna juntas", lens = "35 mm", eye = C + new Vector3(-2.2f * R, 0.6f * R, -7f * R),
+            new Shot { title = Loc.L("La Tierra y la Luna juntas", "Earth and Moon together"), lens = "35 mm", eye = C + new Vector3(-2.2f * R, 0.6f * R, -7f * R),
                        aim = C + new Vector3(-0.9f * R, 0.4f * R, 6f * R), fov = 40f, sunFrom = new Vector3(1f, 0.2f, -0.3f),
                        earthAt = C + new Vector3(-1.5f * R, 1.1f * R, 16f * R), earthRadius = 1.1f * R },
         };
@@ -254,24 +254,24 @@ namespace MissionDesign.UI.Visual3D
         /// <summary>Misiones en órbita terrestre: la Tierra ocupa el lugar de la Luna en el estudio.</summary>
         private static List<Shot> EarthShots(Vector3 C, float R) => new List<Shot>
         {
-            new Shot { title = "La Tierra completa desde órbita", lens = "35 mm", eye = C + new Vector3(0f, 0.2f * R, -4.2f * R), aim = C, fov = 34f,
+            new Shot { title = Loc.L("La Tierra completa desde órbita", "The whole Earth from orbit"), lens = "35 mm", eye = C + new Vector3(0f, 0.2f * R, -4.2f * R), aim = C, fov = 34f,
                        sunFrom = new Vector3(0.5f, 0.3f, -1f), earthAt = C, earthRadius = R, moonRadius = -1f },
-            new Shot { title = "Nubes y océanos", lens = "400 mm", eye = C + new Vector3(0.2f * R, 0.3f * R, -2f * R),
+            new Shot { title = Loc.L("Nubes y océanos", "Clouds and oceans"), lens = "400 mm", eye = C + new Vector3(0.2f * R, 0.3f * R, -2f * R),
                        aim = C + R * new Vector3(0.15f, 0.25f, -0.96f).normalized, fov = 10f, sunFrom = new Vector3(0.4f, 0.6f, -1f),
                        earthAt = C, earthRadius = R, moonRadius = -1f },
-            new Shot { title = "El día y la noche (terminador)", lens = "80 mm", eye = C + new Vector3(0f, 0f, -3.2f * R), aim = C, fov = 40f,
+            new Shot { title = Loc.L("El día y la noche (terminador)", "Day and night (terminator)"), lens = "80 mm", eye = C + new Vector3(0f, 0f, -3.2f * R), aim = C, fov = 40f,
                        sunFrom = new Vector3(1f, 0.15f, 0.1f), earthAt = C, earthRadius = R, moonRadius = -1f },
-            new Shot { title = "La Luna sobre el horizonte terrestre", lens = "80–400 mm", eye = C + new Vector3(0f, 1.0f * R, -2.6f * R),
+            new Shot { title = Loc.L("La Luna sobre el horizonte terrestre", "The Moon over Earth's horizon"), lens = "80–400 mm", eye = C + new Vector3(0f, 1.0f * R, -2.6f * R),
                        aim = C + new Vector3(0.2f * R, 1.2f * R, 6f * R), fov = 22f, sunFrom = new Vector3(0.6f, 0.4f, -0.6f),
                        earthAt = C, earthRadius = R, moonAt = C + new Vector3(0.2f * R, 1.28f * R, 7f * R), moonRadius = 0.3f * R },
-            new Shot { title = "Ala solar con la Tierra", lens = "Cámara en el ala solar", orion = true, eye = C + new Vector3(-6f, 3f, -4.6f * R),
+            new Shot { title = Loc.L("Ala solar con la Tierra", "Solar wing with the Earth"), lens = Loc.L("Cámara en el ala solar", "Solar wing camera"), orion = true, eye = C + new Vector3(-6f, 3f, -4.6f * R),
                        aim = C, fov = 55f, sunFrom = new Vector3(0.8f, 0.4f, -0.5f), earthAt = C, earthRadius = R, moonRadius = -1f },
-            new Shot { title = "Casquete polar y nubes", lens = "35 mm", eye = C + new Vector3(0f, 2.6f * R, -1.6f * R), aim = C + new Vector3(0f, 0.6f * R, 0f),
+            new Shot { title = Loc.L("Casquete polar y nubes", "Polar cap and clouds"), lens = "35 mm", eye = C + new Vector3(0f, 2.6f * R, -1.6f * R), aim = C + new Vector3(0f, 0.6f * R, 0f),
                        fov = 30f, sunFrom = new Vector3(1f, 0.6f, -0.5f), earthAt = C, earthRadius = R, moonRadius = -1f },
-            new Shot { title = "Limbo terrestre al amanecer", lens = "35 mm", eye = C + new Vector3(0f, 1.03f * R, -2.4f * R),
+            new Shot { title = Loc.L("Limbo terrestre al amanecer", "Earth's limb at sunrise"), lens = "35 mm", eye = C + new Vector3(0f, 1.03f * R, -2.4f * R),
                        aim = C + new Vector3(0f, 0.9f * R, 3f * R), fov = 34f, sunFrom = new Vector3(0.3f, 0.25f, 1f),
                        earthAt = C, earthRadius = R, moonRadius = -1f },
-            new Shot { title = "La Tierra que se aleja", lens = "80 mm", eye = C + new Vector3(-1.8f * R, 0.4f * R, -8f * R), aim = C, fov = 22f,
+            new Shot { title = Loc.L("La Tierra que se aleja", "The receding Earth"), lens = "80 mm", eye = C + new Vector3(-1.8f * R, 0.4f * R, -8f * R), aim = C, fov = 22f,
                        sunFrom = new Vector3(0.7f, 0.3f, -0.6f), earthAt = C, earthRadius = R, moonRadius = -1f },
         };
 
