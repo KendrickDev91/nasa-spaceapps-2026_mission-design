@@ -552,8 +552,18 @@ namespace MissionDesign.UI.Visual3D
             float day;
             switch (phase)
             {
-                case MissionPhase.Launch: day = Mathf.Lerp(start, 0f, Mathf.SmoothStep(0f, 1f, k)); break;
-                case MissionPhase.OrbitInsertion: day = Mathf.Lerp(0f, 0.6f, k); break;
+                // Durante el despegue la cámara muestra el cohete en la plataforma: la nave espera en el hito 1.
+                case MissionPhase.Launch: day = start; break;
+                // El mapa aparece en esta fase: primero recorre 1 → 2 → 3 (órbita baja y alta) y luego la TLI (4).
+                // El tramo inicial queda en el 1 mientras dura el plano de reacción de la sala.
+                case MissionPhase.OrbitInsertion:
+                {
+                    const float hold = 0.12f, preTli = 0.75f;
+                    day = k < preTli
+                        ? Mathf.Lerp(start, 0f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(hold, preTli, k)))
+                        : Mathf.Lerp(0f, 0.6f, Mathf.InverseLerp(preTli, 1f, k));
+                    break;
+                }
                 case MissionPhase.ScienceOperations: day = Mathf.Lerp(0.6f, flyby + 0.5f, k); break;
                 case MissionPhase.DataTransmission: day = Mathf.Lerp(flyby + 0.5f, total - 0.4f, k); break;
                 case MissionPhase.ReturnAndRecovery:

@@ -123,8 +123,41 @@ namespace MissionDesign.UI.Visual3D
             if (planned > 0 && session == null) session = StartCoroutine(Session());
         }
 
+        /// <summary>Ventana de fotos alrededor del máximo acercamiento (días): la tripulación de Artemis II
+        /// fotografió la Luna durante las horas del sobrevuelo, cuando la cara oculta llena la ventanilla.</summary>
+        private const float PhotoWindowBeforeDays = 0.35f, PhotoWindowAfterDays = 0.2f;
+
         private IEnumerator Session()
         {
+            // Sobrevuelo con retorno libre: cada foto se toma en su momento del paso por la Luna, siguiendo el reloj de la misión.
+            var orbit = FindAnyObjectByType<OrbitViewController>();
+            if (orbit != null && orbit.ShowsFreeReturn)
+            {
+                float from = orbit.Solution.flybyTimeDays - PhotoWindowBeforeDays;
+                float width = PhotoWindowBeforeDays + PhotoWindowAfterDays;
+                float lastShot = -1f;
+                while (photos.Count < planned && manager.Phase == MissionPhase.ScienceOperations)
+                {
+                    float due = from + width * (photos.Count + 0.5f) / planned;
+                    // Separación mínima para que cada disparo se oiga y se vea.
+                    if (orbit.CurrentDay >= due && Time.time - lastShot >= 0.12f)
+                    {
+                        Take(photos.Count);
+                        lastShot = Time.time;
+                    }
+                    yield return null;
+                }
+                // Si la fase terminó antes de completar la serie, las que falten se toman ya (a la salida de la Luna),
+                // no al final de la misión.
+                while (photos.Count < planned && manager.Phase != MissionPhase.PostMission)
+                {
+                    Take(photos.Count);
+                    yield return null;
+                }
+                session = null;
+                yield break;
+            }
+
             float spacing = (runner != null ? runner.SecondsPerPhase : 3f) * 0.85f / Mathf.Max(1, planned);
             yield return new WaitForSeconds(spacing * 0.5f);
             while (photos.Count < planned && manager.Phase == MissionPhase.ScienceOperations)
