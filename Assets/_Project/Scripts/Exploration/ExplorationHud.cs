@@ -34,6 +34,7 @@ namespace MissionDesign.Exploration
         [Header("Menú")]
         [SerializeField] private CanvasGroup pauseMenu;
         [SerializeField] private Button resumeButton, designButton, plansButton, controlsButton, quitButton;
+        [SerializeField] private Button optionsButton;
         [SerializeField] private Button[] travelButtons;
         [SerializeField] private Transform[] travelPoints;
 
@@ -71,7 +72,7 @@ namespace MissionDesign.Exploration
         private bool offerDesign;
 
         public Interactable Current => current;
-        public bool IsBlocking => Visible(infoPanel) || Visible(pauseMenu);
+        public bool IsBlocking => Visible(infoPanel) || Visible(pauseMenu) || MissionDesign.UI.OptionsMenu.IsOpen;
         public int PageCount => pages?.Length ?? 0;
         public string CurrentTitle => infoTitle != null ? infoTitle.text : string.Empty;
         public string CurrentZone => zoneText != null ? zoneText.text : string.Empty;
@@ -95,6 +96,7 @@ namespace MissionDesign.Exploration
             Hook(plansButton, () => { Show(pauseMenu, false); OpenPlans(); });
             Hook(controlsButton, () => { Show(pauseMenu, false); OpenInfo(new[] { new[] { "CONTROLES", SpaceCenterContent.Controls } }); });
             Hook(quitButton, () => SceneFlow.OpenMissionDesign(false));
+            Hook(optionsButton, MissionDesign.UI.OptionsMenu.Open);
             if (travelButtons != null)
                 for (int i = 0; i < travelButtons.Length; i++)
                 {
@@ -124,7 +126,8 @@ namespace MissionDesign.Exploration
             {
                 if (kb.escapeKey.wasPressedThisFrame)
                 {
-                    if (Visible(infoPanel)) CloseInfo();
+                    if (MissionDesign.UI.OptionsMenu.IsOpen) MissionDesign.UI.OptionsMenu.Close();
+                    else if (Visible(infoPanel)) CloseInfo();
                     else Show(pauseMenu, !Visible(pauseMenu));
                 }
                 if (!IsBlocking && kb.mKey.wasPressedThisFrame) OpenPlans();

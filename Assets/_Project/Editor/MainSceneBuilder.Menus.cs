@@ -32,7 +32,7 @@ namespace MissionDesign.Editor
             Place(roleLine.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -345f), new Vector2(1600f, 30f));
 
             var column = NewRect("Buttons", main);
-            Place(column, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, 110f), new Vector2(460f, 470f));
+            Place(column, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, 110f), new Vector2(460f, 540f));
             var vlg = column.gameObject.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 16; vlg.childControlWidth = vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true; vlg.childForceExpandHeight = true;
@@ -40,6 +40,7 @@ namespace MissionDesign.Editor
             var explore = MakeButton("ExploreButton", column, "<b>Explorar el centro espacial</b>", UiTheme.Accent, 22, 0);
             var plans = MakeButton("PlansButton", column, "Planos del centro espacial", UiTheme.AccentDim, 22, 0);
             var tutorial = MakeButton("TutorialButton", column, "Cómo se juega", UiTheme.AccentDim, 22, 0);
+            var options = MakeButton("OptionsButton", column, "Opciones", UiTheme.AccentDim, 22, 0);
             var credits = MakeButton("CreditsButton", column, "Fuentes y créditos", UiTheme.AccentDim, 22, 0);
             var quit = MakeButton("QuitButton", column, "Salir", UiTheme.PanelLight, 22, 0);
             var footer = Text("Footer", main, $"{GameInfo.Event} · Proyecto independiente, no es un producto oficial de la NASA · F1 ayuda · Esc pausa",
@@ -53,7 +54,7 @@ namespace MissionDesign.Editor
             Stretch(pause);
             var pauseGroup = pause.gameObject.AddComponent<CanvasGroup>();
             var pauseCard = Panel("Card", pause, new Color(0.04f, 0.06f, 0.11f, 1f));
-            Place(pauseCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(480f, 520f));
+            Place(pauseCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(480f, 590f));
             var pauseTitle = Text("Title", pauseCard, "<b>PAUSA</b>", 36, UiTheme.Accent, TextAlignmentOptions.Center);
             Place(pauseTitle.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -24f), new Vector2(0f, 50f));
             var pauseCol = NewRect("Buttons", pauseCard);
@@ -63,6 +64,7 @@ namespace MissionDesign.Editor
             pv.childForceExpandWidth = true; pv.childForceExpandHeight = true;
             var resume = MakeButton("ResumeButton", pauseCol, "<b>Reanudar</b>", UiTheme.Accent, 22, 0);
             var pauseTutorial = MakeButton("PauseTutorialButton", pauseCol, "Cómo se juega", UiTheme.AccentDim, 20, 0);
+            var pauseOptions = MakeButton("PauseOptionsButton", pauseCol, "Opciones", UiTheme.AccentDim, 20, 0);
             var restart = MakeButton("RestartButton", pauseCol, "Reiniciar misión", UiTheme.AccentDim, 20, 0);
             var mainMenuBtn = MakeButton("MainMenuButton", pauseCol, "Menú principal", UiTheme.AccentDim, 20, 0);
             var pauseQuit = MakeButton("PauseQuitButton", pauseCol, "Salir", UiTheme.PanelLight, 20, 0);
@@ -90,6 +92,8 @@ namespace MissionDesign.Editor
             var (infoImage, infoFrame, infoCaption) = InfoImageArea(infoCard);
             Wire(menus, "exploreButton", explore);
             Wire(menus, "plansButton", plans);
+            Wire(menus, "optionsButton", options);
+            Wire(menus, "pauseOptionsButton", pauseOptions);
             Wire(menus, "infoImage", infoImage);
             Wire(menus, "infoImageFrame", infoFrame);
             Wire(menus, "infoCaption", infoCaption);

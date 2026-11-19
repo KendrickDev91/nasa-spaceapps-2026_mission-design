@@ -1,3 +1,4 @@
+using MissionDesign.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -59,8 +60,9 @@ namespace MissionDesign.Exploration
                     if (mouse.rightButton.isPressed)
                     {
                         Vector2 d = mouse.delta.ReadValue();
-                        yaw += d.x * mouseSensitivity;
-                        pitch = Mathf.Clamp(pitch - d.y * mouseSensitivity, -25f, 70f);
+                        float k = mouseSensitivity * GameSettings.MouseSensitivity;
+                        yaw += d.x * k;
+                        pitch = Mathf.Clamp(pitch - (GameSettings.InvertY ? -d.y : d.y) * k, -25f, 70f);
                     }
                     float scroll = mouse.scroll.ReadValue().y;
                     if (Mathf.Abs(scroll) > 0.01f)

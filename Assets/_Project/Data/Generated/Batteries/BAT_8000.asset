@@ -23,6 +23,8 @@ MonoBehaviour:
   developmentMonths: 4
   technologyReadinessLevel: 9
   advancedOnly: 0
+  requiredBusId: 
+  requiredBusName: 
   prefab: {fileID: 919132149155446097, guid: 66239ea087b04dd45bc5095961a850cd, type: 3}
   socket: 6
   icon: {fileID: 0}

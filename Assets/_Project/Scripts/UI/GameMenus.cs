@@ -26,6 +26,7 @@ namespace MissionDesign.UI
         [SerializeField] private Button resumeButton, pauseTutorialButton, restartButton, mainMenuButton, pauseQuitButton;
         [SerializeField] private Button infoPrevButton, infoNextButton, infoCloseButton;
         [SerializeField] private Button exploreButton, plansButton;
+        [SerializeField] private Button optionsButton, pauseOptionsButton;
         [SerializeField] private TMP_Text infoCaption;
         [SerializeField] private RawImage infoImage;
         [SerializeField] private GameObject infoImageFrame;
@@ -36,7 +37,7 @@ namespace MissionDesign.UI
         private int page;
         private Texture2D[] pageImages;
 
-        public bool IsBlocking => Visible(mainMenu) || Visible(pauseMenu) || Visible(infoPanel);
+        public bool IsBlocking => Visible(mainMenu) || Visible(pauseMenu) || Visible(infoPanel) || OptionsMenu.IsOpen;
 
         public static readonly string[][] TutorialPages =
         {
@@ -99,6 +100,8 @@ namespace MissionDesign.UI
             Hook(quitButton, Quit);
             Hook(exploreButton, SceneFlow.OpenSpaceCenter);
             Hook(plansButton, OpenPlans);
+            Hook(optionsButton, OptionsMenu.Open);
+            Hook(pauseOptionsButton, OptionsMenu.Open);
             Hook(resumeButton, Resume);
             Hook(pauseTutorialButton, () => OpenInfo(TutorialPages));
             Hook(restartButton, Restart);
@@ -120,7 +123,8 @@ namespace MissionDesign.UI
             if (kb == null) return;
             if (kb.escapeKey.wasPressedThisFrame)
             {
-                if (Visible(infoPanel)) Show(infoPanel, false);
+                if (OptionsMenu.IsOpen) OptionsMenu.Close();
+                else if (Visible(infoPanel)) Show(infoPanel, false);
                 else if (Visible(pauseMenu)) Resume();
                 else if (!Visible(mainMenu)) Show(pauseMenu, true);
             }

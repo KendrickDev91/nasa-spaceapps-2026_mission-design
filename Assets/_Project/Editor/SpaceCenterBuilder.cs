@@ -719,7 +719,7 @@ namespace MissionDesign.Editor
             Stretch(pause);
             var pauseGroup = pause.gameObject.AddComponent<CanvasGroup>();
             var pcard = Panel("Card", pause, new Color(0.04f, 0.06f, 0.11f, 1f));
-            Place(pcard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560f, 800f));
+            Place(pcard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560f, 862f));
             var ptitle = Text("Title", pcard, "<b>CENTRO ESPACIAL</b>", 32, UiTheme.Accent, TextAlignmentOptions.Center);
             Place(ptitle.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -24f), new Vector2(0f, 46f));
             var col = NewRect("Buttons", pcard);
@@ -733,6 +733,7 @@ namespace MissionDesign.Editor
             var travelButtons = travelNames.Select((n, i) => (Object)MakeButton("Travel" + i, col, n, UiTheme.PanelLight, 19, 0)).ToArray();
             var plansBtn = MakeButton("PlansButton", col, "Planos (M)", UiTheme.AccentDim, 20, 0);
             var controlsBtn = MakeButton("ControlsButton", col, "Controles", UiTheme.AccentDim, 20, 0);
+            var optionsBtn = MakeButton("OptionsButton", col, "Opciones", UiTheme.AccentDim, 20, 0);
             var designBtn = MakeButton("DesignButton", col, "<b>Diseñar la misión</b>", UiTheme.Launch, 20, 0);
             var quitBtn = MakeButton("MainMenuButton", col, "Menú principal", UiTheme.PanelLight, 20, 0);
             _ = travelLabel;
@@ -758,6 +759,7 @@ namespace MissionDesign.Editor
             Wire(hud, "designButton", designBtn);
             Wire(hud, "plansButton", plansBtn);
             Wire(hud, "controlsButton", controlsBtn);
+            Wire(hud, "optionsButton", optionsBtn);
             Wire(hud, "quitButton", quitBtn);
             WireArray(hud, "travelButtons", travelButtons);
             WireArray(hud, "travelPoints", travelPoints.Cast<Object>().ToArray());

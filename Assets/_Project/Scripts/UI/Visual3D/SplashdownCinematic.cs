@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using MissionDesign.Simulation;
 using TMPro;
+using MissionDesign.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -712,7 +713,7 @@ namespace MissionDesign.UI.Visual3D
 
         private void PlaySound(AudioClip clip)
         {
-            if (audioSource != null && clip != null) audioSource.PlayOneShot(clip, 0.9f);
+            if (audioSource != null && clip != null) audioSource.PlayOneShot(clip, 0.9f * GameSettings.SfxVolume);
         }
 
         private void HideOtherCanvases(bool hide)

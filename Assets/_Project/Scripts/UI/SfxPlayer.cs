@@ -18,6 +18,8 @@ namespace MissionDesign.UI
         [Range(0f, 1f)] [SerializeField] private float volume = 0.5f;
 
         private AudioSource source;
+        /// <summary>Volumen de efectos con la preferencia del jugador (Opciones → Efectos).</summary>
+        private float Vol => volume * GameSettings.SfxVolume;
         private AudioSource rumbleSource;
         private AudioClip click, error, alarm, rumble, countdown, applause, chime, shutter, modem, fanfare, failure;
         private MissionStateManager manager;
@@ -84,7 +86,7 @@ namespace MissionDesign.UI
         {
             Play(countdown, 0.8f);
             rumbleSource.clip = rumble;
-            rumbleSource.volume = volume * 0.8f;
+            rumbleSource.volume = Vol * 0.8f;
             rumbleSource.PlayDelayed(1.6f);
         }
 
@@ -105,7 +107,7 @@ namespace MissionDesign.UI
         private void Play(AudioClip clip, float gain = 1f)
         {
             if (clip == null || source == null) return;
-            source.PlayOneShot(clip, volume * gain);
+            source.PlayOneShot(clip, Vol * gain);
             LastPlayed = clip.name;
         }
     }

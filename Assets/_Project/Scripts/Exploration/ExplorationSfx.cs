@@ -1,5 +1,6 @@
 using MissionDesign.Characters;
 using MissionDesign.UI;
+using MissionDesign.Core;
 using UnityEngine;
 
 namespace MissionDesign.Exploration
@@ -14,6 +15,9 @@ namespace MissionDesign.Exploration
         [Range(0f, 1f)] [SerializeField] private float volume = 0.5f;
 
         private AudioSource source;
+        private AudioSource fire;
+        /// <summary>Volumen de efectos con la preferencia del jugador (Opciones → Efectos).</summary>
+        private float Vol => volume * GameSettings.SfxVolume;
         private AudioClip[] steps;
         private AudioClip door, rise, blip;
         private PlayerController player;
@@ -49,17 +53,25 @@ namespace MissionDesign.Exploration
             if (ring != null)
             {
                 // Fuego del círculo: sonido 3D en bucle que se oye al acercarse.
-                var fire = ring.gameObject.AddComponent<AudioSource>();
+                fire = ring.gameObject.AddComponent<AudioSource>();
                 fire.clip = Synth.Crackle();
                 fire.loop = true;
                 fire.spatialBlend = 1f;
                 fire.minDistance = 1.5f;
                 fire.maxDistance = 14f;
                 fire.rolloffMode = AudioRolloffMode.Linear;
-                fire.volume = volume * 0.7f;
+                fire.volume = Vol * 0.7f;
                 fire.Play();
+                GameSettings.Changed += UpdateFireVolume;
             }
         }
+
+        private void UpdateFireVolume()
+        {
+            if (fire != null) fire.volume = Vol * 0.7f;
+        }
+
+        private void OnDestroy() => GameSettings.Changed -= UpdateFireVolume;
 
         private void Update()
         {
@@ -70,7 +82,7 @@ namespace MissionDesign.Exploration
                 {
                     stepTimer = 0.5f;
                     source.pitch = Random.Range(0.9f, 1.1f);
-                    source.PlayOneShot(steps[Random.Range(0, steps.Length)], volume * 0.6f);
+                    source.PlayOneShot(steps[Random.Range(0, steps.Length)], Vol * 0.6f);
                     source.pitch = 1f;
                     StepsPlayed++;
                 }
@@ -83,7 +95,7 @@ namespace MissionDesign.Exploration
                 bool opening = doors[i].Openness > 0.05f;
                 if (opening && !doorWasOpening[i])
                 {
-                    AudioSource.PlayClipAtPoint(door, doors[i].transform.position, volume);
+                    AudioSource.PlayClipAtPoint(door, doors[i].transform.position, Vol);
                     DoorsPlayed++;
                 }
                 doorWasOpening[i] = opening;
@@ -92,13 +104,13 @@ namespace MissionDesign.Exploration
             if (ring != null && ring.IsEntering && !ringEntered)
             {
                 ringEntered = true;
-                source.PlayOneShot(rise, volume);
+                source.PlayOneShot(rise, Vol);
             }
 
             if (hud != null && hud.CurrentOutfit != lastOutfit)
             {
                 lastOutfit = hud.CurrentOutfit;
-                source.PlayOneShot(blip, volume * 0.6f);
+                source.PlayOneShot(blip, Vol * 0.6f);
             }
         }
     }
