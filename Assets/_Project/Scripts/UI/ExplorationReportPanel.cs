@@ -40,6 +40,7 @@ namespace MissionDesign.UI
             if (nextButton != null) nextButton.onClick.AddListener(() => Select(index + 1));
             if (closeButton != null) closeButton.onClick.AddListener(() => Show(false));
             if (folderButton != null) folderButton.onClick.AddListener(OpenFolder);
+            if (folderButton != null && GameSettings.IsWeb) folderButton.gameObject.SetActive(false);
             var manager = MissionStateManager.Instance;
             if (manager != null) manager.PhaseChanged += OnPhaseChanged;
         }

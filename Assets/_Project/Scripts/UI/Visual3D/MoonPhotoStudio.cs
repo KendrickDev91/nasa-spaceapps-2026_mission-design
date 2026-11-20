@@ -358,6 +358,8 @@ namespace MissionDesign.UI.Visual3D
         private void Save(MissionOutcomeReport o)
         {
             if (photos.Count == 0 && (o.cameras == null || o.cameras.Length == 0)) return;
+            // En el navegador no hay carpetas que abrir: las fotos se ven en el «Informe de la exploración».
+            if (GameSettings.IsWeb) return;
             try
             {
                 string basePath = !string.IsNullOrEmpty(manager.LastReportPath)

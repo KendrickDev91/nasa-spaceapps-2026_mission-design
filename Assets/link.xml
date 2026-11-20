@@ -1,0 +1,5 @@
+<!-- Evita que el «stripping» de la versión web quite la física: los modelos del centro espacial traen
+     SphereCollider/CapsuleCollider serializados y sin este archivo WebGL da «Can't add component». -->
+<linker>
+  <assembly fullname="UnityEngine.PhysicsModule" preserve="all" />
+</linker>

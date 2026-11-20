@@ -81,6 +81,8 @@ namespace MissionDesign.UI
                     Loc.SetLanguage(Loc.English ? GameLanguage.Spanish : GameLanguage.English);
                 });
             Section(card, Loc.L("VÍDEO", "VIDEO"), ref y);
+            if (!GameSettings.IsWeb)
+            {
             Stepper(card, Loc.L("Modo de pantalla", "Display mode"), ref y,
                 () => GameSettings.DisplayModeLabel(GameSettings.DisplayMode),
                 d =>
@@ -97,12 +99,14 @@ namespace MissionDesign.UI
                     i = Mathf.Clamp((i < 0 ? resolutions.Count - 1 : i) + d, 0, resolutions.Count - 1);
                     GameSettings.SetDisplay(GameSettings.DisplayMode, resolutions[i]);
                 });
+            }
             Stepper(card, Loc.L("Calidad gráfica", "Graphics quality"), ref y,
                 () => QualityName(QualitySettings.GetQualityLevel()),
                 d => GameSettings.SetQuality(Mathf.Clamp(QualitySettings.GetQualityLevel() + d, 0, QualitySettings.names.Length - 1)));
-            Stepper(card, Loc.L("Sincronización vertical (VSync)", "Vertical sync (VSync)"), ref y,
-                () => GameSettings.VSync ? Loc.L("Activada", "On") : Loc.L("Desactivada", "Off"),
-                _ => GameSettings.SetVSync(!GameSettings.VSync));
+            if (!GameSettings.IsWeb)
+                Stepper(card, Loc.L("Sincronización vertical (VSync)", "Vertical sync (VSync)"), ref y,
+                    () => GameSettings.VSync ? Loc.L("Activada", "On") : Loc.L("Desactivada", "Off"),
+                    _ => GameSettings.SetVSync(!GameSettings.VSync));
 
             Section(card, "AUDIO", ref y);
             SliderRow(card, Loc.L("Volumen general", "Master volume"), ref y, 0f, 1f, () => GameSettings.MasterVolume, GameSettings.SetMasterVolume, v => $"{v:P0}");

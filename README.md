@@ -1,4 +1,6 @@
-# AstroByte · MISSION TRADE-OFF — NASA Space Apps Challenge 2026
+# AstroByte: Space Mission Simulator — NASA Space Apps Challenge 2026
+
+*Co-op space mission simulator: design a spacecraft and fly to the Moon with real NASA data. English & Español.* (In-game title: **MISSION TRADE-OFF**.)
 
 **Team ASTROBYTE:** Alejandro Marco Toranzo Cazorla · Keni Breython Ramos Ramirez · Jhamil Obando Requis · Tony Cahuaya
 

@@ -56,6 +56,7 @@ namespace MissionDesign.UI
             manager.MissionCompleted += Show;
             if (backButton != null) backButton.onClick.AddListener(manager.ReturnToDesign);
             if (openReportsButton != null) openReportsButton.onClick.AddListener(OpenReportsFolder);
+            if (openReportsButton != null && GameSettings.IsWeb) openReportsButton.gameObject.SetActive(false);
             if (explorationButton != null && explorationPanel != null) explorationButton.onClick.AddListener(explorationPanel.Open);
             if (manager.LastOutcome != null) Show(manager.LastOutcome);
         }

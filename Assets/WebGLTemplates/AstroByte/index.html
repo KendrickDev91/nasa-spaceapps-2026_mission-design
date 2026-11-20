@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
+  <title>{{{ PRODUCT_NAME }}}</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #02040c; }
+    body { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; color: #e6eeff; }
+    #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+    /* El lienzo mantiene 16:9 y ocupa todo lo posible (bandas negras si la ventana tiene otra proporción). */
+    #unity-canvas { display: block; background: #02040c; width: min(100vw, calc(100vh * 16 / 9)); height: min(100vh, calc(100vw * 9 / 16)); outline: none; }
+    #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+              background: radial-gradient(ellipse at 50% 60%, #0e1634 0%, #02040c 70%); transition: opacity .5s; }
+    #loader h1 { margin: 0; font-size: clamp(36px, 7vw, 84px); font-weight: 900; letter-spacing: .06em; color: #fff;
+                 text-shadow: 0 0 24px rgba(90, 160, 255, .65); }
+    #loader h2 { margin: 0; font-size: clamp(13px, 1.8vw, 22px); font-weight: 700; letter-spacing: .28em; color: #ffb046;
+                 text-shadow: 0 0 14px rgba(255, 120, 30, .5); }
+    #bar { width: min(420px, 70vw); height: 8px; border-radius: 4px; background: #13203f; overflow: hidden; margin-top: 18px; }
+    #bar-full { width: 0; height: 100%; background: linear-gradient(90deg, #a78bfa, #ffa03c); transition: width .2s; }
+    #status { font-size: 13px; color: #8fa3c8; min-height: 1em; }
+    #fs { position: fixed; right: 10px; bottom: 10px; width: 38px; height: 38px; border: 0; border-radius: 8px; cursor: pointer;
+          background: rgba(12, 24, 52, .75); color: #e6eeff; font-size: 20px; line-height: 38px; opacity: .55; transition: opacity .2s; }
+    #fs:hover { opacity: 1; }
+    #warning { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); max-width: 90vw; padding: 8px 14px; border-radius: 8px;
+               background: #5a1d1d; color: #fff; font-size: 14px; display: none; }
+  </style>
+</head>
+<body>
+  <div id="stage"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+  <div id="loader">
+    <h1>ASTROBYTE</h1>
+    <h2>SPACE MISSION SIMULATOR</h2>
+    <div id="bar"><div id="bar-full"></div></div>
+    <div id="status">Loading… · Cargando…</div>
+  </div>
+  <button id="fs" title="Fullscreen · Pantalla completa" aria-label="Fullscreen">⛶</button>
+  <div id="warning"></div>
+  <script>
+    var canvas = document.querySelector("#unity-canvas");
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    function showBanner(msg, type) {
+      if (type !== "error") { console.warn(msg); return; }
+      var w = document.querySelector("#warning");
+      w.textContent = msg; w.style.display = "block";
+    }
+
+    var config = {
+      arguments: [],
+      dataUrl: "Build/{{{ DATA_FILENAME }}}",
+      frameworkUrl: "Build/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_THREADS
+      workerUrl: "Build/{{{ WORKER_FILENAME }}}",
+#endif
+#if USE_WASM
+      codeUrl: "Build/{{{ CODE_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+      symbolsUrl: "Build/{{{ SYMBOLS_FILENAME }}}",
+#endif
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+      productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+      productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+      showBanner: showBanner,
+    };
+    // En móviles se limita la resolución interna para no saturar la GPU.
+    if (isMobile) config.devicePixelRatio = 1;
+    else config.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+
+    if (isMobile) document.querySelector("#status").textContent =
+      "Best on a computer with mouse · Mejor en computadora con ratón";
+
+    var script = document.createElement("script");
+    script.src = "Build/{{{ LOADER_FILENAME }}}";
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (progress) {
+        document.querySelector("#bar-full").style.width = (100 * progress) + "%";
+      }).then(function (unityInstance) {
+        var loader = document.querySelector("#loader");
+        loader.style.opacity = "0";
+        setTimeout(function () { loader.style.display = "none"; }, 500);
+        canvas.focus();
+        document.querySelector("#fs").onclick = function () { unityInstance.SetFullscreen(1); };
+      }).catch(function (message) {
+        showBanner("Error: " + message, "error");
+      });
+    };
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>

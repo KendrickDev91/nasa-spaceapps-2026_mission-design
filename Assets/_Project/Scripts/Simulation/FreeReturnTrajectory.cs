@@ -89,7 +89,14 @@ namespace MissionDesign.Simulation
         public static bool IsReady => cached != null;
 
         /// <summary>Calcula la solución en segundo plano para que no se note al entrar en la vista orbital.</summary>
-        public static void WarmUpAsync() => System.Threading.Tasks.Task.Run(() => { _ = Default; });
+        public static void WarmUpAsync()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            _ = Default;   // el navegador no tiene hilos: se calcula aquí, una sola vez
+#else
+            System.Threading.Tasks.Task.Run(() => { _ = Default; });
+#endif
+        }
 
         /// <summary>Artemis II: TLI el 2 de abril y sobrevuelo el 6 de abril de 2026 (~4 días de ida).</summary>
         public const double TargetFlybyDays = 4.0;

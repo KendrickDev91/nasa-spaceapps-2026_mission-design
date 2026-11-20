@@ -163,6 +163,12 @@ namespace MissionDesign.UI
             Hook(restartButton, Restart);
             Hook(mainMenuButton, () => { Show(pauseMenu, false); Show(mainMenu, true); });
             Hook(pauseQuitButton, Quit);
+            // En el navegador no se «sale» del juego: se cierra la pestaña.
+            if (GameSettings.IsWeb)
+            {
+                if (quitButton != null) quitButton.gameObject.SetActive(false);
+                if (pauseQuitButton != null) pauseQuitButton.gameObject.SetActive(false);
+            }
             Hook(infoPrevButton, () => Turn(-1));
             Hook(infoNextButton, () => Turn(1));
             Hook(infoCloseButton, () => Show(infoPanel, false));

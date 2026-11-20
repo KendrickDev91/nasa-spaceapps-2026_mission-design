@@ -13,6 +13,14 @@ namespace MissionDesign.Core
     {
         private const string Prefix = "settings.";
 
+        /// <summary>Versión para navegador (WebGL): sin hilos, sin carpetas locales y la ventana la controla el navegador.</summary>
+        public static bool IsWeb =>
+#if UNITY_WEBGL && !UNITY_EDITOR
+            true;
+#else
+            false;
+#endif
+
         public static float MasterVolume { get; private set; } = 1f;
         public static float SfxVolume { get; private set; } = 1f;
         public static int QualityLevel { get; private set; } = -1;
@@ -58,13 +66,19 @@ namespace MissionDesign.Core
         {
             MasterVolume = PlayerPrefs.GetFloat(Prefix + "master", 1f);
             SfxVolume = PlayerPrefs.GetFloat(Prefix + "sfx", 1f);
-            QualityLevel = PlayerPrefs.GetInt(Prefix + "quality", -1);
+            QualityLevel = PlayerPrefs.GetInt(Prefix + "quality", IsWeb ? DefaultWebQuality() : -1);
             DisplayMode = (FullScreenMode)PlayerPrefs.GetInt(Prefix + "displayMode", (int)FullScreenMode.FullScreenWindow);
             ResolutionWidth = PlayerPrefs.GetInt(Prefix + "width", 0);
             ResolutionHeight = PlayerPrefs.GetInt(Prefix + "height", 0);
             VSync = PlayerPrefs.GetInt(Prefix + "vsync", 1) == 1;
             MouseSensitivity = PlayerPrefs.GetFloat(Prefix + "mouse", 1f);
             InvertY = PlayerPrefs.GetInt(Prefix + "invertY", 0) == 1;
+        }
+
+        private static int DefaultWebQuality()
+        {
+            int i = System.Array.IndexOf(QualitySettings.names, "Medium");
+            return i >= 0 ? i : -1;
         }
 
         public static void Save()
@@ -89,7 +103,7 @@ namespace MissionDesign.Core
                 QualitySettings.SetQualityLevel(QualityLevel, true);
             QualitySettings.vSyncCount = VSync ? 1 : 0;
             Application.targetFrameRate = VSync ? -1 : 144;
-            if (applyResolution)
+            if (applyResolution && !IsWeb)
             {
                 int w = ResolutionWidth > 0 ? ResolutionWidth : Screen.currentResolution.width;
                 int h = ResolutionHeight > 0 ? ResolutionHeight : Screen.currentResolution.height;

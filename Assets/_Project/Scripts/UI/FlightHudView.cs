@@ -137,9 +137,12 @@ namespace MissionDesign.UI
 
         private IEnumerator Flash()
         {
-            for (float t = 0f; t < 0.35f; t += Time.deltaTime)
+            // Destello sutil: las 8 fotos caen en pocos segundos y un flash fuerte tapaba el sobrevuelo (y molesta a
+            // jugadores fotosensibles). El «clic» lo dan el sonido y la miniatura que aparece.
+            const float peak = 0.14f, duration = 0.18f;
+            for (float t = 0f; t < duration; t += Time.deltaTime)
             {
-                flash.color = new Color(1f, 1f, 1f, 0.75f * (1f - t / 0.35f));
+                flash.color = new Color(1f, 1f, 1f, peak * (1f - t / duration));
                 yield return null;
             }
             flash.color = new Color(1f, 1f, 1f, 0f);
