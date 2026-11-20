@@ -7,19 +7,19 @@ using UnityEngine;
 namespace MissionDesign.Editor
 {
     /// <summary>
-    /// Compila el ejecutable de Windows en Builds/Windows/MissionTradeOff.exe (la carpeta Builds no va a git).
+    /// Compila el ejecutable de Windows en Builds/Windows/AstroByte.exe (la carpeta Builds no va a git).
     /// Batch: -executeMethod MissionDesign.Editor.BuildPlayer.BuildWindows
     /// </summary>
     public static class BuildPlayer
     {
         public const string OutputDir = "Builds/Windows";
-        public const string ExeName = "MissionTradeOff.exe";
+        public const string ExeName = "AstroByte.exe";
 
         [MenuItem("NASA SpaceApps/Build Windows Player")]
         public static void BuildWindows()
         {
-            PlayerSettings.productName = GameInfo.Title;
-            PlayerSettings.companyName = "MissionTradeOff";
+            PlayerSettings.productName = "AstroByte";
+            PlayerSettings.companyName = "KendrickDev91";
             PlayerSettings.defaultScreenWidth = 1920;
             PlayerSettings.defaultScreenHeight = 1080;
             PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
@@ -50,8 +50,8 @@ namespace MissionDesign.Editor
         [MenuItem("NASA SpaceApps/Build WebGL Player")]
         public static void BuildWebGL()
         {
-            PlayerSettings.productName = GameInfo.Title;
-            PlayerSettings.companyName = "MissionTradeOff";
+            PlayerSettings.productName = "AstroByte";
+            PlayerSettings.companyName = "KendrickDev91";
             PlayerSettings.defaultWebScreenWidth = 1280;
             PlayerSettings.defaultWebScreenHeight = 720;
             PlayerSettings.runInBackground = true;

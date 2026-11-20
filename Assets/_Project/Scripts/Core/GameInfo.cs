@@ -8,9 +8,13 @@ namespace MissionDesign.Core
     /// </summary>
     public static class GameInfo
     {
-        public const string Title = "MISSION TRADE-OFF";
+        /// <summary>Título corto (barra superior, centro espacial).</summary>
+        public const string Title = "ASTROBYTE";
 
-        /// <summary>Título grande de la pantalla inicial (el nombre del equipo); el resto del juego sigue usando <see cref="Title"/>.</summary>
+        /// <summary>Nombre completo del juego (créditos, reportes, ventana, itch.io). Antes se llamaba «Mission Trade-Off».</summary>
+        public const string FullTitle = "AstroByte: Space Mission Simulator";
+
+        /// <summary>Título grande de la pantalla inicial.</summary>
         public const string StartScreenTitle = "AstroByte";
 
         public const string TaglineEs = "Diseña, negocia y vuela tu misión espacial";

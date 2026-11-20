@@ -93,6 +93,72 @@ namespace MissionDesign.Tests
             Loc.SetForTests(GameLanguage.Spanish);
         }
 
+        [UnityTest, Explicit("Capturas de tienda: se ejecuta a mano con -testFilter StoreScreenshots")]
+        public IEnumerator Shoot_Scenarios_English() => ShootScenarios(GameLanguage.English, "en");
+
+        [UnityTest, Explicit("Capturas de tienda: se ejecuta a mano con -testFilter StoreScreenshots")]
+        public IEnumerator Shoot_Scenarios_Spanish() => ShootScenarios(GameLanguage.Spanish, "es");
+
+        /// <summary>
+        /// Una misión por escenario (el ganador de ejemplo en Avanzado): pantalla de diseño, despegue con su cohete y
+        /// la nave en su órbita (LEO, GEO, Luna). Muestra la variedad del juego más allá del sobrevuelo tripulado.
+        /// </summary>
+        private static IEnumerator ShootScenarios(GameLanguage lang, string tag)
+        {
+            var plan = new[]
+            {
+                ("SCN_EARTH_CLIMATE", "climate", MissionRole.PrincipalScientist),
+                ("SCN_GEO_WEATHER", "geo", MissionRole.TelecomLaunchEngineer),
+                ("SCN_LUNAR_RECON", "lunar", MissionRole.SystemsEngineer),
+                ("SCN_CUBESAT_EDU", "cubesat", MissionRole.MissionDirector),
+            };
+            foreach (var (scenarioId, name, role) in plan)
+            {
+                Loc.SetForTests(lang);
+                SceneManager.LoadScene(SceneFlow.MissionDesignScene);
+                yield return null;
+                yield return null;
+                yield return new WaitForSeconds(0.5f);
+                Object.FindAnyObjectByType<GameMenus>().CloseAll();
+
+                var mgr = MissionStateManager.Instance;
+                var example = DesignLibrary.Demos().First(d => d.snapshot.scenarioId == scenarioId
+                                                              && d.snapshot.difficulty == DifficultyLevel.Advanced && d.snapshot.demoOrder == 0);
+                Object.FindAnyObjectByType<DesignLibraryPanel>(FindObjectsInactive.Include).Load(example.snapshot);
+                var roles = Object.FindAnyObjectByType<RoleTurnManager>();
+                roles.SetActiveRole(role);
+                yield return new WaitForSeconds(1.2f);
+                yield return EnglishLanguageTests.Shot($"Logs/store_{tag}_s_{name}_1_design.png");
+
+                roles.SetPlayerCount(1);
+                roles.ApproveAsActivePlayer();
+                var runner = Object.FindAnyObjectByType<MissionSimulationRunner>();
+                runner.FixedSeed = 3;
+                runner.SecondsPerPhase = 6f;
+                Assert.IsTrue(roles.TryRequestLaunch(out string msg), scenarioId + ": " + msg);
+                float t0 = Time.realtimeSinceStartup;
+                yield return new WaitForSeconds(3.2f);
+                yield return EnglishLanguageTests.Shot($"Logs/store_{tag}_s_{name}_2_launch.png");
+
+                while (mgr.Phase < MissionPhase.ScienceOperations && Time.realtimeSinceStartup - t0 < 90f) yield return null;
+                yield return new WaitForSeconds(3f);
+                yield return EnglishLanguageTests.Shot($"Logs/store_{tag}_s_{name}_3_orbit.png");
+
+                while (mgr.Phase != MissionPhase.PostMission && Time.realtimeSinceStartup - t0 < 200f) yield return null;
+                var post = Object.FindAnyObjectByType<PostMissionPanel>();
+                float t1 = Time.realtimeSinceStartup;
+                while (post != null && post.Revealing && Time.realtimeSinceStartup - t1 < 12f) yield return null;
+                yield return new WaitForSeconds(2f);
+                yield return EnglishLanguageTests.Shot($"Logs/store_{tag}_s_{name}_4_result.png");
+            }
+
+            // Centro espacial: el recorrido en tercera persona.
+            SceneManager.LoadScene(SceneFlow.SpaceCenterScene);
+            yield return new WaitForSeconds(2f);
+            yield return EnglishLanguageTests.Shot($"Logs/store_{tag}_s_space_center.png");
+            Loc.SetForTests(GameLanguage.Spanish);
+        }
+
         /// <summary>Renderiza una cámara concreta con sus lienzos de cámara (la cinemática).</summary>
         private static IEnumerator CaptureCamera(Camera cam, string path)
         {

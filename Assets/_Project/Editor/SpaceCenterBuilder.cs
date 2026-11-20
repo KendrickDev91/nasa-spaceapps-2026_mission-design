@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MissionDesign.Characters;
+using MissionDesign.Core;
 using MissionDesign.Exploration;
 using MissionDesign.UI;
 using MissionDesign.UI.Visual3D;
@@ -670,7 +671,7 @@ namespace MissionDesign.Editor
             // Zona actual + subtítulo.
             var zoneBack = Panel("ZoneBar", root, new Color(0.02f, 0.04f, 0.09f, 0.72f));
             Place(zoneBack, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24f, -24f), new Vector2(760f, 86f));
-            var sub = Text("Subtitle", zoneBack, "CENTRO ESPACIAL · MISSION TRADE-OFF", 15, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
+            var sub = Text("Subtitle", zoneBack, "CENTRO ESPACIAL · " + GameInfo.Title, 15, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
             Place(sub.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(20f, -10f), new Vector2(-40f, 22f));
             var zone = Text("Zone", zoneBack, "Centro espacial", 28, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
             Place(zone.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(20f, -36f), new Vector2(-40f, 40f));

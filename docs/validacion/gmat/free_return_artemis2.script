@@ -1,4 +1,4 @@
-%  MISSION TRADE-OFF - validacion de la trayectoria de retorno libre (tipo Artemis II) con NASA GMAT
+%  AstroByte - validacion de la trayectoria de retorno libre (tipo Artemis II) con NASA GMAT
 %  Estado inicial = salida del modelo CR3BP del juego justo despues de la TLI:
 %    parking 185 km - angulo 235.500 deg - 10.9452 km/s
 %    CR3BP: sobrevuelo 7671 km (dia 3.72) - perigeo de regreso 51 km (dia 7.68)

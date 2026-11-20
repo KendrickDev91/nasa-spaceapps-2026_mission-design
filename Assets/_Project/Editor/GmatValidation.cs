@@ -49,7 +49,7 @@ namespace MissionDesign.Editor
             string results = Path.Combine(folder, ResultsName).Replace('\\', '/');
             string F(double d) => d.ToString("R", CultureInfo.InvariantCulture);
 
-            string script = $@"%  MISSION TRADE-OFF · validación de la trayectoria de retorno libre (tipo Artemis II) con NASA GMAT
+            string script = $@"%  AstroByte · validación de la trayectoria de retorno libre (tipo Artemis II) con NASA GMAT
 %  Estado inicial = salida del modelo CR3BP del juego justo después de la TLI:
 %    parking {s.parkingAltitudeKm:F0} km · ángulo {s.injectionAngleDeg.ToString("F3", CultureInfo.InvariantCulture)}° · {s.injectionSpeedKmS.ToString("F4", CultureInfo.InvariantCulture)} km/s
 %    CR3BP: sobrevuelo {s.flybyAltitudeKm:F0} km (día {s.flybyTimeDays.ToString("F2", CultureInfo.InvariantCulture)}) · perigeo de regreso {s.returnPerigeeAltitudeKm:F0} km (día {s.totalDays.ToString("F2", CultureInfo.InvariantCulture)})

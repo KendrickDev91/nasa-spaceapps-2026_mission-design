@@ -205,7 +205,7 @@ namespace MissionDesign.Core
             { "Controles", "Controls" },
             { "<b>Diseñar la misión</b>", "<b>Design the mission</b>" },
             { "<b>Diseñar la misión »</b>", "<b>Design the mission »</b>" },
-            { "CENTRO ESPACIAL · MISSION TRADE-OFF", "SPACE CENTER · MISSION TRADE-OFF" },
+            { "CENTRO ESPACIAL · " + GameInfo.Title, "SPACE CENTER · " + GameInfo.Title },
             { "Centro espacial · exteriores", "Space center · outdoors" },
             { "<b>DISEÑAR MISIÓN</b>\n<size=70%>pisa el círculo</size>", "<b>DESIGN MISSION</b>\n<size=70%>step into the circle</size>" },
             { "CENTRO DE CONTROL", "CONTROL CENTER" },

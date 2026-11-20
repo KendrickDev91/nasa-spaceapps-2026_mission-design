@@ -144,7 +144,7 @@ namespace MissionDesign.Simulation
         public string ToText()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"=== {Loc.L("REPORTE DE MISIÓN", "MISSION REPORT")} — {GameInfo.Title} ({GameInfo.Event}) ===");
+            sb.AppendLine($"=== {Loc.L("REPORTE DE MISIÓN", "MISSION REPORT")} — {GameInfo.FullTitle} ({GameInfo.Event}) ===");
             sb.AppendLine(Loc.L($"Generado (UTC): {generatedAtUtc}   Semilla: {seed}   Dificultad: {difficulty}", $"Generated (UTC): {generatedAtUtc}   Seed: {seed}   Difficulty: {difficulty}"));
             sb.AppendLine($"{Loc.L("Escenario", "Scenario")}: {scenarioName} ({scenarioId})");
             sb.AppendLine(Loc.L($"Órbita: {orbit}   Lanzador: {launchVehicle}   Red terrena: {groundNetwork}", $"Orbit: {orbit}   Launcher: {launchVehicle}   Ground network: {groundNetwork}"));

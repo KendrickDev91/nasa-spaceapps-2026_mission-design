@@ -1,15 +1,15 @@
 # AstroByte: Space Mission Simulator — NASA Space Apps Challenge 2026
 
-*Co-op space mission simulator: design a spacecraft and fly to the Moon with real NASA data. English & Español.* (In-game title: **MISSION TRADE-OFF**.)
+*Co-op space mission simulator: design a spacecraft and fly to the Moon with real NASA data. English & Español.*
 
 **Developed by** Keni Breython Ramos Ramirez ([KendrickDev91](https://kendrickdev91.itch.io)) — game design and development.  
 **Concept and ideas:** team ASTROBYTE (Bolivia) — Alejandro Marco Toranzo Cazorla · Jhamil Obando Requis · Tony Cahuaya — at the NASA Space Apps Challenge 2026.
 
 ## 🎮 Play AstroByte · Juega AstroByte
 
-[![Available on itch.io](https://img.shields.io/badge/itch.io-Play%20free%20·%20Juega%20gratis-FA5C5C?logo=itchdotio&logoColor=white)](https://kendrickdev91.itch.io/astrobyte-mission-trade-off)
+[![Available on itch.io](https://img.shields.io/badge/itch.io-Play%20free%20·%20Juega%20gratis-FA5C5C?logo=itchdotio&logoColor=white)](https://kendrickdev91.itch.io/astrobyte-space-mission-simulator)
 
-**[kendrickdev91.itch.io/astrobyte-mission-trade-off](https://kendrickdev91.itch.io/astrobyte-mission-trade-off)** — free download for Windows, English & Spanish, 1–4 players. Leave a comment with your score! · Descarga gratis para Windows, en inglés y español, de 1 a 4 jugadores. ¡Déjanos un comentario con tu puntuación!
+**[kendrickdev91.itch.io/astrobyte-space-mission-simulator](https://kendrickdev91.itch.io/astrobyte-space-mission-simulator)** — play in your browser or download for Windows, English & Spanish, 1–4 players. Leave a comment with your score! · Juega en el navegador o descarga gratis para Windows, en inglés y español, de 1 a 4 jugadores. ¡Déjanos un comentario con tu puntuación!
 
 Also on GitHub: [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest).
 
@@ -23,7 +23,7 @@ Also on GitHub: [latest release](https://github.com/KendrickDev91/nasa-spaceapps
 | [**Full walkthrough**](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 1:13 |
 | [30-second demo (English)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_EN.mp4) | English narration + English captions | 0:29 |
 
-Subtitles (SRT): [`docs/video/`](docs/video/) · **Play the game (Windows):** [itch.io](https://kendrickdev91.itch.io/astrobyte-mission-trade-off) or the [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest)
+Subtitles (SRT): [`docs/video/`](docs/video/) · **Play the game (browser or Windows):** [itch.io](https://kendrickdev91.itch.io/astrobyte-space-mission-simulator) or the [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest)
 
 ## 📊 Presentation (7 slides)
 
@@ -52,7 +52,9 @@ operations, and a post-mission analysis that explains **what went right, what fa
 
 ---
 
-# MISSION TRADE-OFF — proyecto para NASA Space Apps Challenge 2026
+# AstroByte: Space Mission Simulator — proyecto para NASA Space Apps Challenge 2026
+
+> Antes se llamaba **Mission Trade-Off**; el nombre cambió el 2026-11-20.
 
 Juego de diseño de misiones espaciales para 1-4 jugadores (hot-seat) que responde al reto
 **Space Mission Design Game**: definir objetivo, diseñar la nave, elegir instrumentos, cohete, órbita y
@@ -259,7 +261,7 @@ powershell -ExecutionPolicy Bypass -File ArtSource/Blender/build_all.ps1        
 Unity.exe -batchmode -quit -projectPath . -executeMethod MissionDesign.Editor.MainSceneBuilder.BuildEverything # 2-3. catálogo + escena de diseño + centro espacial
 Unity.exe -batchmode -projectPath . -runTests -testPlatform EditMode -testResults Logs/EditMode-results.xml    # 4. pruebas
 Unity.exe -batchmode -projectPath . -runTests -testPlatform PlayMode -testResults Logs/PlayMode-results.xml    #    (+ capturas)
-Unity.exe -batchmode -quit -projectPath . -executeMethod MissionDesign.Editor.BuildPlayer.BuildWindows         # 5. Builds/Windows/MissionTradeOff.exe
+Unity.exe -batchmode -quit -projectPath . -executeMethod MissionDesign.Editor.BuildPlayer.BuildWindows         # 5. Builds/Windows/AstroByte.exe
 ```
 
 Los mismos pasos están en el menú **NASA SpaceApps** del editor. Reconstruir la escena la **sobrescribe**:
