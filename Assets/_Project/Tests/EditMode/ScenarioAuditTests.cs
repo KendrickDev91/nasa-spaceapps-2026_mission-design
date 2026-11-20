@@ -249,7 +249,8 @@ namespace MissionDesign.Tests
             var files = System.IO.Directory.GetFiles(DesignLibrary.DemoFolder, "*.json").OrderBy(f => f).ToList();
             Assert.AreEqual(files.Count, bundle.json.Count, "Regenera el paquete: MissionDesign.Editor.DemoDesigns.WriteBundle");
             for (int i = 0; i < files.Count; i++)
-                Assert.AreEqual(System.IO.File.ReadAllText(files[i]), bundle.json[i], System.IO.Path.GetFileName(files[i]));
+                Assert.AreEqual(System.IO.File.ReadAllText(files[i]).Replace("\r\n", "\n"), bundle.json[i].Replace("\r\n", "\n"),
+                    System.IO.Path.GetFileName(files[i]));
         }
 
         [Test]

@@ -59,7 +59,7 @@ namespace MissionDesign.Editor
             foreach (var file in Directory.GetFiles(Folder, "*.json").OrderBy(f => f))
             {
                 bundle.files.Add(Path.GetFileName(file));
-                bundle.json.Add(File.ReadAllText(file));
+                bundle.json.Add(File.ReadAllText(file).Replace("\r\n", "\n"));   // igual con o sin CRLF de git
             }
             string text = JsonUtility.ToJson(bundle, true);
             if (File.Exists(BundlePath) && File.ReadAllText(BundlePath) == text) return;
