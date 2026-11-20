@@ -88,6 +88,12 @@ namespace MissionDesign.Exploration
                 run |= kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
                 jump = kb.spaceKey.wasPressedThisFrame;
             }
+            if (!InputLocked && TouchControls.Active)
+            {
+                input += TouchControls.Move;
+                run |= TouchControls.Run;
+                jump |= TouchControls.ConsumeJump();
+            }
             if (InputLocked) { input = Vector2.zero; jump = false; }
             input = Vector2.ClampMagnitude(input, 1f);
 

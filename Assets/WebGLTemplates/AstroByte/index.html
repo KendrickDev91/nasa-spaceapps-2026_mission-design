@@ -65,12 +65,12 @@
       productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
       showBanner: showBanner,
     };
-    // En móviles se limita la resolución interna para no saturar la GPU.
-    if (isMobile) config.devicePixelRatio = 1;
-    else config.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    // Resolución interna: en móviles hasta 2× (con 1× la imagen y el texto se veían borrosos en pantallas de alta
+    // densidad); en escritorio hasta 1.5× para no cargar la GPU en monitores 4K.
+    config.devicePixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 2 : 1.5);
 
     if (isMobile) document.querySelector("#status").textContent =
-      "Best on a computer with mouse · Mejor en computadora con ratón";
+      "Touch controls ready · Controles táctiles listos — landscape recommended · mejor en horizontal";
 
     var script = document.createElement("script");
     script.src = "Build/{{{ LOADER_FILENAME }}}";

@@ -84,8 +84,11 @@ namespace MissionDesign.Exploration
         public string GeoText => geoText != null ? geoText.text : string.Empty;
         public bool MapRendered => mapTexture != null;
 
+        private TouchControls touch;
+
         private void Start()
         {
+            touch = TouchControls.CreateIfTouch();
             interactables = FindObjectsByType<Interactable>();
             zones = FindObjectsByType<ZoneVolume>();
             Hook(infoPrev, () => Turn(-1));
@@ -140,7 +143,20 @@ namespace MissionDesign.Exploration
                 }
             }
 
+            if (touch != null)
+            {
+                if (TouchControls.ConsumeMenu())
+                {
+                    if (MissionDesign.UI.OptionsMenu.IsOpen) MissionDesign.UI.OptionsMenu.Close();
+                    else if (Visible(infoPanel)) CloseInfo();
+                    else Show(pauseMenu, !Visible(pauseMenu));
+                }
+                if (TouchControls.ConsumeMap() && !IsBlocking) ToggleBigMap();
+            }
+
             bool locked = IsBlocking || CutsceneLock;
+            // Los controles táctiles se ocultan mientras hay un menú o panel abierto (no tapan sus botones).
+            if (touch != null) touch.gameObject.SetActive(!locked);
             if (player != null) player.InputLocked = locked;
             if (cameraRig != null) cameraRig.InputLocked = locked;
             Time.timeScale = Visible(pauseMenu) ? 0f : 1f;
@@ -149,8 +165,13 @@ namespace MissionDesign.Exploration
             UpdateMap();
             Show(promptGroup, current != null);
             if (current != null && promptText != null)
-                promptText.text = $"<b>[E]</b>  {(current.kind == InteractionKind.Elevator && current.elevator != null && player != null ? current.elevator.PromptFor(player.transform) : Loc.Static(current.prompt))}";
+                promptText.text = $"<b>{(touch != null ? Loc.L("[Usar]", "[Use]") : "[E]")}</b>  {(current.kind == InteractionKind.Elevator && current.elevator != null && player != null ? current.elevator.PromptFor(player.transform) : Loc.Static(current.prompt))}";
             if (current != null && kb != null && kb.eKey.wasPressedThisFrame) Interact(current);
+            if (touch != null)
+            {
+                touch.SetInteractAvailable(current != null);
+                if (TouchControls.ConsumeInteract() && current != null) Interact(current);
+            }
 
             if (zoneText != null && player != null)
             {

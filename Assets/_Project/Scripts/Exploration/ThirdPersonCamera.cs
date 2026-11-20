@@ -68,6 +68,14 @@ namespace MissionDesign.Exploration
                     if (Mathf.Abs(scroll) > 0.01f)
                         distance = Mathf.Clamp(distance - Mathf.Sign(scroll) * 0.6f, minDistance, maxDistance);
                 }
+                if (TouchControls.Active)
+                {
+                    // Arrastrar con el dedo en la mitad derecha de la pantalla gira la cámara.
+                    Vector2 d = TouchControls.ConsumeLook();
+                    float k = 0.22f * GameSettings.MouseSensitivity;
+                    yaw += d.x * k;
+                    pitch = Mathf.Clamp(pitch - (GameSettings.InvertY ? -d.y : d.y) * k, -25f, 70f);
+                }
                 if (kb != null)
                 {
                     if (kb.qKey.isPressed) yaw -= 90f * dt;
