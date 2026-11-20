@@ -169,6 +169,49 @@ namespace MissionDesign.Editor
 
         // ───────────── Sala de control ─────────────
 
+        /// <summary>
+        /// Plano de una pantalla del modelo: normal media de su malla (hacia quien mira), y el centro y tamaño del
+        /// rectángulo medidos sobre ese plano, en su cara delantera.
+        /// </summary>
+        private static void ScreenPlane(Transform t, Vector3 viewDirection, out Vector3 facing, out Vector3 center, out Vector2 size)
+        {
+            var bounds = t.GetComponent<Renderer>().bounds;
+            facing = -viewDirection;
+            center = bounds.center;
+            size = new Vector2(Mathf.Max(bounds.size.x, bounds.size.z), bounds.size.y);
+            var mf = t.GetComponent<MeshFilter>();
+            var mesh = mf != null ? mf.sharedMesh : null;
+            if (mesh == null || mesh.vertexCount == 0) return;
+
+            // Normal dominante: la de la cara más grande que mira hacia quien observa.
+            var verts = mesh.vertices;
+            var tris = mesh.triangles;
+            Vector3 n = Vector3.zero;
+            for (int i = 0; i + 2 < tris.Length; i += 3)
+            {
+                Vector3 a = t.TransformPoint(verts[tris[i]]), b = t.TransformPoint(verts[tris[i + 1]]), c = t.TransformPoint(verts[tris[i + 2]]);
+                Vector3 area = Vector3.Cross(b - a, c - a);       // longitud = 2 × área
+                if (Vector3.Dot(area, viewDirection) < 0f) n += area;   // solo las caras que miran a la sala
+            }
+            if (n.sqrMagnitude < 1e-8f) return;
+            facing = n.normalized;
+
+            Vector3 fwd = -facing;
+            Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
+            Vector3 up = Vector3.Cross(fwd, right).normalized;
+            float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue, maxY = float.MinValue, maxD = float.MinValue;
+            foreach (var v in verts)
+            {
+                Vector3 w = t.TransformPoint(v) - bounds.center;
+                float x = Vector3.Dot(w, right), y = Vector3.Dot(w, up), d = Vector3.Dot(w, facing);
+                minX = Mathf.Min(minX, x); maxX = Mathf.Max(maxX, x);
+                minY = Mathf.Min(minY, y); maxY = Mathf.Max(maxY, y);
+                maxD = Mathf.Max(maxD, d);
+            }
+            center = bounds.center + right * ((minX + maxX) * 0.5f) + up * ((minY + maxY) * 0.5f) + facing * maxD;
+            size = new Vector2(maxX - minX, maxY - minY);
+        }
+
         private static Transform PlaceControlRoom(GameObject room, RenderTexture screenRt)
         {
             room.transform.position = ControlRoomPos;
@@ -206,16 +249,19 @@ namespace MissionDesign.Editor
                 if (t == null) continue;
                 var r = t.GetComponent<Renderer>();
                 r.sharedMaterial = sideMat;
-                var bounds = r.bounds;
+                // Plano real de esta pantalla (inclinación y grosor de la malla). Antes el texto se colocaba en el centro
+                // del volumen con la orientación de la pantalla central: quedaba dentro de la malla y se veía cortado.
+                ScreenPlane(t, screenNormal, out Vector3 screenFacing, out Vector3 center, out Vector2 size);
                 var textGo = new GameObject(side + "_Live", typeof(RectTransform));
                 textGo.transform.SetParent(room.transform, true);
-                textGo.transform.SetPositionAndRotation(bounds.center - screenNormal * 0.08f, Quaternion.LookRotation(screenNormal, Vector3.up));
+                textGo.transform.SetPositionAndRotation(center + screenFacing * 0.06f, Quaternion.LookRotation(-screenFacing, Vector3.up));
                 var tmp = textGo.AddComponent<TextMeshPro>();
-                tmp.rectTransform.sizeDelta = new Vector2(Mathf.Max(bounds.size.x, bounds.size.z) * 0.9f, bounds.size.y * 0.88f);
+                tmp.rectTransform.sizeDelta = new Vector2(size.x * 0.9f, size.y * 0.86f);
                 tmp.alignment = TextAlignmentOptions.TopLeft;
                 tmp.enableAutoSizing = true;
                 tmp.fontSizeMin = 0.05f;
-                tmp.fontSizeMax = bounds.size.y * 1.1f;
+                tmp.fontSizeMax = size.y * 1.1f;
+                tmp.overflowMode = TextOverflowModes.Truncate;
                 tmp.color = new Color(0.86f, 0.92f, 1f);
                 tmp.richText = true;
                 tmp.text = "";
