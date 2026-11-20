@@ -1,5 +1,5 @@
 {
-    "designName": "2 · Sobrevuelo económico (parcial ~80 %)",
+    "designName": "2 · Sobrevuelo económico (parcial ~75 %)",
     "teamName": "Demo",
     "savedAtUtc": "demo",
     "difficulty": 0,
@@ -19,5 +19,8 @@
         "INS_EXPLORER_CAMS"
     ],
     "demoSeed": 0,
-    "demoNote": "Menos cámaras y menos ciencia: se cumple solo una parte del objetivo. Compáralo con la demo 1."
+    "demoNote": "Menos cámaras y menos ciencia: se cumple solo una parte del objetivo. Compáralo con la demo 1.",
+    "designNameEn": "2 · Budget flyby (partial ~75%)",
+    "demoNoteEn": "Fewer cameras and less science: only part of the goal is met. Compare it with demo 1.",
+    "demoOrder": 1
 }

@@ -1,0 +1,26 @@
+{
+    "designName": "Meteorología GEO (avanzado): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 1,
+    "scenarioId": "SCN_GEO_WEATHER",
+    "orbitId": "ORB_GEO",
+    "launchVehicleId": "LV_FALCON9",
+    "groundNetworkId": "GND_COMMERCIAL",
+    "componentIds": [
+        "BUS_LARGE",
+        "SOL_ROSA",
+        "BAT_2000",
+        "ANT_KA",
+        "CDH_SSR",
+        "ADCS_RW_STAR"
+    ],
+    "instrumentIds": [
+        "INS_ABI"
+    ],
+    "demoSeed": 0,
+    "demoNote": "ABI con computadora endurecida con grabador de 4 TB y rastreador estelar: soporta la radiación y los cortes de enlace.",
+    "designNameEn": "GEO weather (advanced): winner",
+    "demoNoteEn": "ABI with a radiation-hardened computer, a 4 TB recorder and a star tracker: it withstands radiation and link outages.",
+    "demoOrder": 0
+}

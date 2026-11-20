@@ -234,6 +234,44 @@ namespace MissionDesign.Tests
             Assert.IsEmpty(missing, "Nombres del catálogo sin traducción al inglés:\n" + string.Join("\n", missing));
         }
 
+        /// <summary>
+        /// Cada ejemplo de la ventana «Diseños» se puede lanzar y, con su semilla y las reglas del juego, da el resultado que
+        /// promete: los «ganadores» ganan y las «lecciones» no. Hay ejemplos para cada escenario en Básico y Avanzado.
+        /// </summary>
+        [Test]
+        public void EveryExampleDesign_GivesItsDocumentedResult_ForEveryScenarioAndDifficulty()
+        {
+            var db = AssetDatabase.LoadAssetAtPath<NasaDatabaseSO>(DatabasePath);
+            var demos = DesignLibrary.Demos();
+            Assert.GreaterOrEqual(demos.Count, 18);
+            var report = new StringBuilder();
+            var problems = new List<string>();
+            foreach (var scn in db.scenarios)
+            foreach (var diff in new[] { DifficultyLevel.Basic, DifficultyLevel.Advanced })
+                if (!demos.Any(d => d.snapshot.scenarioId == scn.scenarioId && d.snapshot.difficulty == diff && d.snapshot.demoOrder == 0))
+                    problems.Add($"Falta un ganador para {scn.scenarioId} [{diff}]");
+            foreach (var (path, s) in demos)
+            {
+                Assert.IsFalse(string.IsNullOrEmpty(s.designNameEn), $"{path}: falta el nombre en inglés");
+                Assert.IsFalse(string.IsNullOrEmpty(s.demoNoteEn), $"{path}: falta la nota en inglés");
+                var d = new SpacecraftDesign();
+                var missing = s.ApplyTo(d, db);
+                Assert.IsEmpty(missing, path);
+                var v = OrbitAndLaunchValidator.Validate(d);
+                if (!v.canLaunch) { problems.Add($"{s.designName}: bloqueado"); continue; }
+                bool advanced = s.difficulty == DifficultyLevel.Advanced;
+                var o = MissionSimulator.Run(d, db.randomEvents, new SimulationSettings
+                {
+                    seed = s.demoSeed, allowLaunchFailure = advanced, minEvents = 1, maxEvents = advanced ? 2 : 1, realMissions = db.realMissions
+                });
+                report.AppendLine($"{s.scenarioId} [{s.difficulty}] #{s.demoOrder} {s.designName}: {o.verdict} {o.score}/100");
+                bool won = o.verdict == MissionVerdict.Success;
+                if ((s.demoOrder == 0) != won) problems.Add($"{s.designName}: {o.verdict} (orden {s.demoOrder})");
+            }
+            Debug.Log("[Examples]\n" + report);
+            Assert.IsEmpty(problems, string.Join("\n", problems) + "\n" + report);
+        }
+
         [Test]
         public void InstrumentOffTheScenarioObjective_GivesHalfItsScience()
         {

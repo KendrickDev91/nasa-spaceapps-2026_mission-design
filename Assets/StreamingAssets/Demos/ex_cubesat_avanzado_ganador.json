@@ -1,0 +1,27 @@
+{
+    "designName": "CubeSat (avanzado): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 1,
+    "scenarioId": "SCN_CUBESAT_EDU",
+    "orbitId": "ORB_LEO_SSO",
+    "launchVehicleId": "LV_RIDESHARE",
+    "groundNetworkId": "GND_UNIVERSITY",
+    "componentIds": [
+        "BUS_CUBESAT_12U",
+        "SOL_CUBESAT",
+        "BAT_CUBESAT",
+        "ANT_S_CUBESAT",
+        "CDH_COTS",
+        "ADCS_MAG"
+    ],
+    "instrumentIds": [
+        "INS_MINXSS",
+        "INS_CUBECAM"
+    ],
+    "demoSeed": 27,
+    "demoNote": "Con computadora comercial y magnetopares baratos: cabe en el presupuesto, aunque el apuntamiento es menos preciso.",
+    "designNameEn": "CubeSat (advanced): winner",
+    "demoNoteEn": "With a commercial computer and cheap magnetorquers: it fits the budget, although pointing is less precise.",
+    "demoOrder": 0
+}

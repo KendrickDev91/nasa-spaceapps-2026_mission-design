@@ -19,5 +19,8 @@
         "INS_CREW_CAMERAS"
     ],
     "demoSeed": 1,
-    "demoNote": "La batería no aguanta un evento: la cápsula no vuelve y solo quedan las fotos transmitidas. Lección: margen de energía."
+    "demoNote": "La batería no aguanta un evento: la cápsula no vuelve y solo quedan las fotos transmitidas. Lección: margen de energía.",
+    "designNameEn": "3 · Undersized battery (failure)",
+    "demoNoteEn": "The battery cannot ride out an event: the capsule does not return and only the transmitted photos remain. Lesson: power margin.",
+    "demoOrder": 2
 }

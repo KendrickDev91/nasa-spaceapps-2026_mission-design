@@ -1,0 +1,24 @@
+{
+    "designName": "Reconocimiento lunar (básico): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_LUNAR_RECON",
+    "orbitId": "ORB_LUNAR",
+    "launchVehicleId": "LV_ARIANE64",
+    "groundNetworkId": "GND_DSN",
+    "componentIds": [
+        "BUS_MEDIUM",
+        "SOL_WINGS",
+        "BAT_2000",
+        "ANT_KA"
+    ],
+    "instrumentIds": [
+        "INS_LROC"
+    ],
+    "demoSeed": 0,
+    "demoNote": "La cámara LROC en órbita lunar polar, antena Ka y la DSN: cartografía las zonas de alunizaje del polo sur.",
+    "designNameEn": "Lunar recon (basic): winner",
+    "demoNoteEn": "The LROC camera in a polar lunar orbit, Ka antenna and the DSN: it maps the south-pole landing zones.",
+    "demoOrder": 0
+}

@@ -1,0 +1,26 @@
+{
+    "designName": "Reconocimiento lunar (avanzado): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 1,
+    "scenarioId": "SCN_LUNAR_RECON",
+    "orbitId": "ORB_LUNAR",
+    "launchVehicleId": "LV_ARIANE64",
+    "groundNetworkId": "GND_DSN",
+    "componentIds": [
+        "BUS_MEDIUM",
+        "SOL_WINGS",
+        "BAT_2000",
+        "ANT_KA",
+        "CDH_RAD",
+        "ADCS_RW_STAR"
+    ],
+    "instrumentIds": [
+        "INS_LROC"
+    ],
+    "demoSeed": 0,
+    "demoNote": "LROC necesita apuntamiento fino: computadora endurecida (sin magnetosfera hay más radiación) y rastreador estelar.",
+    "designNameEn": "Lunar recon (advanced): winner",
+    "demoNoteEn": "LROC needs fine pointing: a radiation-hardened computer (no magnetosphere means more radiation) and a star tracker.",
+    "demoOrder": 0
+}

@@ -283,7 +283,7 @@ namespace MissionDesign.Editor
             Place(status.rectTransform, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -178), new Vector2(-64, 24));
 
             // Lista de guardados (izquierda) y comparación (derecha).
-            var listTitle = Text("ListTitle", card, "GUARDADOS", 16, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
+            var listTitle = Text("ListTitle", card, "EJEMPLOS Y DISEÑOS GUARDADOS", 16, UiTheme.Accent, TextAlignmentOptions.TopLeft, bold: true);
             Place(listTitle.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(32, -212), new Vector2(600, 24));
             var list = NewRect("List", card);
             Place(list, new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 1), new Vector2(32, -242), new Vector2(620, -274));

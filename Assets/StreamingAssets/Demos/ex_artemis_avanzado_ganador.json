@@ -1,0 +1,27 @@
+{
+    "designName": "Artemis II (avanzado): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 1,
+    "scenarioId": "SCN_ARTEMIS_FLYBY",
+    "orbitId": "ORB_FREE_RETURN",
+    "launchVehicleId": "LV_SLS_B1",
+    "groundNetworkId": "GND_OPTICAL",
+    "componentIds": [
+        "BUS_ORION",
+        "SOL_ESM",
+        "BAT_2000",
+        "ANT_O2O",
+        "CDH_ORION",
+        "ADCS_RW_SUN"
+    ],
+    "instrumentIds": [
+        "INS_ORION_CAMERAS",
+        "INS_CREW_CAMERAS"
+    ],
+    "demoSeed": 0,
+    "demoNote": "Orion con su computadora y ruedas de reacción: el apuntamiento de las cámaras no recorta ciencia. Hay 1-2 eventos y el SLS puede fallar.",
+    "designNameEn": "Artemis II (advanced): winner",
+    "demoNoteEn": "Orion with its computer and reaction wheels: camera pointing costs no science. There are 1-2 events and the SLS can fail.",
+    "demoOrder": 0
+}

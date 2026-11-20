@@ -199,7 +199,9 @@ namespace MissionDesign.Tests
             yield return null;
             Object.FindAnyObjectByType<GameMenus>().CloseAll();
             var demos = DesignLibrary.Demos();
-            Assert.AreEqual(3, demos.Count, "Tres diseños de demostración en StreamingAssets/Demos.");
+            Assert.GreaterOrEqual(demos.Count, 18, "Las 3 demos de Artemis + ejemplos por escenario y dificultad.");
+            foreach (var prefix in new[] { "1 · ", "2 · ", "3 · " })
+                Assert.That(demos.Select(d => d.snapshot.designName), Has.Some.StartsWith(prefix), "Demos de la presentación");
             var library = Object.FindAnyObjectByType<DesignLibraryPanel>();
             var runner = Object.FindAnyObjectByType<MissionSimulationRunner>();
             foreach (var (_, demo) in demos)
@@ -222,7 +224,7 @@ namespace MissionDesign.Tests
             yield return null;
             yield return null;
             Object.FindAnyObjectByType<GameMenus>().CloseAll();
-            var demo = DesignLibrary.Demos()[demoIndex].Item2;
+            var demo = DesignLibrary.Demos().First(d => d.snapshot.designName.StartsWith($"{demoIndex + 1} · ")).snapshot;
             Object.FindAnyObjectByType<DesignLibraryPanel>().Load(demo);
             yield return new WaitForSeconds(0.3f);
             var roles = Object.FindAnyObjectByType<RoleTurnManager>();

@@ -1,0 +1,25 @@
+{
+    "designName": "Clima (básico): error de enlace",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_EARTH_CLIMATE",
+    "orbitId": "ORB_LEO_SSO",
+    "launchVehicleId": "LV_FALCON9",
+    "groundNetworkId": "GND_NSN",
+    "componentIds": [
+        "BUS_MEDIUM",
+        "SOL_WINGS",
+        "BAT_2000",
+        "ANT_S"
+    ],
+    "instrumentIds": [
+        "INS_MODIS",
+        "INS_OCO2"
+    ],
+    "demoSeed": 0,
+    "demoNote": "Los mismos instrumentos con una antena de banda S: generan más datos de los que se pueden bajar y se pierde ciencia. Compáralo con el ganador.",
+    "designNameEn": "Climate (basic): downlink mistake",
+    "demoNoteEn": "The same instruments with an S-band antenna: they generate more data than can be downlinked and science is lost. Compare it with the winner.",
+    "demoOrder": 1
+}

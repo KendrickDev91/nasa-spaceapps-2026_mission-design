@@ -1,0 +1,24 @@
+{
+    "designName": "Sandbox (básico): radar NISAR",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_SANDBOX",
+    "orbitId": "ORB_LEO_SSO",
+    "launchVehicleId": "LV_FALCON9",
+    "groundNetworkId": "GND_COMMERCIAL",
+    "componentIds": [
+        "BUS_LARGE",
+        "SOL_ROSA",
+        "BAT_8000",
+        "ANT_KA"
+    ],
+    "instrumentIds": [
+        "INS_NISAR"
+    ],
+    "demoSeed": 3,
+    "demoNote": "Sin límites: el radar NISAR (3 250 GB/día) necesita bus pesado, mucha energía y banda Ka. Prueba a cambiar la antena y mira qué pasa.",
+    "designNameEn": "Sandbox (basic): NISAR radar",
+    "demoNoteEn": "No limits: the NISAR radar (3,250 GB/day) needs a heavy bus, lots of power and Ka band. Try changing the antenna and see what happens.",
+    "demoOrder": 0
+}

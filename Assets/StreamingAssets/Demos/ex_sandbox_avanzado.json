@@ -1,0 +1,26 @@
+{
+    "designName": "Sandbox (avanzado): radar NISAR",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 1,
+    "scenarioId": "SCN_SANDBOX",
+    "orbitId": "ORB_LEO_SSO",
+    "launchVehicleId": "LV_FALCON9",
+    "groundNetworkId": "GND_COMMERCIAL",
+    "componentIds": [
+        "BUS_LARGE",
+        "SOL_ROSA",
+        "BAT_8000",
+        "ANT_KA",
+        "CDH_SSR",
+        "ADCS_RW_STAR"
+    ],
+    "instrumentIds": [
+        "INS_NISAR"
+    ],
+    "demoSeed": 1,
+    "demoNote": "El mismo radar con grabador de 4 TB y rastreador estelar: en Avanzado el cohete puede fallar y hay 1-2 eventos.",
+    "designNameEn": "Sandbox (advanced): NISAR radar",
+    "demoNoteEn": "The same radar with a 4 TB recorder and a star tracker: in Advanced the rocket can fail and there are 1-2 events.",
+    "demoOrder": 0
+}

@@ -1,0 +1,25 @@
+{
+    "designName": "Clima (básico): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_EARTH_CLIMATE",
+    "orbitId": "ORB_LEO_SSO",
+    "launchVehicleId": "LV_FALCON9",
+    "groundNetworkId": "GND_NSN",
+    "componentIds": [
+        "BUS_MEDIUM",
+        "SOL_WINGS",
+        "BAT_2000",
+        "ANT_X"
+    ],
+    "instrumentIds": [
+        "INS_MODIS",
+        "INS_OCO2"
+    ],
+    "demoSeed": 0,
+    "demoNote": "MODIS + OCO-2, los dos instrumentos del objetivo clima, en LEO heliosíncrona con banda X: toda la ciencia llega a tierra y sobra presupuesto.",
+    "designNameEn": "Climate (basic): winner",
+    "demoNoteEn": "MODIS + OCO-2, both climate-goal instruments, in sun-synchronous LEO with X band: all the science reaches the ground with budget to spare.",
+    "demoOrder": 0
+}

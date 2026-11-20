@@ -19,5 +19,8 @@
         "INS_CREW_CAMERAS"
     ],
     "demoSeed": 0,
-    "demoNote": "Éxito total: 32 cámaras de Orion + cámaras de la tripulación, enlace láser y fotos de la Luna en el informe."
+    "demoNote": "Éxito total: 32 cámaras de Orion + cámaras de la tripulación, enlace láser y fotos de la Luna en el informe.",
+    "designNameEn": "1 · Artemis II with photos (100% success)",
+    "demoNoteEn": "Full success: Orion's 32 cameras + the crew cameras, laser link and Moon photos in the report.",
+    "demoOrder": 0
 }

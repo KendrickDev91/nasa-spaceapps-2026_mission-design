@@ -1,0 +1,27 @@
+{
+    "designName": "Clima (avanzado): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 1,
+    "scenarioId": "SCN_EARTH_CLIMATE",
+    "orbitId": "ORB_LEO_SSO",
+    "launchVehicleId": "LV_FALCON9",
+    "groundNetworkId": "GND_NSN",
+    "componentIds": [
+        "BUS_MEDIUM",
+        "SOL_WINGS",
+        "BAT_2000",
+        "ANT_X",
+        "CDH_SSR",
+        "ADCS_RW_STAR"
+    ],
+    "instrumentIds": [
+        "INS_MODIS",
+        "INS_OCO2"
+    ],
+    "demoSeed": 0,
+    "demoNote": "Igual que en Básico, más un grabador de 4 TB (aguanta cortes de enlace) y rastreador estelar para el apuntamiento fino.",
+    "designNameEn": "Climate (advanced): winner",
+    "demoNoteEn": "Same as Basic, plus a 4 TB recorder (rides out link outages) and a star tracker for fine pointing.",
+    "demoOrder": 0
+}

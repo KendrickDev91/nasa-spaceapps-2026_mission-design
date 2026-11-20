@@ -1,0 +1,24 @@
+{
+    "designName": "Reconocimiento lunar (básico): instrumento equivocado",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_LUNAR_RECON",
+    "orbitId": "ORB_LUNAR",
+    "launchVehicleId": "LV_ARIANE64",
+    "groundNetworkId": "GND_DSN",
+    "componentIds": [
+        "BUS_LARGE",
+        "SOL_WINGS",
+        "BAT_2000",
+        "ANT_KA"
+    ],
+    "instrumentIds": [
+        "INS_MODIS"
+    ],
+    "demoSeed": 0,
+    "demoNote": "MODIS estudia el clima terrestre: en la Luna está fuera de su órbita y fuera del objetivo, y aporta muy poca ciencia.",
+    "designNameEn": "Lunar recon (basic): wrong instrument",
+    "demoNoteEn": "MODIS studies Earth's climate: at the Moon it is outside its orbit and off the goal, and gives very little science.",
+    "demoOrder": 1
+}

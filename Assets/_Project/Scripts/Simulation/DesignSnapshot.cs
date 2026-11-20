@@ -28,8 +28,15 @@ namespace MissionDesign.Simulation
         [Tooltip("Diseños de demostración: semilla fija para que el resultado se repita en la presentación (-1 = aleatoria).")]
         public int demoSeed = -1;
         public string demoNote;
+        [Tooltip("Ejemplos: nombre y nota en inglés (los guardados por el jugador no los tienen).")]
+        public string designNameEn;
+        public string demoNoteEn;
+        [Tooltip("Ejemplos: orden dentro de su escenario y dificultad (0 = ganador primero, luego los errores típicos).")]
+        public int demoOrder;
 
         public bool IsDemo => demoSeed >= 0;
+        public string DisplayName => Loc.L(designName, designNameEn);
+        public string DisplayNote => Loc.L(demoNote, demoNoteEn);
 
         public static DesignSnapshot Capture(SpacecraftDesign d, string name, string team = null) => new DesignSnapshot
         {

@@ -1,0 +1,24 @@
+{
+    "designName": "CubeSat (básico): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_CUBESAT_EDU",
+    "orbitId": "ORB_LEO_SSO",
+    "launchVehicleId": "LV_RIDESHARE",
+    "groundNetworkId": "GND_UNIVERSITY",
+    "componentIds": [
+        "BUS_CUBESAT_12U",
+        "SOL_CUBESAT",
+        "BAT_CUBESAT",
+        "ANT_S_CUBESAT"
+    ],
+    "instrumentIds": [
+        "INS_MINXSS"
+    ],
+    "demoSeed": 0,
+    "demoNote": "CubeSat 12U con el espectrómetro solar MinXSS en un lanzamiento compartido: menos de $9 M, como la misión real MinXSS-1.",
+    "designNameEn": "CubeSat (basic): winner",
+    "demoNoteEn": "A 12U CubeSat with the MinXSS solar spectrometer on a rideshare launch: under $9 M, like the real MinXSS-1 mission.",
+    "demoOrder": 0
+}

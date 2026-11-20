@@ -1,0 +1,24 @@
+{
+    "designName": "Meteorología GEO (básico): ganador",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_GEO_WEATHER",
+    "orbitId": "ORB_GEO",
+    "launchVehicleId": "LV_FALCON9",
+    "groundNetworkId": "GND_COMMERCIAL",
+    "componentIds": [
+        "BUS_LARGE",
+        "SOL_ROSA",
+        "BAT_2000",
+        "ANT_KA"
+    ],
+    "instrumentIds": [
+        "INS_ABI"
+    ],
+    "demoSeed": 3,
+    "demoNote": "El generador de imágenes ABI de GOES-R en GEO con banda Ka: 713 GB/día de huracanes en vivo, contacto 24 h con tierra.",
+    "designNameEn": "GEO weather (basic): winner",
+    "demoNoteEn": "GOES-R's ABI imager in GEO with Ka band: 713 GB/day of live hurricane imagery, 24 h contact with the ground.",
+    "demoOrder": 0
+}

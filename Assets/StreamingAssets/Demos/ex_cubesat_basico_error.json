@@ -1,0 +1,24 @@
+{
+    "designName": "CubeSat (básico): fuera del objetivo",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_CUBESAT_EDU",
+    "orbitId": "ORB_LEO_SSO",
+    "launchVehicleId": "LV_RIDESHARE",
+    "groundNetworkId": "GND_NSN",
+    "componentIds": [
+        "BUS_CUBESAT_12U",
+        "SOL_CUBESAT",
+        "BAT_CUBESAT",
+        "ANT_S_CUBESAT"
+    ],
+    "instrumentIds": [
+        "INS_CUBECAM"
+    ],
+    "demoSeed": 0,
+    "demoNote": "Solo la cámara multiespectral, que fotografía la Tierra: el objetivo del escenario es el Sol, así que vale la mitad y no alcanza.",
+    "designNameEn": "CubeSat (basic): off the goal",
+    "demoNoteEn": "Only the multispectral camera, which images the Earth: the scenario goal is the Sun, so it counts half and falls short.",
+    "demoOrder": 1
+}

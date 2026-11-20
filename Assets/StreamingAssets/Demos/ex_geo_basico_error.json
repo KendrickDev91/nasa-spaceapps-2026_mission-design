@@ -1,0 +1,24 @@
+{
+    "designName": "Meteorología GEO (básico): error de antena",
+    "teamName": "Demo",
+    "savedAtUtc": "demo",
+    "difficulty": 0,
+    "scenarioId": "SCN_GEO_WEATHER",
+    "orbitId": "ORB_GEO",
+    "launchVehicleId": "LV_FALCON9",
+    "groundNetworkId": "GND_COMMERCIAL",
+    "componentIds": [
+        "BUS_LARGE",
+        "SOL_ROSA",
+        "BAT_2000",
+        "ANT_X"
+    ],
+    "instrumentIds": [
+        "INS_ABI"
+    ],
+    "demoSeed": 0,
+    "demoNote": "ABI con antena de banda X: a 36 000 km la señal es ~360 veces más débil que en LEO y casi toda la ciencia se pierde (ley 1/r²).",
+    "designNameEn": "GEO weather (basic): antenna mistake",
+    "demoNoteEn": "ABI with an X-band antenna: at 36,000 km the signal is ~360 times weaker than in LEO and most of the science is lost (1/r² law).",
+    "demoOrder": 1
+}
