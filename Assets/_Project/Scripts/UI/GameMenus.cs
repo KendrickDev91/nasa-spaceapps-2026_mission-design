@@ -203,6 +203,20 @@ namespace MissionDesign.UI
         }
 
         public void ShowMainMenu() => Show(mainMenu, true);
+
+        /// <summary>
+        /// Desde el análisis o el informe de la exploración: vuelve a la fase de diseño (se cierran esos paneles) y abre el
+        /// menú principal, para elegir otro escenario, ir al centro espacial o cambiar opciones.
+        /// </summary>
+        public static void BackToMainMenu()
+        {
+            var report = FindAnyObjectByType<ExplorationReportPanel>(FindObjectsInactive.Include);
+            if (report != null) report.Show(false);
+            var manager = MissionStateManager.Instance;
+            if (manager != null && manager.Phase != MissionPhase.Design) manager.ReturnToDesign();
+            var menus = FindAnyObjectByType<GameMenus>();
+            if (menus != null) menus.ShowMainMenu();
+        }
         public void OpenTutorial() => OpenInfo(TutorialPages);
 
         public void CloseAll()

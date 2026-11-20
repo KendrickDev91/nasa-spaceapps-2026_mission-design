@@ -453,7 +453,9 @@ namespace MissionDesign.Editor
             Place(leaderboard.rectTransform, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(0, 16), new Vector2(-48, 100));
 
             var export = Text("ExportText", card, "", 15, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft);
-            Place(export.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(36, 34), new Vector2(560, 50));
+            Place(export.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(36, 34), new Vector2(400, 50));
+            var menu = MakeButton("MainMenuButton", card, "Menú principal", UiTheme.PanelLight, 19, 0);
+            Place((RectTransform)menu.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-964, 30), new Vector2(220, 60));
             var exploration = MakeButton("ExplorationButton", card, "Informe de la exploración", UiTheme.Launch, 20, 0);
             Place((RectTransform)exploration.transform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-568, 30), new Vector2(380, 60));
             var open = MakeButton("OpenReportsButton", card, "Abrir reportes", UiTheme.AccentDim, 19, 0);
@@ -476,6 +478,7 @@ namespace MissionDesign.Editor
             Wire(view, "openReportsButton", open);
             Wire(view, "backButton", back);
             Wire(view, "explorationButton", exploration);
+            Wire(view, "menuButton", menu);
 
             var confetti = NewRect("Confetti", overlay);
             Stretch(confetti);

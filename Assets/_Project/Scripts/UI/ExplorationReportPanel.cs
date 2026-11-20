@@ -24,6 +24,7 @@ namespace MissionDesign.UI
         [SerializeField] private TMP_Text captionText;
         [SerializeField] private RectTransform thumbGrid;
         [SerializeField] private Button prevButton, nextButton, closeButton, folderButton;
+        [SerializeField] private Button menuButton;
 
         private readonly List<GameObject> thumbs = new List<GameObject>();
         private int index;
@@ -39,6 +40,7 @@ namespace MissionDesign.UI
             if (prevButton != null) prevButton.onClick.AddListener(() => Select(index - 1));
             if (nextButton != null) nextButton.onClick.AddListener(() => Select(index + 1));
             if (closeButton != null) closeButton.onClick.AddListener(() => Show(false));
+            if (menuButton != null) menuButton.onClick.AddListener(() => { Show(false); GameMenus.BackToMainMenu(); });
             if (folderButton != null) folderButton.onClick.AddListener(OpenFolder);
             if (folderButton != null && GameSettings.IsWeb) folderButton.gameObject.SetActive(false);
             var manager = MissionStateManager.Instance;

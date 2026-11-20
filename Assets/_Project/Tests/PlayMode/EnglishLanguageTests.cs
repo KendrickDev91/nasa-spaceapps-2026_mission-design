@@ -156,6 +156,16 @@ namespace MissionDesign.Tests
                 yield return new WaitForSeconds(0.5f);
                 Collect("exploration-report");
                 yield return Shot("Logs/screenshot_en_exploration_report.png");
+
+                // Desde el informe se puede volver al menú principal (antes solo había «Cerrar»).
+                var menuButton = report.GetComponentsInChildren<UnityEngine.UI.Button>(true).First(b => b.name == "MainMenuButton");
+                Assert.AreEqual("Main menu", menuButton.GetComponentInChildren<TMP_Text>().text);
+                menuButton.onClick.Invoke();
+                yield return new WaitForSeconds(0.3f);
+                Assert.IsFalse(report.IsOpen, "El informe se cierra.");
+                Assert.AreEqual(MissionPhase.Design, mgr.Phase, "Vuelve a la fase de diseño.");
+                Assert.IsTrue(Object.FindAnyObjectByType<GameMenus>().IsBlocking, "El menú principal queda abierto.");
+                yield return Shot("Logs/screenshot_en_back_to_main_menu.png");
             }
 
             Debug.Log("[EnglishAudit] " + leftovers.Count + " posibles restos en español:\n" + string.Join("\n", leftovers));

@@ -33,6 +33,7 @@ namespace MissionDesign.UI
         [SerializeField] private Button openReportsButton;
         [SerializeField] private Button backButton;
         [SerializeField] private Button explorationButton;
+        [SerializeField] private Button menuButton;
         [SerializeField] private ExplorationReportPanel explorationPanel;
         [Tooltip("Contenedor donde cae el confeti en un éxito.")]
         [SerializeField] private RectTransform confettiLayer;
@@ -58,6 +59,7 @@ namespace MissionDesign.UI
             if (openReportsButton != null) openReportsButton.onClick.AddListener(OpenReportsFolder);
             if (openReportsButton != null && GameSettings.IsWeb) openReportsButton.gameObject.SetActive(false);
             if (explorationButton != null && explorationPanel != null) explorationButton.onClick.AddListener(explorationPanel.Open);
+            if (menuButton != null) menuButton.onClick.AddListener(GameMenus.BackToMainMenu);
             if (manager.LastOutcome != null) Show(manager.LastOutcome);
         }
 

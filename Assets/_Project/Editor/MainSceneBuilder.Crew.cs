@@ -362,6 +362,11 @@ namespace MissionDesign.Editor
             Place(header.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(-64f, 26f));
             var title = Text("Title", card, "", 36, UiTheme.Text, TextAlignmentOptions.TopLeft, bold: true);
             Place(title.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -52f), new Vector2(760f, 48f));
+            // Una sola línea: los títulos largos («INFORME DEL EQUIPO DE EXPLORACIÓN») se achican en vez de pisar la firma.
+            title.textWrappingMode = TextWrappingModes.NoWrap;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 22;
+            title.fontSizeMax = 36;
             var signature = Text("Signature", card, "", 18, UiTheme.TextDim, TextAlignmentOptions.TopLeft);
             Place(signature.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -104f), new Vector2(760f, 30f));
             var body = Text("Body", card, "", 20, UiTheme.Text, TextAlignmentOptions.TopLeft);
@@ -397,6 +402,8 @@ namespace MissionDesign.Editor
             var close = B("CloseButton", "<b>Cerrar</b>", UiTheme.PanelLight, -32f, 186f);
             // Fuera de pantalla hasta que se abra: el CanvasGroup controla la visibilidad.
             close.transform.SetAsLastSibling();
+            var menu = MakeButton("MainMenuButton", card, "Menú principal", UiTheme.PanelLight, 18, 0);
+            Place((RectTransform)menu.transform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(32f, 28f), new Vector2(220f, 54f));
 
             var panel = overlay.gameObject.AddComponent<ExplorationReportPanel>();
             Wire(panel, "group", group);
@@ -411,6 +418,7 @@ namespace MissionDesign.Editor
             Wire(panel, "nextButton", next);
             Wire(panel, "closeButton", close);
             Wire(panel, "folderButton", folder);
+            Wire(panel, "menuButton", menu);
             return panel;
         }
 
