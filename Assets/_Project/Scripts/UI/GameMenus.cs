@@ -77,8 +77,9 @@ namespace MissionDesign.UI
         {
             new[] { "TEAM " + GameInfo.Team,
                 "<size=120%><b>" + GameInfo.Title + "</b></size>\n" + GameInfo.EventEn + "\n\n" +
-                "Developed by team <b>" + GameInfo.Team + "</b>:\n\n" +
-                "• " + string.Join("\n• ", GameInfo.TeamMembers) + "\n\n" +
+                "<b>Game design and development</b>\n" + GameInfo.Developer + " (" + GameInfo.DeveloperHandle + ")\n\n" +
+                "<b>Concept and ideas</b> — team " + GameInfo.Team + ", Bolivia\n" +
+                "• " + string.Join("\n• ", GameInfo.IdeaContributors) + "\n\n" +
                 "<size=85%>Thanks for playing. Every mission you design is a trade-off: there is no single right answer.</size>" },
             new[] { "SOURCES & CREDITS",
                 GameInfo.Title + " — " + GameInfo.EventEn + ". Independent project: <b>not an official NASA product</b>.\n\n" +
@@ -130,8 +131,9 @@ namespace MissionDesign.UI
         {
             new[] { "EQUIPO " + GameInfo.Team,
                 "<size=120%><b>" + GameInfo.Title + "</b></size>\n" + GameInfo.EventEs + "\n\n" +
-                "Desarrollado por el equipo <b>" + GameInfo.Team + "</b>:\n\n" +
-                "• " + string.Join("\n• ", GameInfo.TeamMembers) + "\n\n" +
+                "<b>Diseño y desarrollo del juego</b>\n" + GameInfo.Developer + " (" + GameInfo.DeveloperHandle + ")\n\n" +
+                "<b>Concepto e ideas</b> — equipo " + GameInfo.Team + ", Bolivia\n" +
+                "• " + string.Join("\n• ", GameInfo.IdeaContributors) + "\n\n" +
                 "<size=85%>Gracias por jugar. Cada misión que diseñan es un trade-off: no hay una única respuesta correcta.</size>" },
             new[] { "FUENTES Y CRÉDITOS",
                 GameInfo.Title + " — " + GameInfo.EventEs + ". Proyecto independiente: <b>no es un producto oficial de la NASA</b>.\n\n" +

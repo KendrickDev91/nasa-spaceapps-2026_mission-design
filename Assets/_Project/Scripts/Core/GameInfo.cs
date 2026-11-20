@@ -33,6 +33,18 @@ namespace MissionDesign.Core
             "Tony Cahuaya"
         };
 
+        /// <summary>Autor del juego: diseño y desarrollo (programación, arte 3D, datos).</summary>
+        public const string Developer = "Keni Breython Ramos Ramirez";
+        public const string DeveloperHandle = "KendrickDev91";
+
+        /// <summary>Resto del equipo del evento: aportaron el concepto y las ideas.</summary>
+        public static readonly string[] IdeaContributors =
+        {
+            "Alejandro Marco Toranzo Cazorla",
+            "Jhamil Obando Requis",
+            "Tony Cahuaya"
+        };
+
         /// <summary>Línea corta para el menú principal.</summary>
         public static string TeamLine => Loc.L(TeamLineEs, TeamLineEn);
         public const string TeamLineEs = "Equipo " + Team + " · NASA Space Apps Challenge 2026";

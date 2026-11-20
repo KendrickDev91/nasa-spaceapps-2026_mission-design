@@ -2,7 +2,8 @@
 
 *Co-op space mission simulator: design a spacecraft and fly to the Moon with real NASA data. English & Español.* (In-game title: **MISSION TRADE-OFF**.)
 
-**Team ASTROBYTE:** Alejandro Marco Toranzo Cazorla · Keni Breython Ramos Ramirez · Jhamil Obando Requis · Tony Cahuaya
+**Developed by** Keni Breython Ramos Ramirez ([KendrickDev91](https://kendrickdev91.itch.io)) — game design and development.  
+**Concept and ideas:** team ASTROBYTE (Bolivia) — Alejandro Marco Toranzo Cazorla · Jhamil Obando Requis · Tony Cahuaya — at the NASA Space Apps Challenge 2026.
 
 ## 🎮 Play AstroByte · Juega AstroByte
 
@@ -137,8 +138,9 @@ sobrevuelo de 7 672 km y el perigeo de 50 km (regreso 8,2 días después de la T
 
 ## Equipo ASTROBYTE
 
-Proyecto del equipo **ASTROBYTE** para NASA Space Apps Challenge 2026: Alejandro Marco Toranzo Cazorla, Keni Breython Ramos
-Ramirez, Jhamil Obando Requis y Tony Cahuaya. Los nombres viven en `Core/GameInfo.cs` (créditos y menú principal).
+Desarrollado por **Keni Breython Ramos Ramirez** (KendrickDev91): diseño y desarrollo del juego. Concepto e ideas del
+equipo **ASTROBYTE** de Bolivia en el NASA Space Apps Challenge 2026: Alejandro Marco Toranzo Cazorla, Jhamil Obando
+Requis y Tony Cahuaya. Los nombres viven en `Core/GameInfo.cs` (créditos y menú principal).
 
 ## Trayectoria en "8", Luna real y amerizaje (ronda 2026-11-15)
 
