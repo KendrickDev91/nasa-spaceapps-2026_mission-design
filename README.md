@@ -2,6 +2,14 @@
 
 **Team ASTROBYTE:** Alejandro Marco Toranzo Cazorla · Keni Breython Ramos Ramirez · Jhamil Obando Requis · Tony Cahuaya
 
+## 🎮 Play AstroByte · Juega AstroByte
+
+[![Available on itch.io](https://img.shields.io/badge/itch.io-Play%20free%20·%20Juega%20gratis-FA5C5C?logo=itchdotio&logoColor=white)](https://kendrickdev91.itch.io/astrobyte-mission-trade-off)
+
+**[kendrickdev91.itch.io/astrobyte-mission-trade-off](https://kendrickdev91.itch.io/astrobyte-mission-trade-off)** — free download for Windows, English & Spanish, 1–4 players. Leave a comment with your score! · Descarga gratis para Windows, en inglés y español, de 1 a 4 jugadores. ¡Déjanos un comentario con tu puntuación!
+
+Also on GitHub: [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest).
+
 ## 🎬 Demo video (30 s · Spanish narration, English subtitles)
 
 [![AstroByte — 30-second demo (click to watch)](docs/video/thumbnail_en_1280x720.jpg)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_ES_subs_EN.mp4)
@@ -12,7 +20,7 @@
 | [**Full walkthrough**](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_ES_subs_EN.mp4) | Spanish narration + **English subtitles** | 1:13 |
 | [30-second demo (English)](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/download/v2026.11.15-ocho-luna-amerizaje/AstroByte_Jury_30s_EN.mp4) | English narration + English captions | 0:29 |
 
-Subtitles (SRT): [`docs/video/`](docs/video/) · **Play the game (Windows):** [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest)
+Subtitles (SRT): [`docs/video/`](docs/video/) · **Play the game (Windows):** [itch.io](https://kendrickdev91.itch.io/astrobyte-mission-trade-off) or the [latest release](https://github.com/KendrickDev91/nasa-spaceapps-2026_mission-design/releases/latest)
 
 ## 📊 Presentation (7 slides)
 
