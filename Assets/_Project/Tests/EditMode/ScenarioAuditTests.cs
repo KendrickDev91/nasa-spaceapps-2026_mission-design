@@ -238,6 +238,20 @@ namespace MissionDesign.Tests
         /// Cada ejemplo de la ventana «Diseños» se puede lanzar y, con su semilla y las reglas del juego, da el resultado que
         /// promete: los «ganadores» ganan y las «lecciones» no. Hay ejemplos para cada escenario en Básico y Avanzado.
         /// </summary>
+        /// <summary>
+        /// La versión web no puede leer StreamingAssets como carpeta: los ejemplos salen del paquete de Resources, que
+        /// debe tener exactamente los mismos diseños que la carpeta.
+        /// </summary>
+        [Test]
+        public void DemoBundle_ForTheWebVersion_MatchesTheDemoFolder()
+        {
+            var bundle = JsonUtility.FromJson<DesignLibrary.DemoBundle>(Resources.Load<TextAsset>(DesignLibrary.DemoBundleResource).text);
+            var files = System.IO.Directory.GetFiles(DesignLibrary.DemoFolder, "*.json").OrderBy(f => f).ToList();
+            Assert.AreEqual(files.Count, bundle.json.Count, "Regenera el paquete: MissionDesign.Editor.DemoDesigns.WriteBundle");
+            for (int i = 0; i < files.Count; i++)
+                Assert.AreEqual(System.IO.File.ReadAllText(files[i]), bundle.json[i], System.IO.Path.GetFileName(files[i]));
+        }
+
         [Test]
         public void EveryExampleDesign_GivesItsDocumentedResult_ForEveryScenarioAndDifficulty()
         {

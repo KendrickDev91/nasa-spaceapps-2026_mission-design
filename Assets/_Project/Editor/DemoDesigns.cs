@@ -43,7 +43,30 @@ namespace MissionDesign.Editor
             if (db == null) { Debug.LogError("[Demos] Falta la base de datos."); return; }
             Directory.CreateDirectory(Folder);
             foreach (var group in Groups()) Solve(db, group);
+            WriteBundle();
             AssetDatabase.Refresh();
+        }
+
+        public const string BundlePath = "Assets/Resources/" + DesignLibrary.DemoBundleResource + ".json";
+
+        /// <summary>
+        /// Empaqueta los JSON de StreamingAssets/Demos en Resources para la versión web, donde StreamingAssets no se
+        /// puede leer como carpeta. Lo llaman Generate y las compilaciones.
+        /// </summary>
+        public static void WriteBundle()
+        {
+            var bundle = new DesignLibrary.DemoBundle();
+            foreach (var file in Directory.GetFiles(Folder, "*.json").OrderBy(f => f))
+            {
+                bundle.files.Add(Path.GetFileName(file));
+                bundle.json.Add(File.ReadAllText(file));
+            }
+            string text = JsonUtility.ToJson(bundle, true);
+            if (File.Exists(BundlePath) && File.ReadAllText(BundlePath) == text) return;
+            Directory.CreateDirectory(Path.GetDirectoryName(BundlePath));
+            File.WriteAllText(BundlePath, text);
+            AssetDatabase.ImportAsset(BundlePath);
+            Debug.Log($"[Demos] Paquete para la web: {bundle.json.Count} diseños → {BundlePath}");
         }
 
         private static List<Candidate[]> Groups()

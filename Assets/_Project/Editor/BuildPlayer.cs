@@ -25,6 +25,7 @@ namespace MissionDesign.Editor
             PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
             PlayerSettings.resizableWindow = true;
 
+            DemoDesigns.WriteBundle();
             Directory.CreateDirectory(OutputDir);
             var options = new BuildPlayerOptions
             {
@@ -63,6 +64,7 @@ namespace MissionDesign.Editor
             // ventana o al iframe de itch.io y botón de pantalla completa.
             PlayerSettings.WebGL.template = "PROJECT:AstroByte";
 
+            DemoDesigns.WriteBundle();   // en el navegador los ejemplos salen de Resources
             if (Directory.Exists(WebGLOutputDir)) Directory.Delete(WebGLOutputDir, true);
             Directory.CreateDirectory(WebGLOutputDir);
             var options = new BuildPlayerOptions

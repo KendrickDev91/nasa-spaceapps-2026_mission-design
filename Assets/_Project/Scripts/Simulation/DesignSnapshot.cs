@@ -108,9 +108,43 @@ namespace MissionDesign.Simulation
         /// <summary>Carpeta de solo lectura con los diseños de demostración que acompañan al juego.</summary>
         public static string DemoFolder => Path.Combine(Application.streamingAssetsPath, "Demos");
 
-        /// <summary>Diseños de demostración (StreamingAssets/Demos), ordenados por nombre.</summary>
-        public static List<(string path, DesignSnapshot snapshot)> Demos() =>
-            List(DemoFolder).OrderBy(d => d.snapshot.designName).ToList();
+        /// <summary>Paquete de los ejemplos dentro de Resources (lo escribe el editor al generar o compilar).</summary>
+        public const string DemoBundleResource = "DemoDesigns";
+
+        [Serializable]
+        public sealed class DemoBundle
+        {
+            public List<string> files = new List<string>();
+            public List<string> json = new List<string>();
+        }
+
+        private static List<(string, DesignSnapshot)> bundleCache;
+
+        /// <summary>
+        /// Diseños de demostración, ordenados por nombre. Se leen de StreamingAssets/Demos; en el navegador (WebGL) esa
+        /// carpeta no se puede leer como disco, así que se usa el paquete de Resources.
+        /// </summary>
+        public static List<(string path, DesignSnapshot snapshot)> Demos()
+        {
+            var list = List(DemoFolder);
+            if (list.Count == 0) list = FromBundle();
+            return list.OrderBy(d => d.snapshot.designName).ToList();
+        }
+
+        private static List<(string, DesignSnapshot)> FromBundle()
+        {
+            if (bundleCache != null) return new List<(string, DesignSnapshot)>(bundleCache);
+            bundleCache = new List<(string, DesignSnapshot)>();
+            var asset = Resources.Load<TextAsset>(DemoBundleResource);
+            if (asset == null) return new List<(string, DesignSnapshot)>();
+            var bundle = JsonUtility.FromJson<DemoBundle>(asset.text);
+            for (int i = 0; bundle != null && i < bundle.json.Count; i++)
+            {
+                var s = DesignSnapshot.FromJson(bundle.json[i]);
+                if (s != null) bundleCache.Add((i < bundle.files.Count ? bundle.files[i] : $"demo{i}", s));
+            }
+            return new List<(string, DesignSnapshot)>(bundleCache);
+        }
 
         /// <summary>Diseños guardados, del más reciente al más antiguo.</summary>
         public static List<(string path, DesignSnapshot snapshot)> List(string folder = null)
